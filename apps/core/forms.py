@@ -45,12 +45,8 @@ class _SettingsModelForm(forms.ModelForm):
         for field in self.fields.values():
             widget = field.widget
             if isinstance(widget, (forms.CheckboxInput,)):
-                # Checkbox visible y consistente con el resto de la UI (mismo
-                # patrón que el "seleccionar todo" de la lista). El checkbox
-                # nativo sin estilo pasa desapercibido en algunos temas.
-                widget.attrs["style"] = (
-                    "accent-color:var(--action-primary); width:16px; height:16px; cursor:pointer;"
-                )
+                # Los checkboxes se renderizan como toggle/switch (.perfil-switch)
+                # en las plantillas; el input queda oculto por CSS, sin estilo aquí.
                 continue
             css = widget.attrs.get("class", "")
             widget.attrs["class"] = (css + " " + _INPUT).strip()

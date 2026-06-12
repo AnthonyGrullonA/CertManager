@@ -43,9 +43,7 @@ Panel Seguridad. Dos tarjetas:
             <div class="settings-row__hint">{% trans "Obligar a cambiar la contraseña cada cierto tiempo. Apagado por defecto." %}</div>
           </div>
           <div class="settings-control-sm">
-            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-              {{ form.password_expiry_enabled }} {% trans "Habilitar" %}
-            </label>
+            <label class="perfil-switch">{{ form.password_expiry_enabled }}<span class="perfil-switch__track"></span></label>
           </div>
         </div>
 
@@ -63,9 +61,7 @@ Panel Seguridad. Dos tarjetas:
             <div class="settings-row__hint">{% trans "Mostrar el acceso vía directorio en la pantalla de inicio de sesión." %}</div>
           </div>
           <div class="settings-control-sm">
-            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-              {{ form.ldap_enabled }} {% trans "Habilitar" %}
-            </label>
+            <label class="perfil-switch">{{ form.ldap_enabled }}<span class="perfil-switch__track"></span></label>
           </div>
         </div>
 

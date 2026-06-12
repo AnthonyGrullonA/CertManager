@@ -69,9 +69,7 @@ muestra '●●● configurado' si ya hay una guardada y un POST vacío la conse
       <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Envía alertas por SMS mediante el gateway FTP corporativo. La contraseña nunca se muestra en claro." %}</p>
     </div>
     <div class="px-6 pb-2 pt-3 flex flex-col gap-4">
-      <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-        {{ sms_form.enabled }} {% trans "Habilitar envío de SMS" %}
-      </label>
+      <label class="perfil-switch" style="gap:8px;">{{ sms_form.enabled }}<span class="perfil-switch__track"></span><span class="text-sm text-slate-700">{% trans "Habilitar envío de SMS" %}</span></label>
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-medium text-slate-700">{% trans "Host FTP" %}</span>
         {{ sms_form.ftp_host }}

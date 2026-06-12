@@ -27,9 +27,7 @@ comparte el endpoint settings-panel/seguridad.
           <div class="text-xs text-slate-500 mt-0.5">{% trans "Activa la verificación de contraseña contra el directorio al iniciar sesión." %}</div>
         </div>
         <div class="flex-none">
-          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-            {{ form.enabled }} {% trans "Habilitar" %}
-          </label>
+          <label class="perfil-switch">{{ form.enabled }}<span class="perfil-switch__track"></span></label>
         </div>
       </div>
 
@@ -91,12 +89,8 @@ comparte el endpoint settings-panel/seguridad.
           <div class="text-xs text-slate-500 mt-0.5">{% trans "Usa SSL (ldaps) o StartTLS para proteger la conexión." %}</div>
         </div>
         <div class="flex-none flex items-center gap-5">
-          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-            {{ form.use_ssl }} {% trans "SSL (ldaps)" %}
-          </label>
-          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-            {{ form.start_tls }} {% trans "StartTLS" %}
-          </label>
+          <label class="perfil-switch" style="gap:8px;">{{ form.use_ssl }}<span class="perfil-switch__track"></span><span class="text-sm text-slate-700">{% trans "SSL (ldaps)" %}</span></label>
+          <label class="perfil-switch" style="gap:8px;">{{ form.start_tls }}<span class="perfil-switch__track"></span><span class="text-sm text-slate-700">{% trans "StartTLS" %}</span></label>
         </div>
       </div>
 
