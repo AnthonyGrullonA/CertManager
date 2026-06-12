@@ -82,7 +82,8 @@ def _scoped_certificates(request):
         or ""
     ).strip()
     if raw and raw not in ("", "all"):
-        certs = certs.filter(team_id=raw)
+        # Dueño (FK) o compartido al grupo (M2M groups); espejo de for_team().
+        certs = certs.filter(Q(team_id=raw) | Q(groups=raw)).distinct()
     return certs
 
 

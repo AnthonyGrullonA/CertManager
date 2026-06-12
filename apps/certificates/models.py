@@ -18,6 +18,13 @@ class CertificateQuerySet(models.QuerySet):
             models.Q(team_id__in=team_ids) | models.Q(groups__in=team_ids)
         ).distinct()
 
+    def for_team(self, team):
+        """Certificados de un grupo: los que le pertenecen (FK ``team``) O los
+        compartidos vía ``groups`` (M2M). Acepta instancia o pk."""
+        return self.filter(
+            models.Q(team=team) | models.Q(groups=team)
+        ).distinct()
+
 
 class Certificate(TimeStampedModel):
     """Un host:puerto a monitorear, perteneciente a un grupo.

@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, View
 
+from apps.certificates.models import Certificate
 from apps.core.enums import CertificateStatus, MembershipRole
 from apps.teams.forms import TeamForm
 from apps.teams.models import Membership, Team
@@ -40,7 +41,7 @@ STATUS_TO_FAMILY = {
 def _health_counts(team):
     """Conteo de certificados por familia Forge para la barra de salud."""
     rows = (
-        team.certificates.values_list("status").annotate(n=Count("id"))
+        Certificate.objects.for_team(team).values_list("status").annotate(n=Count("id"))
     )
     counts = {fam: 0 for fam in HEALTH_ORDER}
     for status, n in rows:
@@ -207,7 +208,7 @@ class TeamDetailView(LoginRequiredMixin, View):
     def get(self, request, pk, *args, **kwargs):
         team = _get_team_visible(request.user, pk)
         _decorate_team(team)
-        certs = list(team.certificates.all().order_by("domain")[: self.CERT_PREVIEW])
+        certs = list(Certificate.objects.for_team(team).order_by("domain")[: self.CERT_PREVIEW])
         ctx = _members_context(team, request.user)
         ctx["certificates"] = certs
         # Overview: no listamos cientos; mostramos un preview + enlace al listado.

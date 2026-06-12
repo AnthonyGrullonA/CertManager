@@ -165,7 +165,8 @@ def _apply_filters(request, certs):
 
     team = (request.GET.get("team") or "").strip()
     if team and team not in ("", "all"):
-        certs = certs.filter(team_id=team)
+        # Dueño (FK) o compartido al grupo (M2M groups); espejo de for_team().
+        certs = certs.filter(Q(team_id=team) | Q(groups=team)).distinct()
 
     # Ventana de días (drill desde el dashboard): days_gte / days_lt, numéricos e
     # independientes. La primera barra ``≤7d`` manda solo ``days_lt=7`` ->

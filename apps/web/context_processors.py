@@ -180,7 +180,8 @@ def _panel_count(user, is_owner, scope, scope_team, groups) -> int:
     # Certificados del ámbito.
     certs = Certificate.objects.for_user(user)
     if scope != SCOPE_ALL and scope_team is not None:
-        certs = certs.filter(team_id=scope_team["id"])
+        # Dueño (FK) o compartido al grupo (M2M groups); espejo de for_team().
+        certs = certs.filter(Q(team_id=scope_team["id"]) | Q(groups=scope_team["id"])).distinct()
     elif not is_owner and not groups:
         return 0
 
