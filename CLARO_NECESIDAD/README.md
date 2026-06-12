@@ -10,6 +10,8 @@ despliegue de **CertManager** (monitoreo de certificados SSL/TLS).
 | [`01_diagrama_flujo_datos.md`](01_diagrama_flujo_datos.md) | Diagrama de alto nivel del flujo de datos (Mermaid + ASCII + detalle). |
 | [`02_necesidades_instalacion.md`](02_necesidades_instalacion.md) | Alcance, requisitos del servidor, paquetes, **egress/ingress (firewall)**, BD externa. |
 | [`03_cambios_para_produccion.md`](03_cambios_para_produccion.md) | Checklist de cambios y configuración para producción. |
+| [`04_aprovisionamiento_y_certificados.md`](04_aprovisionamiento_y_certificados.md) | **Manual del equipo:** servir en 443/TLS con el wildcard `*.claro.com.do` y **dónde colocar el certificado** (Linux/Docker/K8s). |
+| [`../k8s/`](../k8s/) | Manifiestos de Kubernetes (Deployments, Service, Ingress TLS, Job de migración). |
 | [`.env.example`](.env.example) | Plantilla del `.env` de producción (cópiala a `.env` y complétala). |
 | `.env` | Configuración real (NO versionada — contiene secretos). |
 

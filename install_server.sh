@@ -22,12 +22,21 @@ ENV_FILE="$APP_DIR/CLARO_NECESIDAD/.env"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 GUNICORN_BIND="127.0.0.1:8000"
 WORKERS="${WORKERS:-3}"
-# Rutas del certificado TLS (AJUSTAR o pasar por entorno):
-TLS_CERT="${TLS_CERT:-/etc/ssl/certs/certmanager.crt}"
-TLS_KEY="${TLS_KEY:-/etc/ssl/private/certmanager.key}"
+# Certificado wildcard *.claro.com.do (colócalo en estas rutas antes de correr,
+# o pásalas por entorno). Ver CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md
+#   TLS_CERT = certificado + cadena intermedia (fullchain)
+#   TLS_KEY  = clave privada
+TLS_CERT="${TLS_CERT:-/etc/ssl/claro/claro-wildcard.crt}"
+TLS_KEY="${TLS_KEY:-/etc/ssl/claro/claro-wildcard.key}"
 
 [ "$(id -u)" -eq 0 ] || { echo "ERROR: corre como root (sudo)." >&2; exit 1; }
 [ -f "$ENV_FILE" ] || { echo "ERROR: falta $ENV_FILE. Copia CLARO_NECESIDAD/.env.example y complétalo." >&2; exit 1; }
+if [ ! -f "$TLS_CERT" ] || [ ! -f "$TLS_KEY" ]; then
+  echo "ADVERTENCIA: no se encuentra el certificado TLS:" >&2
+  echo "   $TLS_CERT / $TLS_KEY" >&2
+  echo "   Coloca el wildcard *.claro.com.do ahí (o exporta TLS_CERT/TLS_KEY) antes de" >&2
+  echo "   exponer en 443. NGINX no arrancará en TLS hasta que existan." >&2
+fi
 
 # FQDN desde ALLOWED_HOSTS del .env (primer host).
 FQDN="$(grep -E '^ALLOWED_HOSTS=' "$ENV_FILE" | head -1 | cut -d= -f2- | tr -d ' ' | cut -d, -f1)"

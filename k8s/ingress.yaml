@@ -1,0 +1,28 @@
+# Ingress: expone https://certmanager.claro.com.do (443) y termina TLS con el
+# wildcard *.claro.com.do (Secret tipo TLS `certmanager-tls`, ver k8s/README.md).
+# `ingressClassName` y las annotations dependen del controlador de Claro
+# (aquí, ingress-nginx). Ajústalo con el equipo de plataforma.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: certmanager
+  namespace: certmanager
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"          # 80 -> 443
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: ["certmanager.claro.com.do"]
+      secretName: certmanager-tls
+  rules:
+    - host: certmanager.claro.com.do
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: certmanager-web
+                port:
+                  number: 8000

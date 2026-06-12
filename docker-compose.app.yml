@@ -1,13 +1,31 @@
 # =============================================================================
-# docker-compose.app.yml — SOLO el aplicativo (web + scheduler).
-# La base de datos MySQL es EXTERNA (la provee Claro): se configura por
-# las vars DB_* dentro de CLARO_NECESIDAD/.env. Aquí NO se levanta ninguna BD ni
-# stack de observabilidad.
+# docker-compose.app.yml — el aplicativo (web + scheduler) + NGINX con TLS.
+# Sirve en :443 (HTTPS) y redirige :80 -> :443 con el wildcard *.claro.com.do.
+# La base de datos MySQL es EXTERNA (la provee Claro): se configura por las vars
+# DB_* dentro de CLARO_NECESIDAD/.env.
 #
-# Uso:  ./install_docker.sh         (o: docker compose -f docker-compose.app.yml up -d --build)
+# Coloca el certificado en ./tls/ (gitignored):
+#   tls/claro-wildcard.crt   (cert + cadena intermedia)
+#   tls/claro-wildcard.key   (clave privada)
+# Detalle: CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md
+#
+# Uso:  ./install_docker.sh   (o: docker compose -f docker-compose.app.yml up -d --build)
 # =============================================================================
 
 services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"      # redirige a 443
+      - "443:443"    # TLS con el wildcard *.claro.com.do
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./tls:/etc/nginx/tls:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
   web:
     build:
       context: .
@@ -19,9 +37,8 @@ services:
       - CLARO_NECESIDAD/.env
     environment:
       RUN_MIGRATIONS: "1"        # migra + collectstatic al arrancar
-    ports:
-      # Solo expuesto al host (un NGINX/LB del host o de Claro termina el TLS).
-      - "127.0.0.1:8000:8000"
+    expose:
+      - "8000"                   # interno: NGINX hace proxy a web:8000 (no se publica al host)
     restart: unless-stopped
 
   scheduler:

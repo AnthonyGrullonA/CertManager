@@ -1,0 +1,105 @@
+# Namespace + Job de migración + Deployments (web/scheduler) + Service.
+# Sustituye REGISTRO-CLARO/certmanager:TAG por tu imagen (build + push al registro
+# interno). El Ingress/TLS va aparte en ingress.yaml.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: certmanager
+---
+# Migra la BD y recolecta estáticos UNA vez (antes de exponer la app).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: certmanager-migrate
+  namespace: certmanager
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: REGISTRO-CLARO/certmanager:TAG
+          command: ["sh", "-c", "python manage.py migrate --no-input && python manage.py collectstatic --no-input"]
+          envFrom:
+            - configMapRef: { name: certmanager-config }
+            - secretRef: { name: certmanager-secrets }
+          env:
+            - { name: RUN_MIGRATIONS, value: "0" }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certmanager-web
+  namespace: certmanager
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: certmanager, component: web }
+  template:
+    metadata:
+      labels: { app: certmanager, component: web }
+    spec:
+      containers:
+        - name: web
+          image: REGISTRO-CLARO/certmanager:TAG
+          # gunicorn (CMD de la imagen). No migra aquí (lo hizo el Job).
+          envFrom:
+            - configMapRef: { name: certmanager-config }
+            - secretRef: { name: certmanager-secrets }
+          env:
+            - { name: RUN_MIGRATIONS, value: "0" }
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /health/, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "512Mi" }
+---
+# Scheduler: SIEMPRE 1 réplica (el lock es por-proceso; 2 réplicas duplicarían jobs).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certmanager-scheduler
+  namespace: certmanager
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: { app: certmanager, component: scheduler }
+  template:
+    metadata:
+      labels: { app: certmanager, component: scheduler }
+    spec:
+      containers:
+        - name: scheduler
+          image: REGISTRO-CLARO/certmanager:TAG
+          command: ["python", "manage.py", "run_scheduler"]
+          envFrom:
+            - configMapRef: { name: certmanager-config }
+            - secretRef: { name: certmanager-secrets }
+          env:
+            - { name: RUN_MIGRATIONS, value: "0" }
+          resources:
+            requests: { cpu: "100m", memory: "192Mi" }
+            limits:   { cpu: "500m", memory: "384Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: certmanager-web
+  namespace: certmanager
+spec:
+  selector: { app: certmanager, component: web }
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

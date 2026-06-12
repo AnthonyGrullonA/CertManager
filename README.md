@@ -47,7 +47,8 @@ producción es **externa** (MySQL); los scripts solo levantan el aplicativo.
 | Escenario | Script | BD | TLS |
 |-----------|--------|----|-----|
 | Pruebas en **Windows** | `install_windows.bat` | SQLite (auto) | no (dev) |
-| **Docker** (solo el app) | `install_docker.sh` | MySQL externa | NGINX/LB delante |
+| **Docker** (app + NGINX TLS) | `install_docker.sh` | MySQL externa | NGINX 443 (incluido) |
+| **Kubernetes** | `k8s/` + [manual](CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md) | MySQL externa | Ingress 443 |
 | **Servidor Linux** (servicio) | `install_server.sh` | MySQL externa | NGINX (lo instala) |
 | Desarrollo local | manual (abajo) | SQLite | no |
 
@@ -67,9 +68,11 @@ cp CLARO_NECESIDAD/.env.example CLARO_NECESIDAD/.env   # completar (BD externa, 
 ./install_docker.sh           # build + up (web + scheduler)
 ./install_docker.sh logs      # ver logs   ·   ./install_docker.sh down
 ```
-Usa `docker-compose.app.yml`: **no** levanta BD; la toma de las vars `DB_*`
-(`DB_HOST`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_PORT`) del `.env`. Publica en
-`127.0.0.1:8000` (poné un NGINX/LB con TLS delante).
+Usa `docker-compose.app.yml`: levanta **web + scheduler + NGINX con TLS** y sirve
+en **443** (redirige 80→443) con el wildcard `*.claro.com.do` (colocar en `./tls/`).
+**No** levanta BD; la toma de las vars `DB_*` del `.env`. Dónde poner el
+certificado y los 3 modos (Linux/Docker/K8s):
+[`CLARO_NECESIDAD/04`](CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md).
 
 ### 3) Servidor Linux como servicio
 
@@ -97,15 +100,19 @@ El **Owner** de la app (gestiona grupos/usuarios/config) es un usuario con
 
 ---
 
-## Bootstrap de datos (Owner + configuración + certificados)
+## Bootstrap de datos (Owner + configuración)
 
-Una vez instalado, carga de forma **idempotente** el Owner, la configuración por
-defecto y los certificados desde `./cert.txt` (formato `dominio|correo|umbral|puerto`):
+Una vez instalado, carga de forma **idempotente** el Owner y la configuración por
+defecto. La carga de certificados desde `./cert.txt` es **opcional** (para migrar
+la data del legacy cuando se tenga; ver el manual):
 
 ```bash
-# coloca tu cert.txt en la raíz; los secretos salen del .env (de producción).
-./data_update_certs_app.sh                 # o --dry-run
-# Docker:  docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh
+# secretos (Owner/SMTP) salen del .env de producción
+./data_update_certs_app.sh --skip-certs                 # Owner + configuración
+# Docker:  docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh --skip-certs
+
+# (Opcional, más adelante) migrar la data: coloca cert.txt en la raíz y corre:
+./data_update_certs_app.sh
 ```
 Reglas aplicadas: monitoreo por **plataforma + correo**; **ubicación** según el
 dominio (`ntp`/`ntt` → *Servidor*, `claro.com.do` → *netscaler*); **grupos** desde

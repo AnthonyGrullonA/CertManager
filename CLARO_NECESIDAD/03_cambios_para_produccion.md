@@ -100,11 +100,13 @@ Al usar `DJANGO_SETTINGS_MODULE=config.settings.prod`, automáticamente:
 
 ---
 
-## 7. Carga de certificados (`cert.txt`) — PASO MANUAL
+## 7. Carga de certificados (`cert.txt`) — OPCIONAL / PARA MÁS ADELANTE
 
-> El **`cert.txt` lo coloca el responsable del despliegue** (no viene en el repo;
-> está en `.gitignore` por contener datos internos). Una vez instalado el
-> aplicativo, este paso carga Owner + configuración + certificados.
+> **No es necesario para aprovisionar.** El Owner y la configuración se cargan con
+> `data_update_certs_app --skip-certs`. El `cert.txt` es **solo para migrar la
+> data de certificados del sistema legacy** cuando se tenga la versión
+> actualizada; todo queda listo para ese momento. Lo coloca el responsable del
+> despliegue en la raíz (no viene en el repo; está en `.gitignore`).
 
 ### 7.1 Colocar el archivo
 Copiar el `cert.txt` en la **raíz del repo** (junto a `manage.py` y a

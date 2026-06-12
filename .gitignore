@@ -18,6 +18,13 @@ env/
 secret_key
 data/secret_key
 
+# Certificados TLS (NUNCA versionar la clave privada). Repo público.
+tls/
+*.key
+*.crt
+*.pem
+k8s/*-secret.yaml
+
 # Bootstrap de producción: secretos y datos sensibles (repo público)
 data_update_certs_app.env
 /cert.txt

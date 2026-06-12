@@ -26,17 +26,21 @@ case "${1:-up}" in
   down)  $COMPOSE down ;;
   logs)  $COMPOSE logs -f --tail=100 ;;
   up|"")
-    echo ">> Construyendo y levantando el aplicativo (DB externa vía vars DB_*)…"
+    if [ ! -f tls/claro-wildcard.crt ] || [ ! -f tls/claro-wildcard.key ]; then
+      echo "ADVERTENCIA: falta el certificado en ./tls/ (claro-wildcard.crt/.key)." >&2
+      echo "   NGINX no levantará TLS en 443 hasta colocar el wildcard *.claro.com.do." >&2
+      echo "   Ver CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md §2." >&2
+    fi
+    echo ">> Construyendo y levantando app + scheduler + NGINX TLS (DB externa vía DB_*)…"
     $COMPOSE up -d --build
     echo ""
     echo ">> Estado:"; $COMPOSE ps
     echo ""
-    echo ">> El aplicativo escucha en 127.0.0.1:8000 (pon un NGINX/LB con TLS delante)."
-    echo ">> Salud:  curl -fsS http://127.0.0.1:8000/health/"
+    echo ">> El aplicativo se expone en https://<FQDN>/  (443, con redirección 80→443)."
+    echo ">> Salud:  curl -fsS https://<FQDN>/health/"
     echo ""
-    echo ">> Bootstrap (Owner + configuración + certificados):"
-    echo "     coloca cert.txt en la raíz y corre:"
-    echo "     docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh"
+    echo ">> Bootstrap (Owner + configuración; la carga de cert.txt es opcional/posterior):"
+    echo "     docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh --skip-certs"
     ;;
   *) echo "Uso: $0 [up|down|logs]" >&2; exit 1 ;;
 esac
