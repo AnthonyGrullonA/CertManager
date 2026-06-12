@@ -188,3 +188,58 @@ class ApiDocsTests(TestCase):
         self.client.force_login(u)
         self.assertEqual(self.client.get(reverse("api-docs")).status_code, 200)
         self.assertEqual(self.client.get(reverse("api-schema")).status_code, 200)
+
+
+class PasswordMinLengthPolicyTests(TestCase):
+    """La longitud mínima de contraseña sale del panel Seguridad (no es estática)."""
+
+    def test_validator_uses_org_min_length(self):
+        from django.core.exceptions import ValidationError
+
+        from apps.accounts.validators import OrgMinimumLengthValidator
+
+        org = OrganizationSettings.load()
+        org.password_min_length = 12
+        org.save()
+        v = OrgMinimumLengthValidator()
+        with self.assertRaises(ValidationError):
+            v.validate("corta12")        # 7 < 12
+        v.validate("contraseña-larga-ok")  # >= 12 -> sin error
+
+
+class SessionTimeoutTests(TestCase):
+    """Cierra la sesión tras inactividad según session_timeout (panel Seguridad)."""
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user("st@x.test", PWD)
+
+    def _set_timeout(self, minutes):
+        org = OrganizationSettings.load()
+        org.session_timeout = minutes
+        org.save()
+
+    def test_no_timeout_when_zero(self):
+        self._set_timeout(0)
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
+
+    def test_active_within_window(self):
+        self._set_timeout(30)
+        self.client.force_login(self.user)
+        self.client.get(reverse("dashboard"))
+        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
+
+    def test_logout_after_inactivity(self):
+        import time
+
+        self._set_timeout(1)  # 1 minuto
+        self.client.force_login(self.user)
+        self.client.get(reverse("dashboard"))
+        # Simula 2 minutos de inactividad.
+        session = self.client.session
+        session["_last_activity"] = int(time.time()) - 120
+        session.save()
+        resp = self.client.get(reverse("dashboard"))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(reverse("login"), resp["Location"])

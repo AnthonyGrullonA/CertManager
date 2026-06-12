@@ -121,8 +121,9 @@ class ConfigPanelRenderTests(TestCase):
         self.assertContains(resp, reverse("profile"))
         # El placeholder SSO ya NO está: se reemplazó por el panel LDAP real.
         self.assertNotContains(resp, "SSO corporativo")
-        # El toggle rápido de login LDAP sigue presente.
-        self.assertContains(resp, "ldap_enabled")
+        # El toggle real de LDAP vive en la tarjeta LDAP (LdapConfiguration.enabled),
+        # no en Seguridad (el login es transparente, sin botón).
+        self.assertContains(resp, 'name="enabled"')
         # Y el panel LDAP real (campos de core.LdapConfiguration) aparece.
         self.assertContains(resp, "LDAP corporativo")
         self.assertContains(resp, "server_uri")

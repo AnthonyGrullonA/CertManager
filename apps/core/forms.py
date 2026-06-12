@@ -223,12 +223,13 @@ PASSWORD_EXPIRY_CHOICES = [
 
 class SeguridadSettingsForm(_SettingsModelForm):
     class Meta(_SettingsModelForm.Meta):
+        # ldap_enabled se quitó: el login LDAP es transparente (sin botón) y el
+        # toggle real vive en la tarjeta "LDAP corporativo" (LdapConfiguration.enabled).
         fields = [
             "password_min_length",
             "session_timeout",
             "password_expiry_enabled",
             "password_expiry_days",
-            "ldap_enabled",
         ]
         widgets = {
             "password_min_length": forms.Select(

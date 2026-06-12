@@ -175,7 +175,7 @@ Alternativa por `cron` del sistema (en vez del scheduler en-proceso):
 Ver `docs/security/owasp-top10-2025.md`. Resumen:
 
 - **Acceso (A01):** RBAC por grupo (`for_user` recorta querysets); admin Django solo superusuario.
-- **Auth (A07):** bloqueo por fuerza bruta, **2FA TOTP** (opcional/exigible), **expiración de contraseñas** (opcional), mensajes genéricos.
+- **Auth (A07):** bloqueo por fuerza bruta, **2FA TOTP** (opcional/exigible), **expiración** y **longitud mínima** de contraseñas, **timeout de sesión** por inactividad — todo configurable en **Configuración → Seguridad** y aplicado de verdad. Mensajes genéricos.
 - **CSP (A02):** cabeceras Content-Security-Policy. **Secretos** fuera del código (entorno) y write-only en la UI.
 - **Auditoría (A09):** `AuditLog` append-only de acciones humanas + eventos de login.
 - **SSRF:** validación de host en el chequeo SSL y en la entrega de webhooks.

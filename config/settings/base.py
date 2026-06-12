@@ -88,6 +88,8 @@ MIDDLEWARE = [
     "apps.core.middleware.Require2FAMiddleware",
     # Fuerza el cambio de contraseña vencida si la organización lo exige. Tras Auth.
     "apps.core.middleware.PasswordExpiryMiddleware",
+    # Cierra la sesión tras N minutos de inactividad (session_timeout). Tras Auth.
+    "apps.core.middleware.SessionTimeoutMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # CSP en modo Report-Only en esta fase: no bloquea htmx ni los handlers
@@ -152,7 +154,8 @@ AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    # Longitud mínima según OrganizationSettings.password_min_length (panel Seguridad).
+    {"NAME": "apps.accounts.validators.OrgMinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]

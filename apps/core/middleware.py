@@ -238,3 +238,41 @@ class PasswordExpiryMiddleware:
             if org.password_expiry_enabled and user.password_expired(org):
                 return redirect(f"{reverse('profile')}?password_expired=1")
         return self.get_response(request)
+
+
+# Rutas exentas del timeout de sesión (no tiene sentido cerrar sesión ahí).
+_SESSION_EXEMPT_PREFIXES = ("/accounts/login", "/accounts/logout", "/static/", "/media/", "/health")
+
+
+class SessionTimeoutMiddleware:
+    """Cierra la sesión tras N minutos de **inactividad**
+    (``OrganizationSettings.session_timeout``; 0 = sin límite). Solo afecta a
+    usuarios autenticados. Va después de ``AuthenticationMiddleware``."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        path = request.path_info
+        if (
+            user is not None
+            and user.is_authenticated
+            and not path.startswith(_SESSION_EXEMPT_PREFIXES)
+        ):
+            try:
+                from apps.core.models import OrganizationSettings
+
+                timeout_min = OrganizationSettings.load().session_timeout or 0
+            except Exception:  # noqa: BLE001
+                timeout_min = 0
+            if timeout_min and timeout_min > 0:
+                now = int(time.time())
+                last = request.session.get("_last_activity")
+                if last and (now - last) > timeout_min * 60:
+                    from django.contrib.auth import logout
+
+                    logout(request)
+                    return redirect_to_login(request.get_full_path())
+                request.session["_last_activity"] = now
+        return self.get_response(request)
