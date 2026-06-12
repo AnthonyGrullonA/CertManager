@@ -142,7 +142,12 @@ Owner + configuración con `--skip-certs` y completar la migración después:
 ./data_update_certs_app.sh --skip-certs          # Linux
 docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh --skip-certs   # Docker
 
-# cuando llegue el cert.txt actualizado, colocarlo en la raíz y correr:
+# cuando llegue el cert.txt actualizado:
+#  - Linux: colocarlo en la raíz y correr ./data_update_certs_app.sh
+#  - Docker: copiarlo al contenedor (no se hornea en la imagen) y correr:
+#       docker cp cert.txt certforge-web-1:/app/cert.txt
+#       docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh
+#  - Kubernetes: kubectl cp cert.txt <pod-web>:/app/cert.txt y exec el comando
 ./data_update_certs_app.sh                        # carga ubicaciones, grupos sp_*, destinatarios
 ```
 Detalle de formato y reglas: [`03_cambios_para_produccion.md` §7](03_cambios_para_produccion.md).

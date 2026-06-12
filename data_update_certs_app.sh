@@ -38,17 +38,25 @@ PYTHON="${PYTHON:-python}"
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.standalone}"
 SOURCE="${CF_CERT_SOURCE:-cert.txt}"
 
-if [ ! -f "$SOURCE" ]; then
-  echo "ERROR: no se encuentra '$SOURCE'. Coloca tu cert.txt en la raíz" >&2
-  echo "       o exporta CF_CERT_SOURCE con la ruta correcta." >&2
+# ¿Solo Owner + configuración? (--skip-certs no requiere cert.txt)
+SKIP_CERTS=0
+for a in "$@"; do [ "$a" = "--skip-certs" ] && SKIP_CERTS=1; done
+
+if [ "$SKIP_CERTS" = "0" ] && [ ! -f "$SOURCE" ]; then
+  echo "ERROR: no se encuentra '$SOURCE'. Coloca tu cert.txt en la raíz (o exporta" >&2
+  echo "       CF_CERT_SOURCE), o usa --skip-certs para cargar solo Owner + configuración." >&2
   exit 1
 fi
 
 echo ">> Aplicando migraciones…"
 "$PYTHON" manage.py migrate --no-input
 
-echo ">> Cargando Owner + configuración + certificados (idempotente)…"
-"$PYTHON" manage.py data_update_certs_app --source "$SOURCE" "$@"
+echo ">> Cargando Owner + configuración$([ "$SKIP_CERTS" = "0" ] && echo " + certificados") (idempotente)…"
+if [ "$SKIP_CERTS" = "1" ]; then
+  "$PYTHON" manage.py data_update_certs_app "$@"
+else
+  "$PYTHON" manage.py data_update_certs_app --source "$SOURCE" "$@"
+fi
 
 # Chequeo real de los certificados (opcional: lento y requiere conectividad).
 if [ "${CF_RUN_CHECK:-0}" = "1" ]; then

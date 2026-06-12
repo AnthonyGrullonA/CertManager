@@ -39,8 +39,11 @@ case "${1:-up}" in
     echo ">> El aplicativo se expone en https://<FQDN>/  (443, con redirección 80→443)."
     echo ">> Salud:  curl -fsS https://<FQDN>/health/"
     echo ""
-    echo ">> Bootstrap (Owner + configuración; la carga de cert.txt es opcional/posterior):"
+    echo ">> Bootstrap (Owner + configuración):"
     echo "     docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh --skip-certs"
+    echo ">> Migrar el monitoreo (cuando tengas el cert.txt): copialo al contenedor y corre:"
+    echo "     docker cp cert.txt certforge-web-1:/app/cert.txt"
+    echo "     docker compose -f docker-compose.app.yml exec web ./data_update_certs_app.sh"
     ;;
   *) echo "Uso: $0 [up|down|logs]" >&2; exit 1 ;;
 esac

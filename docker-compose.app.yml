@@ -44,6 +44,8 @@ services:
   scheduler:
     image: certmanager:latest
     command: ["python", "manage.py", "run_scheduler"]
+    healthcheck:
+      disable: true              # no expone HTTP; el healthcheck de la imagen no aplica
     env_file:
       - CLARO_NECESIDAD/.env
     environment:

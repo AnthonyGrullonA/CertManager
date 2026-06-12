@@ -14,9 +14,16 @@ db.sqlite3
 /staticfiles
 static/css/forge.css
 certapp_old
-.env
-.env.*
-!.env.example
+# Secretos y datos sensibles: NUNCA en la imagen (van por env_file / volúmenes).
+**/.env
+**/.env.*
+data_update_certs_app.env
+tls
+**/*.key
+**/*.crt
+**/*.pem
+cert.txt
+k8s
 docs
 .github
 *.md
