@@ -19,7 +19,13 @@ echo == CertManager - prueba local en Windows (SQLite) ==
 
 where python >nul 2>nul
 if errorlevel 1 (
-  echo ERROR: Python no esta en el PATH. Instala Python 3.11+ y reintenta.
+  echo ERROR: Python no esta en el PATH.
+  echo   SIN ADMIN: instala Python para tu usuario:
+  echo     - python.org/downloads  -^> "Install Now" ^(per-usuario, sin admin;
+  echo       deja marcado "Add python.exe to PATH"^), o
+  echo     - Microsoft Store -^> "Python 3.x" ^(tambien per-usuario^).
+  echo   Reabre esta ventana y vuelve a correr install_windows.bat.
+  pause
   exit /b 1
 )
 

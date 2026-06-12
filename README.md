@@ -63,6 +63,10 @@ por la **IP del equipo** (`http://<IP>:8000/`); Windows puede pedir permitir Pyt
 en el **Firewall** (Permitir). Solo para pruebas internas (server de desarrollo de
 Django); para producción, Linux/Docker/K8s.
 
+> **Primera visibilidad en VDI/escritorio corporativo SIN admin:**
+> [`PRESENTACION_VDI.md`](PRESENTACION_VDI.md) (Python per-usuario, sin servicios
+> del sistema, demo por pantalla compartida).
+
 ### 2) Docker — solo el contenedor del app
 
 ```bash
