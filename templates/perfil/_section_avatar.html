@@ -34,13 +34,6 @@ fragmento completo (target del guardado parcial: vista re-renderiza + toast).
         <h3 style="margin:0; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Elige un avatar" %}</h3>
         <p style="margin:4px 0 0; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Avatares generados, sin subir archivos." %}</p>
       </div>
-      {% if prefs.avatar_choice %}
-        <button type="button" class="btn-secondary btn-sm"
-                hx-post="{% url 'profile-section' 'avatar_choice' %}"
-                hx-vals='{"avatar_choice": "0"}'
-                hx-target="#section-avatar" hx-swap="outerHTML"
-                style="flex:none;">{% icon "x" size=14 %} {% trans "Quitar" %}</button>
-      {% endif %}
     </div>
     <div class="perfil-avatar-grid" role="radiogroup" aria-label="{% trans 'Avatares disponibles' %}">
       {% avatar_indices as indices %}

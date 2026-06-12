@@ -61,10 +61,11 @@ class PreferencesForm(forms.ModelForm):
 
 
 class AvatarChoiceForm(forms.ModelForm):
-    """Selección de un avatar SVG generado (índice 0..AVATAR_COUNT).
+    """Selección de un avatar SVG generado (índice 1..AVATAR_COUNT).
 
-    0 limpia la selección (vuelve a iniciales). No hay subida de fotos. El índice
-    se valida contra el catálogo de avatares para no persistir basura.
+    No existe el estado "sin avatar": todo usuario tiene uno asignado, así que
+    0 se rechaza. No hay subida de fotos. El índice se valida contra el
+    catálogo de avatares para no persistir basura.
     """
 
     class Meta:
@@ -76,7 +77,7 @@ class AvatarChoiceForm(forms.ModelForm):
         from apps.web.templatetags.forge_avatars import AVATAR_COUNT
 
         value = self.cleaned_data.get("avatar_choice") or 0
-        if value < 0 or value > AVATAR_COUNT:
+        if value < 1 or value > AVATAR_COUNT:
             raise forms.ValidationError("Avatar no válido.")
         return value
 

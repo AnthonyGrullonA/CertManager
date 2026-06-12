@@ -1,4 +1,6 @@
 """Usuario custom de CertManager: login por email + rol global Owner."""
+import hashlib
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -99,7 +101,8 @@ class UserPreferences(TimeStampedModel):
     language = models.CharField("Idioma", max_length=10, default="es-do")
     timezone = models.CharField("Zona horaria", max_length=64, default="America/Santo_Domingo")
 
-    # Avatar SVG generado (0 = sin elegir -> usa iniciales).
+    # Avatar SVG generado (índice 1..N). Todo usuario nace con uno asignado
+    # (determinista por email); 0 solo puede aparecer en datos legados.
     # Evita depender de storage: el SVG se renderiza por índice (1..N).
     avatar_choice = models.PositiveIntegerField("Avatar SVG", default=0)
     panel_cleared_at = models.DateTimeField("Panel limpiado", null=True, blank=True)
@@ -140,9 +143,26 @@ class TwoFactorDevice(TimeStampedModel):
         return self.confirmed_at is not None
 
 
+def default_avatar_choice(email: str) -> int:
+    """Avatar SVG por defecto: pseudo-aleatorio pero determinista por email.
+
+    Usa SHA-256 (estable entre procesos; ``hash()`` nativo está salteado por
+    PYTHONHASHSEED) y mapea al catálogo ``1..AVATAR_COUNT``. Así nadie queda
+    "sin avatar" y migraciones/señales dan el mismo resultado en cualquier
+    ambiente.
+    """
+    # Import perezoso: el catálogo vive en la capa web (templatetag).
+    from apps.web.templatetags.forge_avatars import AVATAR_COUNT
+
+    digest = hashlib.sha256((email or "").strip().lower().encode("utf-8")).digest()
+    return int.from_bytes(digest[:4], "big") % AVATAR_COUNT + 1
+
+
 def get_or_create_preferences(user):
     """Helper para obtener (o crear) las preferencias de un usuario."""
-    prefs, _ = UserPreferences.objects.get_or_create(user=user)
+    prefs, _ = UserPreferences.objects.get_or_create(
+        user=user, defaults={"avatar_choice": default_avatar_choice(user.email)}
+    )
     return prefs
 
 
@@ -156,4 +176,7 @@ def user_has_2fa(user) -> bool:
 def create_user_preferences(sender, instance, created, **kwargs):
     """Crea las preferencias por defecto al crear un usuario."""
     if created:
-        UserPreferences.objects.get_or_create(user=instance)
+        UserPreferences.objects.get_or_create(
+            user=instance,
+            defaults={"avatar_choice": default_avatar_choice(instance.email)},
+        )

@@ -149,23 +149,28 @@ class ProfileSectionTests(TestCase):
         self.assertContains(resp, "section-avatar")
         self.assertContains(resp, "<svg")
 
-    def test_avatar_choice_zero_clears_selection(self):
+    def test_avatar_choice_zero_is_rejected(self):
+        # El estado "sin avatar" (0) ya no existe: el form lo rechaza y el
+        # avatar vigente se conserva.
         prefs = get_or_create_preferences(self.user)
         prefs.avatar_choice = 12
         prefs.save()
         url = reverse("profile-section", args=["avatar_choice"])
         resp = self.client.post(url, {"avatar_choice": "0"})
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 422)
         prefs.refresh_from_db()
-        self.assertEqual(prefs.avatar_choice, 0)
+        self.assertEqual(prefs.avatar_choice, 12)
 
     def test_avatar_choice_out_of_range_errors(self):
+        prefs = get_or_create_preferences(self.user)
+        before = prefs.avatar_choice
+        self.assertGreaterEqual(before, 1)  # default asignado al crear el usuario
         url = reverse("profile-section", args=["avatar_choice"])
         resp = self.client.post(url, {"avatar_choice": "99999"})
         self.assertEqual(resp.status_code, 422)
         self.assertContains(resp, "forge-toast", status_code=422)
-        prefs = get_or_create_preferences(self.user)
-        self.assertEqual(prefs.avatar_choice, 0)
+        prefs.refresh_from_db()
+        self.assertEqual(prefs.avatar_choice, before)
 
     def test_profile_page_shows_avatar_picker(self):
         resp = self.client.get(reverse("profile"))
