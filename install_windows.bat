@@ -60,7 +60,12 @@ python manage.py collectstatic --no-input
 
 REM --- Owner + configuracion (+ migracion del monitoreo desde cert.txt) -------
 if "%CF_OWNER_EMAIL%"=="" set "CF_OWNER_EMAIL=jairol_grullon@claro.com.do"
+
+REM Pide la contrasena del Owner y NO continua hasta que no este vacia
+REM (si viene por entorno CF_OWNER_PASSWORD, no pregunta).
+:pedir_password
 if "%CF_OWNER_PASSWORD%"=="" set /p "CF_OWNER_PASSWORD=Contrasena para el Owner (%CF_OWNER_EMAIL%): "
+if "%CF_OWNER_PASSWORD%"=="" echo    La contrasena no puede estar vacia. Intenta de nuevo. & goto pedir_password
 
 if exist "cert.txt" (
   echo ^>^> Migrando el monitoreo desde cert.txt ^(Owner + configuracion + certificados^) ...
@@ -73,8 +78,13 @@ if exist "cert.txt" (
 if errorlevel 1 ( echo ERROR cargando datos. & exit /b 1 )
 
 echo.
-echo ^>^> Listo. Entra en http://127.0.0.1:8000/ con el Owner %CF_OWNER_EMAIL%.
+echo ^>^> Listo. Owner: %CF_OWNER_EMAIL%
+echo ^>^> Accesible desde la RED (todas las interfaces). Tu(s) IP(s) en la LAN:
+ipconfig | findstr /C:"IPv4"
+echo    Local:    http://127.0.0.1:8000/
+echo    Red:      http://^<TU-IP^>:8000/
+echo    (Windows puede pedir permitir Python en el Firewall: pulsa Permitir.)
 echo ^>^> Arrancando ^(Ctrl+C para detener^) ...
-python manage.py runserver 127.0.0.1:8000
+python manage.py runserver 0.0.0.0:8000
 
 endlocal

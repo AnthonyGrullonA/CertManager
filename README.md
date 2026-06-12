@@ -55,11 +55,13 @@ producción es **externa** (MySQL); los scripts solo levantan el aplicativo.
 ### 1) Pruebas en Windows (SQLite)
 
 ```bat
-install_windows.bat
+install_windows.bat       :: setup (venv + SQLite + Owner + migración) y arranca
+run_windows.bat           :: re-arranca el server (sin reinstalar)
 ```
-Crea el venv, instala dependencias, migra una **SQLite** local (perfil
-`standalone`) y arranca `runserver` en http://127.0.0.1:8000/. Solo para validar
-el aplicativo; no usar en producción.
+Perfil `standalone` (SQLite). Sirve en **`0.0.0.0:8000`** → accesible desde la red
+por la **IP del equipo** (`http://<IP>:8000/`); Windows puede pedir permitir Python
+en el **Firewall** (Permitir). Solo para pruebas internas (server de desarrollo de
+Django); para producción, Linux/Docker/K8s.
 
 ### 2) Docker — solo el contenedor del app
 
