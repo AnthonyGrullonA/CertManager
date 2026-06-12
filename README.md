@@ -145,7 +145,17 @@ Healthcheck sin auth en `GET /health/` (200 si la BD responde, 503 si no).
 
 El planificador es **en-proceso** (APScheduler): chequeo de certificados, reportes
 programados y backup de la BD. En los despliegues corre como proceso aparte
-(`manage.py run_scheduler`). Alternativa por `cron`:
+(`manage.py run_scheduler`).
+
+**Ventana horaria de chequeo** (Configuración → Monitoreo): el chequeo masivo
+abre una conexión TLS a **cada** host monitoreado, así que conviene correrlo en
+**horario valle** para no competir con el tráfico productivo ni generar ruido en
+los sistemas vigilados. Si hay una ventana definida (por defecto **02:00–05:00**),
+el scheduler agenda el chequeo **diario a la hora de inicio** (cron). Si se deja
+vacía, corre por **intervalo** (`SCHEDULER.CERT_CHECK_HOURS`, 24h). Cambiar la
+ventana requiere reiniciar el `run_scheduler`.
+
+Alternativa por `cron` del sistema (en vez del scheduler en-proceso):
 
 ```cron
 0 6 * * *    cd /ruta && /ruta/.venv/bin/python manage.py check_certificates

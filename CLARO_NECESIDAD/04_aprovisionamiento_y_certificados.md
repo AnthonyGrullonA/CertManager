@@ -24,6 +24,24 @@ colocar el certificado en cada modo (Linux, Docker, Kubernetes).
 El FQDN sale de `ALLOWED_HOSTS` (Linux/Docker, en `CLARO_NECESIDAD/.env`) o del
 ConfigMap/Ingress (Kubernetes). Por defecto: `certmanager.claro.com.do` (ajustar).
 
+### Ventana horaria de chequeo (importante para el daemon)
+
+El chequeo masivo abre una **conexión TLS a cada host monitoreado**. Con cientos
+de certificados eso es carga que **conviene correr en horario valle** (madrugada),
+para no competir con el tráfico productivo ni generar ruido en los sistemas
+vigilados (IPS/WAF/logs de los hosts destino).
+
+- **Configuración → Monitoreo → "Ventana horaria"** define esa franja. Por defecto
+  **02:00–05:00** (zona horaria del aplicativo, `America/Santo_Domingo`).
+- Con ventana definida, el daemon (`run_scheduler`) agenda el chequeo **una vez al
+  día a la hora de inicio** (p.ej. 02:00). El rango (–05:00) comunica la franja
+  válida; el chequeo completo debe caber dentro (con cientos de certs tarda pocos
+  minutos a ~media hora según timeouts).
+- **Vacía** = sin ventana → corre por **intervalo** (cada 24h desde que arranca el
+  proceso), menos predecible.
+- **Recomendación:** dejar 02:00–05:00 (o el horario valle de Claro). Cambiarla
+  requiere **reiniciar `run_scheduler`** (la lee al arrancar).
+
 ---
 
 ## 2. El certificado `*.claro.com.do`

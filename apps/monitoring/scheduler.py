@@ -64,14 +64,40 @@ def _run(command: str):
         close_old_connections()
 
 
+def _check_window_start():
+    """Hora de inicio de la ventana de chequeo (OrganizationSettings) o None.
+
+    Fail-safe: ante cualquier error (BD no lista, etc.) devuelve None y el chequeo
+    cae al modo intervalo.
+    """
+    try:
+        from apps.core.models import OrganizationSettings
+
+        return OrganizationSettings.load().preferred_check_window_start
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _build(scheduler):
     cfg = settings.SCHEDULER
     tz = getattr(settings, "TIME_ZONE", "UTC")
-    scheduler.add_job(
-        _run, "interval", args=["check_certificates"],
-        hours=cfg["CERT_CHECK_HOURS"], id="check_certificates",
-        max_instances=1, coalesce=True, replace_existing=True, timezone=tz,
-    )
+    # Chequeo de certificados: si hay ventana horaria preferida, se agenda como un
+    # CRON diario a la hora de inicio (los chequeos masivos corren en horario valle,
+    # p.ej. 02:00). Sin ventana, corre por INTERVALO (SCHEDULER.CERT_CHECK_HOURS).
+    window_start = _check_window_start()
+    if window_start is not None:
+        scheduler.add_job(
+            _run, "cron", args=["check_certificates"],
+            hour=window_start.hour, minute=window_start.minute,
+            id="check_certificates", max_instances=1, coalesce=True,
+            replace_existing=True, timezone=tz,
+        )
+    else:
+        scheduler.add_job(
+            _run, "interval", args=["check_certificates"],
+            hours=cfg["CERT_CHECK_HOURS"], id="check_certificates",
+            max_instances=1, coalesce=True, replace_existing=True, timezone=tz,
+        )
     scheduler.add_job(
         _run, "interval", args=["send_scheduled_reports"],
         minutes=cfg["REPORTS_MINUTES"], id="send_scheduled_reports",

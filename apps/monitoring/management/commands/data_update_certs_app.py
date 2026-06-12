@@ -32,6 +32,7 @@ Uso:
 """
 from __future__ import annotations
 
+import datetime
 import os
 import re
 from pathlib import Path
@@ -147,10 +148,18 @@ class Command(BaseCommand):
                 org.smtp_password = pwd
             org.smtp_from = os.environ.get("CF_SMTP_FROM", org.smtp_from)
             org.smtp_use_tls = os.environ.get("CF_SMTP_USE_TLS", "1") not in ("0", "false", "False")
+        # Ventana de chequeo por defecto (horario valle 02:00–05:00) si no está fijada.
+        if org.preferred_check_window_start is None:
+            org.preferred_check_window_start = datetime.time(2, 0)
+        if org.preferred_check_window_end is None:
+            org.preferred_check_window_end = datetime.time(5, 0)
         org.save()
+        win = ""
+        if org.preferred_check_window_start:
+            win = f"; ventana {org.preferred_check_window_start:%H:%M}–{org.preferred_check_window_end:%H:%M}"
         self.stdout.write(
             f"Configuración cargada (chequeo {org.check_interval_hours}h, timeout {org.connect_timeout}s, "
-            f"reintentos {org.retries}, TZ {org.timezone})"
+            f"reintentos {org.retries}, TZ {org.timezone}{win})"
             + (f"; SMTP {org.smtp_host}:{org.smtp_port}." if org.smtp_host else "; SMTP sin configurar.")
         )
 

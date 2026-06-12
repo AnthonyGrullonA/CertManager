@@ -1,4 +1,5 @@
 """Modelos base y configuración global de la organización."""
+import datetime
 import hashlib
 import secrets
 
@@ -44,9 +45,15 @@ class OrganizationSettings(TimeStampedModel):
     check_interval_hours = models.PositiveIntegerField("Intervalo de chequeo (horas)", default=24)
     connect_timeout = models.PositiveIntegerField("Timeout de conexión (s)", default=10)
     retries = models.PositiveIntegerField("Reintentos", default=1)
-    # Ventana horaria preferida para ejecutar los chequeos (cron). Null = sin restricción.
-    preferred_check_window_start = models.TimeField("Ventana de chequeo (inicio)", null=True, blank=True)
-    preferred_check_window_end = models.TimeField("Ventana de chequeo (fin)", null=True, blank=True)
+    # Ventana horaria preferida para los chequeos masivos (horario valle). Por
+    # defecto 02:00–05:00: el scheduler agenda el chequeo diario a la hora de
+    # inicio. Vacío (null) = sin ventana -> corre por intervalo (CERT_CHECK_HOURS).
+    preferred_check_window_start = models.TimeField(
+        "Ventana de chequeo (inicio)", null=True, blank=True, default=datetime.time(2, 0)
+    )
+    preferred_check_window_end = models.TimeField(
+        "Ventana de chequeo (fin)", null=True, blank=True, default=datetime.time(5, 0)
+    )
 
     # Organización / marca
     account_domain = models.CharField("Dominio de la cuenta", max_length=253, blank=True)
