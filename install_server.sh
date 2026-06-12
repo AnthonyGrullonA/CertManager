@@ -41,6 +41,9 @@ fi
 # FQDN desde ALLOWED_HOSTS del .env (primer host).
 FQDN="$(grep -E '^ALLOWED_HOSTS=' "$ENV_FILE" | head -1 | cut -d= -f2- | tr -d ' ' | cut -d, -f1)"
 FQDN="${FQDN:-certmanager.local}"
+# server_name de NGINX: '*' no es válido; se usa '_' (catch-all) en ese caso.
+NGINX_NAME="$FQDN"
+[ "$FQDN" = "*" ] && NGINX_NAME="_"
 echo ">> FQDN: $FQDN"
 
 # --- 1) Paquetes de sistema -------------------------------------------------
@@ -148,16 +151,18 @@ UNIT
 
 # --- 7) NGINX (reverse proxy + TLS) -----------------------------------------
 echo ">> Configurando NGINX…"
+# Quita el sitio default de Debian/Ubuntu para no chocar con default_server.
+rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
 NGINX_SITE="/etc/nginx/conf.d/certmanager.conf"
 cat > "$NGINX_SITE" <<NGINX
 server {
-    listen 80;
-    server_name $FQDN;
+    listen 80 default_server;
+    server_name $NGINX_NAME;
     return 301 https://\$host\$request_uri;
 }
 server {
-    listen 443 ssl;
-    server_name $FQDN;
+    listen 443 ssl default_server;
+    server_name $NGINX_NAME;
 
     ssl_certificate     $TLS_CERT;
     ssl_certificate_key $TLS_KEY;
@@ -171,7 +176,12 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
     }
-    location = /health/ { proxy_pass http://$GUNICORN_BIND; access_log off; }
+    location = /health/ {
+        access_log off;
+        proxy_pass http://$GUNICORN_BIND;
+        proxy_set_header Host              \$host;
+        proxy_set_header X-Forwarded-Proto https;
+    }
 }
 NGINX
 
