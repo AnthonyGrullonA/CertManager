@@ -24,6 +24,10 @@ claroump.claro.com.do|sp_ordenes-aprov@claro.com.do|45|443
 osbprod2.corp.codetel.com.do|adm_middleware@claro.com.do|45|443
 finanzas-a.claro.com.do|sp_adm-finanzas@claro.com.do|45|443
 finanzas-b.claro.com.do|sp_adm_finanzas@claro.com.do|45|443
+bloqueo1.claro.com.do|soluciones_apps@claro.com.do;spe_infra@claro.com.do|45|443
+pam.corp.codetel.com.do|seguridad_redes@claro.com.do@claro.com.do|50|443
+https://lnpomeapp0001/core/console/console.html#/login|itclienteservidornt@claro.com.do
+https://lnpscgapp0001:5700/SecureConnectGateway/resx/login/user|itclienteservidornt@claro.com.do
 linea-mala-sin-campos
 """
 
@@ -102,6 +106,30 @@ class BootstrapCommandTests(TestCase):
         api = Certificate.objects.get(domain="api.mi.claro.com.do")
         emails = set(api.recipients.values_list("email", flat=True))
         self.assertEqual(emails, {"sp_canales_electronicos@claro.com.do", "itredes@claro.com.do"})
+
+    def test_multiple_emails_separated_by_semicolon(self):
+        # Variante real del cert.txt: dos correos en el mismo campo, con ';'.
+        self._run(CF_OWNER_PASSWORD="x")
+        cert = Certificate.objects.get(domain="bloqueo1.claro.com.do")
+        emails = set(cert.recipients.values_list("email", flat=True))
+        self.assertEqual(emails, {"soluciones_apps@claro.com.do", "spe_infra@claro.com.do"})
+        self.assertEqual([g.name for g in cert.groups.all()], ["spe_infra"])
+
+    def test_email_typo_double_domain_salvaged(self):
+        # Variante real: 'user@claro.com.do@claro.com.do' -> prefijo válido.
+        self._run(CF_OWNER_PASSWORD="x")
+        cert = Certificate.objects.get(domain="pam.corp.codetel.com.do")
+        emails = list(cert.recipients.values_list("email", flat=True))
+        self.assertEqual(emails, ["seguridad_redes@claro.com.do"])
+
+    def test_url_in_domain_field_cleaned(self):
+        # Variante real: URL completa y solo 2 campos (sin umbral ni puerto).
+        self._run(CF_OWNER_PASSWORD="x")
+        a = Certificate.objects.get(domain="lnpomeapp0001")
+        self.assertEqual(a.port, 443)
+        self.assertIsNone(a.alert_threshold_days)  # hereda del grupo
+        b = Certificate.objects.get(domain="lnpscgapp0001")
+        self.assertEqual(b.port, 5700)  # puerto embebido en la URL
 
     def test_group_names_normalized(self):
         # sp_adm-finanzas y sp_adm_finanzas son el mismo grupo (- == _).

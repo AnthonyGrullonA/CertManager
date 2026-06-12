@@ -52,7 +52,10 @@ DEFAULT_OWNER_EMAIL = "jairol_grullon@claro.com.do"
 OWNER_GROUP = "sp_canales_electronicos"  # el grupo propio del Owner
 DEFAULT_TEAM = "Sin asignar"             # team primario contenedor
 DEFAULT_PORT = 443
-EMAIL_RE = re.compile(r"^[^@\s|]+@[^@\s|]+\.[^@\s|]+$")
+# Sin ``$``: se usa .match() y se toma el prefijo válido, para salvar typos
+# reales del cert.txt legado como ``user@claro.com.do@claro.com.do``.
+EMAIL_RE = re.compile(r"[^@\s|]+@[^@\s|]+\.[^@\s|]+")
+SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.-]*://")
 
 
 def derive_location(domain: str) -> str:
@@ -175,15 +178,15 @@ class Command(BaseCommand):
         skipped = 0
         for raw in source.read_text(encoding="utf-8", errors="replace").splitlines():
             parsed = self._parse_line(raw.strip())
-            if parsed is None:
+            if not parsed:
                 skipped += 1
                 continue
-            domain, email, threshold, port = parsed
-            entry = certs.setdefault((domain, port), {"threshold": threshold, "emails": {}})
-            if threshold is not None:
-                entry["threshold"] = max(entry["threshold"] or threshold, threshold)
-            prev = entry["emails"].get(email)
-            entry["emails"][email] = max(prev or threshold or 0, threshold or 0) or None
+            for domain, email, threshold, port in parsed:
+                entry = certs.setdefault((domain, port), {"threshold": threshold, "emails": {}})
+                if threshold is not None:
+                    entry["threshold"] = max(entry["threshold"] or threshold, threshold)
+                prev = entry["emails"].get(email)
+                entry["emails"][email] = max(prev or threshold or 0, threshold or 0) or None
 
         # Team contenedor + caché de teams de soporte (sp*).
         default_team = self._get_team(DEFAULT_TEAM, owner)
@@ -248,26 +251,54 @@ class Command(BaseCommand):
 
     # --- helpers ----------------------------------------------------------
     def _parse_line(self, line: str):
+        """Parsea una línea del cert.txt legado -> lista de (dominio, correo,
+        umbral, puerto), o None si no se puede salvar.
+
+        Tolera las variantes reales del archivo:
+          - URLs en el campo dominio (``https://host:puerto/ruta`` -> host/puerto).
+          - Varios correos separados por ``;`` o ``,``.
+          - Correos con typo ``user@dom@dom`` (se toma el prefijo válido).
+          - Líneas de solo 2 campos ``dominio|correo`` (umbral hereda del grupo).
+        """
         if not line:
             return None
         parts = [p.strip() for p in line.split("|")]
-        if len(parts) < 3:
+        if len(parts) < 2:
             return None
-        domain = parts[0].lower()
-        email = parts[1].lower()
-        if not domain or not EMAIL_RE.match(email):
+        domain, url_port = self._clean_domain(parts[0])
+        emails = []
+        for token in re.split(r"[;,]", parts[1].lower()):
+            m = EMAIL_RE.match(token.strip())
+            if m and m.group(0) not in emails:
+                emails.append(m.group(0))
+        if not domain or not emails:
             return None
-        try:
-            threshold = int(parts[2])
-        except (ValueError, IndexError):
-            threshold = None
-        port = DEFAULT_PORT
+        threshold = None
+        if len(parts) >= 3:
+            try:
+                threshold = int(parts[2])
+            except ValueError:
+                threshold = None
+        port = url_port or DEFAULT_PORT
         if len(parts) >= 4 and parts[3]:
             try:
                 port = int(parts[3])
             except ValueError:
-                port = DEFAULT_PORT
-        return domain, email, threshold, port
+                pass
+        return [(domain, email, threshold, port) for email in emails]
+
+    @staticmethod
+    def _clean_domain(raw: str):
+        """Normaliza el campo dominio: quita esquema/ruta de URLs y extrae el
+        puerto embebido (``host:puerto``) si lo hay. -> (dominio, puerto|None)"""
+        d = SCHEME_RE.sub("", raw.lower())
+        d = d.split("/", 1)[0].split("#", 1)[0].split("?", 1)[0]
+        port = None
+        if ":" in d:
+            d, _, p = d.partition(":")
+            if p.isdigit():
+                port = int(p)
+        return d.strip(), port
 
     def _get_team(self, name: str, owner) -> Team:
         team, created = Team.objects.get_or_create(
