@@ -64,18 +64,32 @@ def _run(command: str):
         close_old_connections()
 
 
+def _org_settings():
+    """OrganizationSettings.load() o None (fail-safe ante BD no lista)."""
+    try:
+        from apps.core.models import OrganizationSettings
+
+        return OrganizationSettings.load()
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _check_window_start():
     """Hora de inicio de la ventana de chequeo (OrganizationSettings) o None.
 
     Fail-safe: ante cualquier error (BD no lista, etc.) devuelve None y el chequeo
     cae al modo intervalo.
     """
-    try:
-        from apps.core.models import OrganizationSettings
+    org = _org_settings()
+    return org.preferred_check_window_start if org else None
 
-        return OrganizationSettings.load().preferred_check_window_start
-    except Exception:  # noqa: BLE001
-        return None
+
+def _check_interval_hours():
+    """Frecuencia de chequeo (Configuración → Monitoreo) o el default de settings."""
+    org = _org_settings()
+    if org and org.check_interval_hours and org.check_interval_hours > 0:
+        return org.check_interval_hours
+    return settings.SCHEDULER["CERT_CHECK_HOURS"]
 
 
 def _build(scheduler):
@@ -95,7 +109,7 @@ def _build(scheduler):
     else:
         scheduler.add_job(
             _run, "interval", args=["check_certificates"],
-            hours=cfg["CERT_CHECK_HOURS"], id="check_certificates",
+            hours=_check_interval_hours(), id="check_certificates",
             max_instances=1, coalesce=True, replace_existing=True, timezone=tz,
         )
     scheduler.add_job(

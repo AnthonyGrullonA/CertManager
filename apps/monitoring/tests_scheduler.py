@@ -50,6 +50,20 @@ class SchedulerJobsTests(TestCase):
         job = s.get_job("check_certificates")
         self.assertEqual(type(job.trigger).__name__, "IntervalTrigger")
 
+    def test_interval_uses_org_check_interval_hours(self):
+        from apscheduler.schedulers.background import BackgroundScheduler
+
+        from apps.core.models import OrganizationSettings
+
+        org = OrganizationSettings.load()
+        org.preferred_check_window_start = None
+        org.preferred_check_window_end = None
+        org.check_interval_hours = 6
+        org.save()
+        s = scheduler._build(BackgroundScheduler())
+        job = s.get_job("check_certificates")
+        self.assertEqual(job.trigger.interval.total_seconds(), 6 * 3600)
+
     @override_settings(SCHEDULER={"CERT_CHECK_HOURS": 24, "REPORTS_MINUTES": 60})
     def test_run_scheduler_command_importable(self):
         # El comando existe y es importable (no lo arrancamos: bloquearía).

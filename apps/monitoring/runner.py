@@ -20,23 +20,45 @@ from .services import CheckResult, SSLChecker
 logger = logging.getLogger("certmanager.monitoring")
 
 
-def _checker() -> SSLChecker:
+def _monitoring_config() -> dict:
+    """Parámetros de monitoreo desde OrganizationSettings (UI), con fallback a
+    ``settings.MONITORING``. Fail-safe ante errores de BD.
+
+    - ``timeout``: segundos antes de abortar un chequeo (Configuración → Monitoreo).
+    - ``attempts``: intentos del chequeo antes de marcar error (campo "Reintentos";
+      mínimo 1).
+    """
     cfg = settings.MONITORING
-    return SSLChecker(
-        timeout=cfg["CONNECT_TIMEOUT"],
-        allow_legacy_renegotiation=cfg["ALLOW_LEGACY_RENEGOTIATION"],
-    )
+    timeout, attempts = cfg["CONNECT_TIMEOUT"], 1
+    try:
+        from apps.core.models import OrganizationSettings
+
+        org = OrganizationSettings.load()
+        timeout = org.connect_timeout or cfg["CONNECT_TIMEOUT"]
+        attempts = max(1, org.retries or 1)
+    except Exception:  # noqa: BLE001 - BD no lista / cualquier error -> defaults
+        pass
+    return {"timeout": timeout, "attempts": attempts}
 
 
 def run_check(certificate: Certificate, *, notify: bool = True) -> tuple[CertificateCheck, CheckResult]:
     """Ejecuta el chequeo de un certificado, lo persiste y (opcional) notifica."""
-    checker = _checker()
-    result = checker.check(
-        certificate.domain,
-        certificate.port,
-        certificate.effective_threshold,
-        certificate.effective_critical,
+    mon = _monitoring_config()
+    checker = SSLChecker(
+        timeout=mon["timeout"],
+        allow_legacy_renegotiation=settings.MONITORING["ALLOW_LEGACY_RENEGOTIATION"],
     )
+    # Reintenta SOLO ante fallo de conexión/verificación, hasta `attempts` intentos.
+    result = None
+    for _attempt in range(mon["attempts"]):
+        result = checker.check(
+            certificate.domain,
+            certificate.port,
+            certificate.effective_threshold,
+            certificate.effective_critical,
+        )
+        if result.ok:
+            break
     now = timezone.now()
 
     check = CertificateCheck.objects.create(

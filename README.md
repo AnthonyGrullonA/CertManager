@@ -147,6 +147,11 @@ El planificador es **en-proceso** (APScheduler): chequeo de certificados, report
 programados y backup de la BD. En los despliegues corre como proceso aparte
 (`manage.py run_scheduler`).
 
+Los parámetros de **Configuración → Monitoreo** controlan el comportamiento real:
+**Timeout** y **Reintentos** los usa cada chequeo (`run_check`); **Frecuencia** y
+**Ventana horaria** los usa el daemon. Cambiar frecuencia/ventana requiere
+reiniciar `run_scheduler` (se leen al arrancar).
+
 **Ventana horaria de chequeo** (Configuración → Monitoreo): el chequeo masivo
 abre una conexión TLS a **cada** host monitoreado, así que conviene correrlo en
 **horario valle** para no competir con el tráfico productivo ni generar ruido en
