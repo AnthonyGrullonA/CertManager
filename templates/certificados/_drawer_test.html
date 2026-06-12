@@ -1,0 +1,89 @@
+{% load forge_icons forge_ui i18n %}
+{% comment %}
+Drawer "Probar ahora" de Certificados con resultado REAL del chequeo
+(run_check). Se inyecta en #drawer-root.
+  - GET (done=False): cáscara con botón para disparar el chequeo (POST).
+  - POST (done=True): pasos reales + resultado (estado, días, emisor, latencia) o
+    el mensaje de ERROR/timeout devuelto por el servicio.
+Variables: cert, domain, port, steps, result, done, throttled, checked_at.
+{% endcomment %}
+<div class="forge-drawer" data-forge-drawer>
+  <div class="forge-drawer__scrim" data-forge-modal-close></div>
+  <aside class="forge-drawer__panel" role="dialog" aria-modal="true" aria-label="{% trans 'Probar ahora' %}">
+    <div class="forge-drawer__header">
+      <div class="min-w-0 flex-1">
+        <div class="forge-drawer__title">{% trans "Probar ahora" %}</div>
+        <div class="forge-drawer__subtitle mono">{{ domain }}{% if port %}:{{ port }}{% endif %}</div>
+      </div>
+      <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>
+        {% icon "x" size=18 %}
+      </button>
+    </div>
+
+    <div class="forge-drawer__body">
+      {% if not done %}
+      <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary); margin-bottom:14px;">
+        {% trans "Se abrirá una conexión TLS al host y se leerá el certificado del servidor." %}
+      </p>
+      <ol class="forge-steps">
+        <li class="forge-step forge-step--pending">
+          <span class="forge-step__icon">{% icon "clock" size=18 %}</span>
+          <span class="forge-step__label">{% trans "Esperando para iniciar el chequeo…" %}</span>
+        </li>
+      </ol>
+      {% else %}
+      <ol class="forge-steps">
+        {% for step in steps %}
+        <li class="forge-step forge-step--{{ step.state|default:'pending' }}">
+          <span class="forge-step__icon">
+            {% if step.state == 'ok' %}{% icon "circle-check" size=18 %}
+            {% elif step.state == 'err' %}{% icon "circle-x" size=18 %}
+            {% elif step.state == 'running' %}{% icon "refresh-cw" size=18 %}
+            {% else %}{% icon "clock" size=18 %}{% endif %}
+          </span>
+          <span class="forge-step__label">{{ step.label }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+
+      {% if result and result.ok %}
+      <div style="margin-top:16px; padding:14px; border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--surface-hover);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          {% include "components/_status_badge.html" with status=cert.status label=cert.get_status_display size="sm" %}
+          {% if cert.days_left != None %}
+          <span style="font-family:var(--font-sans); font-size:var(--text-sm); font-weight:600; color:var(--status-{{ cert.status|status_family }}-fg);">
+            {% if cert.days_left < 0 %}{% blocktrans with days=cert.days_left|cut:"-" %}venció hace {{ days }}d{% endblocktrans %}{% else %}{% blocktrans with days=cert.days_left %}{{ days }} días restantes{% endblocktrans %}{% endif %}
+          </span>
+          {% endif %}
+        </div>
+        <dl style="display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-family:var(--font-sans); font-size:var(--text-sm);">
+          <dt style="color:var(--text-tertiary);">{% trans "Emisor" %}</dt><dd style="color:var(--text-primary);">{{ result.issuer|default:"—" }}</dd>
+          <dt style="color:var(--text-tertiary);">{% trans "Vence el" %}</dt><dd style="color:var(--text-primary); font-family:var(--font-mono);">{{ result.valid_to|date:"d M Y"|default:"—" }}</dd>
+          {% if result.latency_ms != None %}<dt style="color:var(--text-tertiary);">{% trans "Latencia" %}</dt><dd style="color:var(--text-primary); font-family:var(--font-mono);">{{ result.latency_ms }} ms</dd>{% endif %}
+        </dl>
+      </div>
+      {% elif result %}
+      <div style="margin-top:16px; padding:14px; border:1px solid var(--status-err-bg); border-radius:var(--radius-md); background:var(--status-err-bg);">
+        <div style="display:flex; align-items:center; gap:8px; color:var(--status-err-fg); font-family:var(--font-sans); font-size:var(--text-sm); font-weight:600;">
+          {% icon "circle-x" size=16 %} {% trans "El chequeo falló" %}
+        </div>
+        <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary); margin-top:6px;">
+          {{ result.error_message|default:"No se pudo completar el chequeo." }}
+        </p>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="forge-drawer__footer">
+      {% if not throttled %}
+      <button type="button" class="btn-primary"
+              hx-post="{% url 'cert-test' cert.id %}"
+              hx-target="#drawer-root" hx-swap="innerHTML">
+        {% icon "play" size=16 %} {% if done %}{% trans "Probar de nuevo" %}{% else %}{% trans "Probar ahora" %}{% endif %}
+      </button>
+      {% endif %}
+      <button type="button" class="btn-outline" data-forge-modal-close>{% trans "Cerrar" %}</button>
+    </div>
+  </aside>
+</div>

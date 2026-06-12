@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load forge_icons %}{% load i18n %}
+{% block title %}Ayuda · CertManager{% endblock %}
+
+{% block content %}
+<div style="padding:28px; max-width:880px; margin:0 auto;">
+  <div class="mb-5">
+    <h1 class="text-xl font-semibold tracking-tight">{% trans "Ayuda y preguntas frecuentes" %}</h1>
+    <p class="text-sm text-slate-500">{% trans "Cómo funciona CertManager: certificados, grupos y roles, reportes, alertas, plantillas y seguridad." %}</p>
+  </div>
+
+  {# Buscador #}
+  <div class="card" style="padding:6px 12px; display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+    {% icon "search" size=16 %}
+    <input id="faq-search" type="search" placeholder="{% trans 'Buscar en la ayuda…' %}" autocomplete="off"
+           style="border:none; outline:none; background:transparent; width:100%; font-size:var(--text-sm); color:var(--text-primary);">
+  </div>
+
+  {# Índice por categoría #}
+  <nav style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;" aria-label="Categorías">
+    {% for icon, title, items in sections %}
+    <a href="#faq-{{ forloop.counter }}" class="badge badge--none badge--sm" style="text-decoration:none; padding:5px 10px;">{{ title }}</a>
+    {% endfor %}
+  </nav>
+
+  <p id="faq-empty" style="display:none; text-align:center; color:var(--text-tertiary); padding:24px;">{% trans "Sin resultados para tu búsqueda." %}</p>
+
+  {% for icon, title, items in sections %}
+  <section id="faq-{{ forloop.counter }}" class="faq-section" style="margin-bottom:22px;">
+    <h2 style="display:flex; align-items:center; gap:8px; font-size:var(--text-h3,1.1rem); font-weight:600; margin:0 0 10px; color:var(--text-primary);">
+      <span style="display:inline-flex; color:var(--brand-600);">{% icon icon size=18 %}</span>{{ title }}
+    </h2>
+    <div class="card" style="padding:4px 0;">
+      {% for q, a in items %}
+      <details class="faq-item" style="border-bottom:1px solid var(--border-subtle); padding:0 16px;">
+        <summary style="cursor:pointer; padding:13px 0; font-weight:600; font-size:var(--text-sm); color:var(--text-primary); list-style:none; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span>{{ q }}</span>
+          <span class="faq-chevron" aria-hidden="true" style="color:var(--text-tertiary); transition:transform .15s;">{% icon "chevron-down" size=16 %}</span>
+        </summary>
+        <div style="padding:0 0 14px; font-size:var(--text-sm); color:var(--text-secondary); line-height:1.6;">{{ a }}</div>
+      </details>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  <p class="text-sm text-slate-500" style="margin-top:8px;">{% trans "¿No encontraste lo que buscabas? Contacta al administrador de tu organización." %}</p>
+</div>
+
+<style>
+  .faq-item:last-child { border-bottom:none !important; }
+  .faq-item[open] .faq-chevron { transform:rotate(180deg); }
+  .faq-item summary::-webkit-details-marker { display:none; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var input = document.getElementById("faq-search");
+  if (!input) return;
+  var items = Array.prototype.slice.call(document.querySelectorAll(".faq-item"));
+  var sections = Array.prototype.slice.call(document.querySelectorAll(".faq-section"));
+  var empty = document.getElementById("faq-empty");
+  input.addEventListener("input", function () {
+    var q = input.value.trim().toLowerCase();
+    var anyVisible = false;
+    items.forEach(function (it) {
+      var match = !q || it.textContent.toLowerCase().indexOf(q) !== -1;
+      it.style.display = match ? "" : "none";
+      if (match && q) it.setAttribute("open", "");
+      else if (q) it.removeAttribute("open");
+      if (match) anyVisible = true;
+    });
+    sections.forEach(function (s) {
+      var visible = s.querySelectorAll('.faq-item:not([style*="display: none"])').length > 0;
+      s.style.display = visible ? "" : "none";
+    });
+    if (empty) empty.style.display = anyVisible ? "none" : "block";
+  });
+})();
+</script>
+{% endblock %}

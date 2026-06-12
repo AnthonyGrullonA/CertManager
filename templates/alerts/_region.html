@@ -1,0 +1,33 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Región del Centro de Alertas (tabs + tabla) que se intercambia COMPLETA en cada
+acción/cambio de tab. Va dentro de #alert-region (un <div>, no un <tbody>), de
+modo que el parser del navegador no aplana las filas (el bug anterior venía de
+inyectar un <nav> OOB dentro de un <tbody>). Re-renderiza el nav con la tab
+activa correcta y la tabla con sus filas; ForgeTable se reinicializa por scan en
+htmx:afterSwap.
+{% endcomment %}
+{% include "alerts/_tabs.html" %}
+
+<div data-forge-table data-page-size="8" data-forge-sortable>
+  <div class="forge-table-scroll">
+    <table class="cf-data-source">
+      <thead>
+        <tr>
+          <th scope="col" style="width:1%;">{% trans "Severidad" %}</th>
+          <th scope="col">{% trans "Alerta" %}</th>
+          <th scope="col">{% trans "Canal" %}</th>
+          <th scope="col" style="text-align:right;">{% trans "Recibida" %}</th>
+          <th data-no-sort scope="col" style="width:1%; text-align:right;"><span class="sr-only">{% trans "Acciones" %}</span></th>
+        </tr>
+      </thead>
+      <tbody id="alert-rows"
+             hx-get="{% url 'alert-list' %}?tab={{ active_tab|default:'todas' }}"
+             hx-trigger="cf:alerts-changed from:body"
+             hx-target="#alert-region" hx-swap="innerHTML">
+        {% include "alerts/_rows.html" %}
+      </tbody>
+    </table>
+  </div>
+</div>

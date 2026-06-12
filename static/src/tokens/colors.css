@@ -1,0 +1,292 @@
+/* Forge UI — Color tokens
+ * Base: cool neutral (slate) for all chrome. Color is reserved for certificate
+ * STATUS (the protagonist) and the single primary action (brand blue).
+ * Semantic aliases resolve per theme via :root (light) and [data-theme="dark"].
+ */
+
+:root {
+  /* ----------------------------------------------------------------------- */
+  /* PRIMITIVE — Neutral (cool slate) ramp                                   */
+  /* ----------------------------------------------------------------------- */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  /* ----------------------------------------------------------------------- */
+  /* PRIMITIVE — Brand (corporate red) ramp — primary action only            */
+  /* Marca roja (Claro). Acción primaria = brand-600 (#dc2626), un rojo más   */
+  /* profundo que el rojo de estado "Error" (#ef4444) para distinguir CTA de  */
+  /* error; el chrome sigue siendo slate y el color se usa con moderación.    */
+  /* ----------------------------------------------------------------------- */
+  --brand-50:  #fef2f2;
+  --brand-100: #fee2e2;
+  --brand-200: #fecaca;
+  --brand-300: #fca5a5;
+  --brand-400: #f87171;
+  --brand-500: #ef4444;
+  --brand-600: #dc2626;
+  --brand-700: #b91c1c;
+  --brand-800: #991b1b;
+  --brand-900: #7f1d1d;
+
+  /* ----------------------------------------------------------------------- */
+  /* PRIMITIVE — Status families (each: solid / soft / softer / border / fg) */
+  /* Order of severity: vigente · por-vencer · critico · vencido · error · sc */
+  /* ----------------------------------------------------------------------- */
+
+  /* Vigente — green */
+  --green-soft:   #f0fdf4;
+  --green-softer: #dcfce7;
+  --green-border: #bbf7d0;
+  --green-solid:  #16a34a;
+  --green-fg:     #15803d;
+  --green-strong: #166534;
+
+  /* Por vencer — amber */
+  --amber-soft:   #fffbeb;
+  --amber-softer: #fef3c7;
+  --amber-border: #fde68a;
+  --amber-solid:  #f59e0b;
+  --amber-fg:     #b45309;
+  --amber-strong: #92400e;
+
+  /* Crítico — orange */
+  --orange-soft:   #fff7ed;
+  --orange-softer: #ffedd5;
+  --orange-border: #fed7aa;
+  --orange-solid:  #f97316;
+  --orange-fg:     #c2410c;
+  --orange-strong: #9a3412;
+
+  /* Error — red (convención universal: rojo = error/peligro) */
+  --red-soft:   #fef2f2;
+  --red-softer: #fee2e2;
+  --red-border: #fecaca;
+  --red-solid:  #ef4444;
+  --red-fg:     #b91c1c;
+  --red-strong: #991b1b;
+
+  /* Total / info — azul cobalto (agregado informativo; NO es la marca roja) */
+  --blue-soft:   #eff6ff;
+  --blue-softer: #dbeafe;
+  --blue-border: #bfdbfe;
+  --blue-solid:  #2563eb;
+  --blue-fg:     #1d4ed8;
+  --blue-strong: #1e40af;
+
+  /* (violet ya no se usa para estados; se conserva por compatibilidad) */
+  --violet-soft:   #f5f3ff;
+  --violet-softer: #ede9fe;
+  --violet-border: #ddd6fe;
+  --violet-solid:  #8b5cf6;
+  --violet-fg:     #6d28d9;
+  --violet-strong: #5b21b6;
+
+  /* Sin chequear — neutral slate */
+  --neutral-soft:   #f8fafc;
+  --neutral-softer: #f1f5f9;
+  --neutral-border: #e2e8f0;
+  --neutral-solid:  #94a3b8;
+  --neutral-fg:     #475569;
+  --neutral-strong: #334155;
+
+  /* ======================================================================= */
+  /* SEMANTIC ALIASES — light theme                                          */
+  /* ======================================================================= */
+
+  /* Surfaces */
+  --surface-page:    var(--slate-50);
+  --surface-card:    #ffffff;
+  --surface-raised:  #ffffff;
+  --surface-sunken:  var(--slate-100);
+  --surface-inverse: var(--slate-900);
+  --surface-hover:   var(--slate-100);
+  --surface-active:  var(--slate-200);
+
+  /* Borders */
+  --border-subtle:  var(--slate-200);
+  --border-default: var(--slate-300);
+  --border-strong:  var(--slate-400);
+
+  /* Text */
+  --text-primary:   var(--slate-900);
+  --text-secondary: var(--slate-600);
+  --text-tertiary:  var(--slate-500);
+  --text-disabled:  var(--slate-400);
+  --text-inverse:   #ffffff;
+  --text-link:      var(--brand-600);
+  --text-brand:     var(--brand-700);
+
+  /* Brand action */
+  --action-primary:        var(--brand-600);
+  --action-primary-hover:  var(--brand-700);
+  --action-primary-active: var(--brand-800);
+  --action-primary-fg:     #ffffff;
+  --action-ghost-hover:    var(--slate-100);
+
+  /* Focus */
+  --focus-ring: var(--brand-500);
+
+  /* Status — semantic (resolve family → role) */
+  --status-ok-bg:        var(--green-softer);
+  --status-ok-bg-soft:   var(--green-soft);
+  --status-ok-border:    var(--green-border);
+  --status-ok-solid:     var(--green-solid);
+  --status-ok-fg:        var(--green-fg);
+
+  --status-warn-bg:      var(--amber-softer);
+  --status-warn-bg-soft: var(--amber-soft);
+  --status-warn-border:  var(--amber-border);
+  --status-warn-solid:   var(--amber-solid);
+  --status-warn-fg:      var(--amber-fg);
+
+  --status-crit-bg:      var(--orange-softer);
+  --status-crit-bg-soft: var(--orange-soft);
+  --status-crit-border:  var(--orange-border);
+  --status-crit-solid:   var(--orange-solid);
+  --status-crit-fg:      var(--orange-fg);
+
+  /* Crítico/Vencido → rojo (peligro: certificado crítico o vencido) */
+  --status-exp-bg:       var(--red-softer);
+  --status-exp-bg-soft:  var(--red-soft);
+  --status-exp-border:   var(--red-border);
+  --status-exp-solid:    var(--red-solid);
+  --status-exp-fg:       var(--red-fg);
+
+  /* Error → rojo (lo usan las páginas de error HTTP y la severidad de alertas) */
+  --status-err-bg:       var(--red-softer);
+  --status-err-bg-soft:  var(--red-soft);
+  --status-err-border:   var(--red-border);
+  --status-err-solid:    var(--red-solid);
+  --status-err-fg:       var(--red-fg);
+
+  --status-none-bg:      var(--neutral-softer);
+  --status-none-bg-soft: var(--neutral-soft);
+  --status-none-border:  var(--neutral-border);
+  --status-none-solid:   var(--neutral-solid);
+  --status-none-fg:      var(--neutral-fg);
+
+  /* Total / info → azul (KPI "Total monitoreados"; agregado, no es estado) */
+  --status-info-bg:      var(--blue-softer);
+  --status-info-bg-soft: var(--blue-soft);
+  --status-info-border:  var(--blue-border);
+  --status-info-solid:   var(--blue-solid);
+  --status-info-fg:      var(--blue-fg);
+
+  /* Chart series (one tint per status) */
+  --chart-ok:   var(--green-solid);
+  --chart-warn: var(--amber-solid);
+  --chart-crit: var(--orange-solid);
+  --chart-exp:  var(--red-solid);
+  --chart-err:  var(--red-solid);
+  --chart-none: var(--neutral-solid);
+  --chart-grid: var(--slate-200);
+  --chart-axis: var(--slate-400);
+
+  color-scheme: light;
+}
+
+/* ========================================================================= */
+/* SEMANTIC ALIASES — dark theme                                             */
+/* Status families keep their meaning; surfaces & text invert.               */
+/* ========================================================================= */
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface-page:    var(--slate-950);
+  --surface-card:    var(--slate-900);
+  --surface-raised:  var(--slate-800);
+  --surface-sunken:  #0b1220;
+  --surface-inverse: var(--slate-100);
+  --surface-hover:   var(--slate-800);
+  --surface-active:  var(--slate-700);
+
+  /* Borders */
+  --border-subtle:  #1f2b3e;
+  --border-default: var(--slate-700);
+  --border-strong:  var(--slate-600);
+
+  /* Text */
+  --text-primary:   var(--slate-100);
+  --text-secondary: var(--slate-400);
+  --text-tertiary:  var(--slate-500);
+  --text-disabled:  var(--slate-600);
+  --text-inverse:   var(--slate-900);
+  --text-link:      var(--brand-400);
+  --text-brand:     var(--brand-300);
+
+  /* Brand action */
+  --action-primary:        var(--brand-500);
+  --action-primary-hover:  var(--brand-400);
+  --action-primary-active: var(--brand-300);
+  --action-primary-fg:     var(--slate-950);
+  --action-ghost-hover:    var(--slate-800);
+
+  /* Focus */
+  --focus-ring: var(--brand-400);
+
+  /* Status — dark: muted tinted bg, brighter fg/solid for contrast */
+  --status-ok-bg:        color-mix(in oklab, var(--green-solid) 22%, var(--slate-900));
+  --status-ok-bg-soft:   color-mix(in oklab, var(--green-solid) 12%, var(--slate-900));
+  --status-ok-border:    color-mix(in oklab, var(--green-solid) 40%, var(--slate-800));
+  --status-ok-solid:     #22c55e;
+  --status-ok-fg:        #4ade80;
+
+  --status-warn-bg:      color-mix(in oklab, var(--amber-solid) 22%, var(--slate-900));
+  --status-warn-bg-soft: color-mix(in oklab, var(--amber-solid) 12%, var(--slate-900));
+  --status-warn-border:  color-mix(in oklab, var(--amber-solid) 40%, var(--slate-800));
+  --status-warn-solid:   #f59e0b;
+  --status-warn-fg:      #fbbf24;
+
+  --status-crit-bg:      color-mix(in oklab, var(--orange-solid) 24%, var(--slate-900));
+  --status-crit-bg-soft: color-mix(in oklab, var(--orange-solid) 12%, var(--slate-900));
+  --status-crit-border:  color-mix(in oklab, var(--orange-solid) 42%, var(--slate-800));
+  --status-crit-solid:   #fb923c;
+  --status-crit-fg:      #fdba74;
+
+  /* Crítico/Vencido → rojo (dark) */
+  --status-exp-bg:       color-mix(in oklab, var(--red-solid) 24%, var(--slate-900));
+  --status-exp-bg-soft:  color-mix(in oklab, var(--red-solid) 12%, var(--slate-900));
+  --status-exp-border:   color-mix(in oklab, var(--red-solid) 42%, var(--slate-800));
+  --status-exp-solid:    #f87171;
+  --status-exp-fg:       #fca5a5;
+
+  /* Error → rojo (dark) */
+  --status-err-bg:       color-mix(in oklab, var(--red-solid) 24%, var(--slate-900));
+  --status-err-bg-soft:  color-mix(in oklab, var(--red-solid) 12%, var(--slate-900));
+  --status-err-border:   color-mix(in oklab, var(--red-solid) 42%, var(--slate-800));
+  --status-err-solid:    #f87171;
+  --status-err-fg:       #fca5a5;
+
+  --status-none-bg:      var(--slate-800);
+  --status-none-bg-soft: color-mix(in oklab, var(--slate-500) 12%, var(--slate-900));
+  --status-none-border:  var(--slate-700);
+  --status-none-solid:   var(--slate-500);
+  --status-none-fg:      var(--slate-400);
+
+  /* Total / info → azul (dark) */
+  --status-info-bg:      color-mix(in oklab, var(--blue-solid) 24%, var(--slate-900));
+  --status-info-bg-soft: color-mix(in oklab, var(--blue-solid) 12%, var(--slate-900));
+  --status-info-border:  color-mix(in oklab, var(--blue-solid) 42%, var(--slate-800));
+  --status-info-solid:   #60a5fa;
+  --status-info-fg:      #93c5fd;
+
+  /* Chart series (dark) */
+  --chart-ok:   #22c55e;
+  --chart-warn: #f59e0b;
+  --chart-crit: #fb923c;
+  --chart-exp:  #f87171;
+  --chart-err:  #f87171;
+  --chart-none: #64748b;
+  --chart-grid: #1f2b3e;
+  --chart-axis: var(--slate-600);
+
+  color-scheme: dark;
+}

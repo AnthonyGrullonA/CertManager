@@ -1,0 +1,26 @@
+{% load static forge_icons %}{% load i18n %}
+{% comment %}
+Página de estado/error full-screen (patrón login.html). NO extiende base.html
+(AppShell) a propósito: así es segura en un 500 (no depende de sesión ni de los
+context processors que tocan la BD). Compone los parciales del sistema.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="es-do" data-theme="light" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if meta.http_status >= 400 %}{{ meta.http_status }} · {% endif %}{{ meta.title }} · CertManager</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v=2">
+  <link rel="stylesheet" href="{% static 'css/forge.css' %}?v={{ forge_assets_v }}">
+</head>
+<body class="forge-body h-full" style="margin:0">
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;background:var(--surface-page)">
+    <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:18px">
+      {% include "system/_status_card.html" %}
+      {% if meta.http_status >= 400 %}{% include "system/_ref_card.html" %}{% endif %}
+      {% include "system/_actions.html" %}
+    </div>
+  </main>
+  {% include "system/_copy_js.html" %}
+</body>
+</html>

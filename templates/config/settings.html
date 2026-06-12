@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% block title %}{% trans "Configuración · CertManager" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-[1120px]">
+  {# ---------- Encabezado ---------- #}
+  <header class="mb-6">
+    <h1 class="text-xl font-semibold tracking-tight text-slate-900">{% trans "Configuración" %}</h1>
+    <p class="text-sm text-slate-500">{% trans "Ajustes globales de la organización · solo Owner" %}</p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[224px_1fr] gap-6 items-start">
+    {# ---------- Nav de secciones (HTMX) ---------- #}
+    <nav class="flex flex-col gap-1 lg:sticky lg:top-5" id="settings-nav" aria-label="{% trans 'Secciones de configuración' %}">
+      {% for s in sections %}
+        <button type="button"
+                class="settings-nav__item flex items-center gap-3 px-3 h-9 rounded-lg text-left text-sm transition-colors
+                       {% if s.key == active_section %}bg-slate-100 text-slate-900 font-semibold{% else %}text-slate-600 font-medium hover:bg-slate-50{% endif %}"
+                data-section="{{ s.key }}"
+                aria-current="{% if s.key == active_section %}page{% else %}false{% endif %}"
+                hx-get="{% url 'settings-panel' s.key %}"
+                hx-target="#settings-panel"
+                hx-swap="innerHTML"
+                hx-push-url="false">
+          {% icon s.icon size=18 %}
+          <span>{{ s.label }}</span>
+        </button>
+      {% endfor %}
+    </nav>
+
+    {# ---------- Panel activo ---------- #}
+    <div id="settings-panel" aria-live="polite">
+      {% include "config/panels/_"|add:active_section|add:".html" %}
+    </div>
+  </div>
+</div>
+
+{# Resalta el item activo de la nav tras cargar un panel por HTMX. #}
+<script>
+(function () {
+  var nav = document.getElementById("settings-nav");
+  if (!nav) return;
+  nav.addEventListener("click", function (e) {
+    var btn = e.target.closest(".settings-nav__item");
+    if (!btn) return;
+    nav.querySelectorAll(".settings-nav__item").forEach(function (b) {
+      b.classList.remove("bg-slate-100", "text-slate-900", "font-semibold");
+      b.classList.add("text-slate-600", "font-medium");
+      b.setAttribute("aria-current", "false");
+    });
+    btn.classList.add("bg-slate-100", "text-slate-900", "font-semibold");
+    btn.classList.remove("text-slate-600", "font-medium");
+    btn.setAttribute("aria-current", "page");
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% comment %}
+Variante embebible (sin <html>): para respuestas HTMX o estados de negocio
+servidos dentro de una página logueada. Reusa los mismos componentes.
+{% endcomment %}
+<section role="alert" style="display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center;padding:48px 24px;max-width:480px;margin:0 auto">
+  {% include "system/_status_card.html" %}
+  {% if meta.http_status >= 400 %}{% include "system/_ref_card.html" %}{% endif %}
+  {% include "system/_actions.html" %}
+  {% include "system/_copy_js.html" %}
+</section>

@@ -1,0 +1,42 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Contenido del panel de la campana (GET alert-panel). El topbar lo inyecta en
+`#forge-panel-list` (innerHTML) al abrir la campana (evento forge:panel-open) y
+tras `cf:alerts-changed`.
+
+Muestra las alertas OPEN del ámbito (las primeras ~8). Cada ítem:
+- al hacer clic abre el DETALLE en un drawer (hx-get alert-detail → #drawer-root);
+- si el usuario puede gestionarla (Admin/Owner), trae un botón "Resolver" que la
+  cierra al instante (hx-post alert-resolve); el badge se actualiza por el OOB.
+"Resolver todas" (en el topbar) cierra todas las gestionables y vacía el panel.
+{% endcomment %}
+{% for alert in panel_alerts %}
+<div id="forge-notif-item-{{ alert.id }}"
+     class="forge-notif__item{% if not alert.is_read %} is-unread{% endif %}"
+     data-family="{{ alert.family }}">
+  {% if not alert.is_read %}<span class="forge-notif__dot" aria-hidden="true"></span>{% endif %}
+  <button type="button" class="forge-notif__item-link"
+          hx-get="{% url 'alert-detail' alert.id %}"
+          hx-target="#drawer-root" hx-swap="innerHTML">
+    <span class="badge badge--{{ alert.family }} badge--sm">{{ alert.get_severity_display }}</span>
+    <span class="forge-notif__item-body">
+      <span class="forge-notif__item-domain">{{ alert.certificate.domain }}</span>
+      <span class="forge-notif__item-meta">{{ alert.message }}</span>
+    </span>
+    <time class="forge-notif__item-time" datetime="{{ alert.created_at|date:'c' }}">
+      {{ alert.created_at|date:'d/m H:i' }}
+    </time>
+  </button>
+  {% if alert.can_manage %}
+  <button type="button" class="forge-iconbtn forge-iconbtn--sm forge-notif__dismiss"
+          aria-label="{% trans 'Resolver alerta' %}" title="{% trans 'Resolver' %}"
+          hx-post="{% url 'alert-resolve' alert.id %}"
+          hx-target="#forge-notif-item-{{ alert.id }}" hx-swap="delete">
+    {% icon "check" size=15 %}
+  </button>
+  {% endif %}
+</div>
+{% empty %}
+<p class="forge-menu__empty">{% trans "No tienes alertas abiertas." %}</p>
+{% endfor %}

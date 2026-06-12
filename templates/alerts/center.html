@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Centro de Alertas (/alerts/) — espejo de Alertas.jsx.
+
+PageHeader con conteo "sin leer", tabs por severidad/estado (Todas / No leídas /
+Críticas-vencidas / Error) y la lista paginada de filas. SIEMPRE muestra todo el
+histórico del ámbito (las archivadas tenues + tag "Archivada").
+
+ForgeDataTable: el wrapper [data-forge-table] envuelve la tabla y PERSISTE; solo el
+<tbody id="alert-rows"> se reemplaza por HTMX al cambiar de tab o tras
+cf:alerts-changed, y el adapter global reinicializa el control en htmx:afterSwap.
+
+Tabs y "Marcar todas leídas" son HTMX; las respuestas inyectan toast/badge OOB.
+{% endcomment %}
+{% block title %}{% trans "Centro de alertas" %} · CertManager{% endblock %}
+
+{% block content %}
+<div class="alert-center">
+  <header class="alert-center__header">
+    <div class="alert-center__heading">
+      <h1 class="alert-center__title">
+        {% trans "Centro de alertas" %}
+        {% if unread_count %}
+        <span class="alert-center__unread">{% blocktrans with count=unread_count %}{{ count }} sin leer{% endblocktrans %}</span>
+        {% endif %}
+      </h1>
+      <p class="alert-center__subtitle">{% trans "Vencimientos y errores detectados en tu ámbito" %}</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button type="button" class="btn-secondary btn-sm"
+              hx-post="{% url 'alert-read-all' %}" hx-swap="none">
+        {% icon "check" size=16 %} {% trans "Marcar todas leídas" %}
+      </button>
+      {% if can_resolve_any %}
+      <button type="button" class="btn-primary btn-sm"
+              hx-post="{% url 'alert-resolve-all' %}" hx-swap="none">
+        {% icon "check-check" size=16 %} {% trans "Resolver todas" %}
+      </button>
+      {% endif %}
+    </div>
+  </header>
+
+  {% comment %}
+  La región (tabs + tabla) se intercambia COMPLETA en cada cambio de tab o
+  acción; el target es este <div> (no el <tbody>) para no romper el parseo.
+  {% endcomment %}
+  <div id="alert-region">
+    {% include "alerts/_region.html" %}
+  </div>
+</div>
+{% endblock %}

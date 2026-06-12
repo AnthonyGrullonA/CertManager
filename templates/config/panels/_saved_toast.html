@@ -1,0 +1,1 @@
+{% load i18n %}{% if saved %}{% translate "Cambios guardados" as t_title %}{% translate "Tu configuración se actualizó." as t_msg %}{% include "partials/_toast.html" with tone="ok" title=t_title message=t_msg %}{% endif %}

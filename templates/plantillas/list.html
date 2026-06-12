@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% block title %}{% trans "Plantillas" %} · CertManager{% endblock %}
+
+{% block content %}
+<div style="padding:28px; max-width:var(--content-max); margin:0 auto;">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight">{% trans "Plantillas de correo" %}</h1>
+      <p class="text-sm text-slate-500">{% trans "Cuerpos de correo para certificados y reportes. Todos pueden usarlas; editan Owner, Admin o quien la creó." %}</p>
+    </div>
+    {% if can_create %}
+    <a class="btn-primary" href="{% url 'mailtemplate-create' %}">{% icon "plus" size=16 %} {% trans "Nueva plantilla" %}</a>
+    {% endif %}
+  </div>
+
+  <div class="flex items-center gap-2 mb-4">
+    <a class="btn-sm {% if not active_kind %}btn-outline{% else %}btn-ghost{% endif %}" href="{% url 'mailtemplate-list' %}">{% trans "Todas" %}</a>
+    {% for val, label in kinds %}
+    <a class="btn-sm {% if active_kind == val %}btn-outline{% else %}btn-ghost{% endif %}" href="?kind={{ val }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <section class="forge-table-card">
+    <div data-forge-table data-page-size="10" data-forge-sortable>
+      <div class="forge-table-scroll">
+        <table class="cf-data-source" style="min-width:760px;">
+          <thead>
+            <tr>
+              <th>{% trans "Nombre" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Etiqueta" %}</th><th>{% trans "Predet." %}</th><th>{% trans "Estado" %}</th>
+              <th data-no-sort style="text-align:right;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in templates %}
+              {% include "plantillas/_row.html" with t=t %}
+            {% empty %}
+              <tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-tertiary)">{% trans "Aún no hay plantillas. Creá la primera." %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

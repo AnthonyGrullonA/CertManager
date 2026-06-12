@@ -1,0 +1,29 @@
+{% load forge_icons %}{% load i18n %}
+{% comment %}
+Toast server-rendered (espejo de KitToast.jsx). Se inyecta en #toast-host vía
+hx-swap-oob: cualquier respuesta HTMX puede incluir este parcial para empujar un
+toast sin tocar el cuerpo principal.
+
+Uso (en una respuesta HTMX, fuera del target):
+  {% include "partials/_toast.html" with tone="ok" title="Listo" message="Cambios guardados" %}
+
+tone ∈ ok | warn | err | info (def info). El handler global de base.html lo
+auto-descarta a los ~4.5s; también se puede cerrar con la X.
+{% endcomment %}
+<div id="toast-host" hx-swap-oob="beforeend">
+  <div class="forge-toast forge-toast--{{ tone|default:'info' }}" data-forge-toast role="status" aria-live="polite">
+    <span class="forge-toast__icon">
+      {% if tone == 'ok' %}{% icon "circle-check" size=18 %}
+      {% elif tone == 'warn' %}{% icon "triangle-alert" size=18 %}
+      {% elif tone == 'err' %}{% icon "circle-alert" size=18 %}
+      {% else %}{% icon "info" size=18 %}{% endif %}
+    </span>
+    <div class="forge-toast__body">
+      {% if title %}<div class="forge-toast__title">{{ title }}</div>{% endif %}
+      {% if message %}<div class="forge-toast__msg">{{ message }}</div>{% endif %}
+    </div>
+    <button type="button" class="forge-toast__close" aria-label="{% trans 'Cerrar' %}" data-forge-toast-close>
+      {% icon "x" size=15 %}
+    </button>
+  </div>
+</div>

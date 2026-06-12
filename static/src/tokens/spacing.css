@@ -1,0 +1,41 @@
+/* Forge UI — Spacing & layout tokens. 4 / 8 px grid. */
+
+:root {
+  /* Spacing scale (4px base) */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+
+  /* Radii — soft rounded corners */
+  --radius-xs:   4px;   /* chips, badges, inputs-sm */
+  --radius-sm:   6px;   /* buttons, inputs */
+  --radius-md:   8px;   /* cards, menus */
+  --radius-lg:   12px;  /* large cards, modals */
+  --radius-xl:   16px;  /* drawers, hero panels */
+  --radius-pill: 999px; /* status dots, avatars, toggles */
+
+  /* Layout constants */
+  --sidebar-w:          248px;
+  --sidebar-collapsed-w: 64px;
+  --topbar-h:           60px;
+  --content-max:        1440px;
+
+  /* Z-index ladder */
+  --z-base:     0;   /* @kind other */
+  --z-sticky:   100; /* @kind other */
+  --z-dropdown: 400; /* @kind other */
+  --z-drawer:   500; /* @kind other */
+  --z-modal:    600; /* @kind other */
+  --z-toast:    700; /* @kind other */
+  --z-tooltip:  800; /* @kind other */
+}

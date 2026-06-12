@@ -1,0 +1,16 @@
+{% load forge_icons %}{% load i18n %}
+{% comment %}
+Card "code" copiable para soporte. El <pre data-ref-block> es la ÚNICA fuente del
+texto que copia el botón. El reference_id == correlation_id de los logs de obsforge
+(cuando está activo), así soporte lo pega en Grafana/Loki y cae en el log exacto.
+{% endcomment %}
+<div class="card" style="padding:13px 16px;background:var(--surface-sunken)">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+    <span style="font-size:var(--text-label);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">{% trans "Detalle para soporte" %}</span>
+    <button type="button" class="btn-outline btn-sm" data-copy-ref aria-label="{% trans 'Copiar detalle' %}">{% icon "copy" size=14 %}<span data-copy-label>{% trans "Copiar" %}</span></button>
+  </div>
+  <pre data-ref-block style="margin:0;white-space:pre-wrap;word-break:break-all;font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.5;color:var(--text-secondary)">ref:    {{ reference.reference_id }}
+status: {{ reference.status }} ({{ reference.key }})
+req:    {{ reference.method }} {{ reference.path }}
+time:   {{ reference.timestamp }}</pre>
+</div>

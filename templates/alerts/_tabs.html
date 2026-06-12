@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}
+Tabs por severidad/estado del Centro de Alertas (Todas / No leídas /
+Críticas-vencidas / Error).
+
+Cada tab intercambia la REGIÓN completa (#alert-region: nav + tabla) por
+innerHTML, de modo que el nav se re-renderiza con la tab activa correcta y la
+tabla con sus filas. (Antes se usaba un swap OOB del <nav> dentro de un <tbody>,
+lo que aplanaba las filas y rompía los estilos hasta recargar.)
+{% endcomment %}
+<nav id="alert-tabs" class="alert-tabs" role="tablist" aria-label="Filtrar alertas">
+  {% with tab=active_tab|default:'todas' %}
+  <a class="alert-tab{% if tab == 'todas' %} is-active{% endif %}" role="tab"
+     href="{% url 'alert-list' %}?tab=todas"
+     hx-get="{% url 'alert-list' %}?tab=todas" hx-target="#alert-region" hx-swap="innerHTML"
+     hx-push-url="true" aria-selected="{% if tab == 'todas' %}true{% else %}false{% endif %}">
+    {% trans "Todas" %} <span class="alert-tab__count">{{ total_count }}</span>
+  </a>
+  <a class="alert-tab{% if tab == 'noleidas' %} is-active{% endif %}" role="tab"
+     href="{% url 'alert-list' %}?tab=noleidas"
+     hx-get="{% url 'alert-list' %}?tab=noleidas" hx-target="#alert-region" hx-swap="innerHTML"
+     hx-push-url="true" aria-selected="{% if tab == 'noleidas' %}true{% else %}false{% endif %}">
+    {% trans "No leídas" %} <span class="alert-tab__count">{{ unread_count }}</span>
+  </a>
+  <a class="alert-tab{% if tab == 'criticas' %} is-active{% endif %}" role="tab"
+     href="{% url 'alert-list' %}?tab=criticas"
+     hx-get="{% url 'alert-list' %}?tab=criticas" hx-target="#alert-region" hx-swap="innerHTML"
+     hx-push-url="true" aria-selected="{% if tab == 'criticas' %}true{% else %}false{% endif %}">
+    {% trans "Críticas / vencidas" %}
+  </a>
+  <a class="alert-tab{% if tab == 'error' %} is-active{% endif %}" role="tab"
+     href="{% url 'alert-list' %}?tab=error"
+     hx-get="{% url 'alert-list' %}?tab=error" hx-target="#alert-region" hx-swap="innerHTML"
+     hx-push-url="true" aria-selected="{% if tab == 'error' %}true{% else %}false{% endif %}">
+    {% trans "Error" %}
+  </a>
+  {% endwith %}
+</nav>

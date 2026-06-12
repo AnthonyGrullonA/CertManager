@@ -1,0 +1,75 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Fila (<tr>) de una alerta en el Centro de Alertas.
+
+Estado de presentación (anotado por views_alerts._decorate):
+- alert.is_read     → no-leídas resaltadas (punto + fondo tenue por familia).
+- alert.is_resolved → resueltas: se muestran TENUES + tag "Resuelta". Nunca se
+                      filtran fuera del Centro (se conserva el histórico).
+- alert.family      → familia Forge (warn/crit/exp/err) para color del badge.
+- alert.can_manage  → Admin del grupo u Owner: puede resolver.
+
+Clic en el cuerpo abre el DETALLE en un drawer (hx-get alert-detail). Acciones de
+fila: "Marcar leída" (personal, cualquiera) y "Resolver" (compartida, Admin/Owner).
+{% endcomment %}
+<tr id="alert-row-{{ alert.id }}"
+    class="alert-row{% if not alert.is_read %} alert-row--unread{% endif %}{% if alert.is_resolved %} alert-row--archived{% endif %}"
+    data-family="{{ alert.family }}">
+  <td class="alert-row__cell alert-row__cell--marker">
+    {% if not alert.is_read %}
+    <span class="alert-row__dot" aria-hidden="true"></span>
+    {% else %}
+    <span class="alert-row__dot alert-row__dot--placeholder" aria-hidden="true"></span>
+    {% endif %}
+    <span class="badge badge--{{ alert.family }} badge--sm">{{ alert.get_severity_display }}</span>
+  </td>
+
+  <td class="alert-row__cell alert-row__cell--body">
+    <button type="button" class="alert-row__open"
+            hx-get="{% url 'alert-detail' alert.id %}"
+            hx-target="#drawer-root" hx-swap="innerHTML"
+            title="{% trans 'Ver detalle' %}">
+      <span class="alert-row__domain">
+        {{ alert.certificate.domain }}
+        {% if alert.is_resolved %}
+        <span class="alert-row__tag" title="{% trans 'Resuelta; se conserva en el histórico' %}">
+          {% icon "check" size=12 %} {% trans "Resuelta" %}
+        </span>
+        {% endif %}
+      </span>
+      <span class="alert-row__meta">{{ alert.message }} · {{ alert.certificate.team.name }}</span>
+    </button>
+  </td>
+
+  <td class="alert-row__cell alert-row__cell--channel">
+    <span class="alert-row__channel">
+      {% icon alert.channel_icon size=14 %}{{ alert.channel_label }}
+    </span>
+  </td>
+
+  <td class="alert-row__cell alert-row__cell--time">
+    <time class="alert-row__time" datetime="{{ alert.created_at|date:'c' }}">
+      {{ alert.created_at|date:'d/m H:i' }}
+    </time>
+  </td>
+
+  <td class="alert-row__cell alert-row__cell--actions">
+    <div class="alert-row__actions">
+      {% if not alert.is_read %}
+      <button type="button" class="forge-iconbtn forge-iconbtn--sm"
+              aria-label="{% trans 'Marcar leída' %}" title="{% trans 'Marcar leída' %}"
+              hx-post="{% url 'alert-read' alert.id %}" hx-swap="none">
+        {% icon "check" size=16 %}
+      </button>
+      {% endif %}
+      {% if alert.can_manage and not alert.is_resolved %}
+      <button type="button" class="forge-iconbtn forge-iconbtn--sm"
+              aria-label="{% trans 'Resolver' %}" title="{% trans 'Resolver (cerrar) la alerta' %}"
+              hx-post="{% url 'alert-resolve' alert.id %}" hx-swap="none">
+        {% icon "check-check" size=16 %}
+      </button>
+      {% endif %}
+    </div>
+  </td>
+</tr>

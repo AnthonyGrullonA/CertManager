@@ -1,0 +1,83 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Panel SMTP. Secreto write-only: el campo Contraseña NUNCA trae el valor real;
+muestra '●●● configurado' si ya hay un secreto guardado (form.has_password) y un
+POST vacío lo conserva (lógica en SmtpSettingsForm.save).
+{% endcomment %}
+{% include "config/panels/_saved_toast.html" %}
+<form hx-post="{% url 'settings-panel' 'smtp' %}"
+      hx-target="#settings-panel" hx-swap="innerHTML">
+  <section class="card !p-0 overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "Correo (SMTP)" %}</h3>
+      <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Servidor de salida para notificaciones por correo. Los secretos nunca se muestran en claro." %}</p>
+    </div>
+    <div class="px-6 pb-2 pt-3">
+      {% if form.non_field_errors %}<div class="text-sm text-red-600 mb-2">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Host" %}</span>
+          {{ form.smtp_host }}
+          {{ form.smtp_host.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Puerto" %}</span>
+          {{ form.smtp_port }}
+          {{ form.smtp_port.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Usuario" %}</span>
+          {{ form.smtp_user }}
+          {{ form.smtp_user.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Contraseña" %}</span>
+          {{ form.smtp_password }}
+          {% if form.has_password %}
+            <span class="text-xs text-emerald-600 inline-flex items-center gap-1">
+              {% icon "circle-check" size=13 %} ●●● configurado · deja en blanco para conservarlo
+            </span>
+          {% else %}
+            <span class="text-xs text-slate-400">{% trans "Sin contraseña configurada." %}</span>
+          {% endif %}
+          {{ form.smtp_password.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5 sm:col-span-2">
+          <span class="text-sm font-medium text-slate-700">{% trans "Remitente (From)" %}</span>
+          {{ form.smtp_from }}
+          {{ form.smtp_from.errors }}
+        </label>
+      </div>
+
+      <div class="flex items-center gap-6 py-4 mt-2 border-t border-slate-100">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-900">{% trans "TLS / STARTTLS" %}</div>
+          <div class="text-xs text-slate-500 mt-0.5">{% trans "Cifrar la conexión con el servidor de correo." %}</div>
+        </div>
+        <div class="flex-none">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            {{ form.smtp_use_tls }} {% trans "Activar" %}
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 py-4 border-t border-slate-100 items-end">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Copia global de correos" %}</span>
+          {{ form.email_copy_address }}
+          {{ form.email_copy_address.errors }}
+        </label>
+        <label class="inline-flex items-center gap-2 text-sm text-slate-700 pb-2">
+          {{ form.email_copy_enabled }} {% trans "Habilitar" %}
+        </label>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <button type="button" class="btn-outline inline-flex items-center gap-2"
+              hx-post="{% url 'settings-test-smtp' %}" hx-swap="none">
+        {% icon "mail" size=16 %} {% trans "Enviar prueba" %}
+      </button>
+      <button type="submit" class="btn-primary">{% trans "Guardar cambios" %}</button>
+    </div>
+  </section>
+</form>

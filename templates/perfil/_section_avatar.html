@@ -1,0 +1,60 @@
+{% load forge_icons forge_ui forge_avatars %}
+{% load i18n %}
+{% comment %}
+Identidad + avatar. SOLO avatares SVG generados (deterministas, sin storage) o
+iniciales como respaldo. No se permite subir fotos. Al elegir un avatar se guarda
+avatar_choice vía HTMX (profile-section 'avatar_choice') y se refresca este
+fragmento completo (target del guardado parcial: vista re-renderiza + toast).
+{% endcomment %}
+{% avatar_tint display_name as tint %}
+<div id="section-avatar" style="margin-bottom:16px;">
+  <div style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px; display:flex; align-items:center; gap:18px;">
+    <span class="forge-avatar{% if prefs.avatar_choice %} forge-avatar--media{% endif %}" style="width:64px; height:64px; font-size:24px; --avatar-tint: var({{ tint }});" aria-hidden="true">
+      {% if prefs.avatar_choice %}
+        {% avatar_svg prefs.avatar_choice size="xl" %}
+      {% else %}{{ display_name|initials:user.email }}{% endif %}
+    </span>
+    <div style="flex:1; min-width:0;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-family:var(--font-sans); font-weight:600; font-size:var(--text-h2); color:var(--text-primary);">{{ display_name }}</span>
+        {% if user.is_owner %}
+          <span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} Owner</span>
+        {% else %}
+          <span class="forge-tag forge-tag--neutral">{% trans "Miembro" %}</span>
+        {% endif %}
+      </div>
+      <span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-tertiary);">{{ user.email }}</span>
+    </div>
+  </div>
+
+  {% comment %} ---------- Picker de avatares SVG generados ---------- {% endcomment %}
+  <div style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px; margin-top:16px;">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px;">
+      <div>
+        <h3 style="margin:0; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Elige un avatar" %}</h3>
+        <p style="margin:4px 0 0; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Avatares generados, sin subir archivos." %}</p>
+      </div>
+      {% if prefs.avatar_choice %}
+        <button type="button" class="btn-secondary btn-sm"
+                hx-post="{% url 'profile-section' 'avatar_choice' %}"
+                hx-vals='{"avatar_choice": "0"}'
+                hx-target="#section-avatar" hx-swap="outerHTML"
+                style="flex:none;">{% icon "x" size=14 %} {% trans "Quitar" %}</button>
+      {% endif %}
+    </div>
+    <div class="perfil-avatar-grid" role="radiogroup" aria-label="{% trans 'Avatares disponibles' %}">
+      {% avatar_indices as indices %}
+      {% for i in indices %}
+        <button type="button"
+                class="perfil-avatar-pick{% if prefs.avatar_choice == i %} perfil-avatar-pick--active{% endif %}"
+                role="radio" aria-checked="{% if prefs.avatar_choice == i %}true{% else %}false{% endif %}"
+                aria-label="{% blocktrans with num=i %}Avatar {{ num }}{% endblocktrans %}"
+                hx-post="{% url 'profile-section' 'avatar_choice' %}"
+                hx-vals='{"avatar_choice": "{{ i }}"}'
+                hx-target="#section-avatar" hx-swap="outerHTML">
+          {% avatar_svg i size="lg" %}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+{% load forge_icons i18n %}
+{% comment %}
+Modal de confirmación de "Eliminar" masivo (decisión congelada: el borrado masivo
+SIEMPRE confirma — migration-plan.md §12). Se inyecta en #modal-root. El botón
+"Eliminar" re-envía el bulk con confirm=1; la respuesta (toast) cierra el modal.
+Variables: certs (queryset), count.
+{% endcomment %}
+<div class="forge-modal" data-forge-modal>
+  <div class="forge-modal__scrim" data-forge-modal-close></div>
+  <div class="forge-modal__panel" role="dialog" aria-modal="true"
+       aria-label="{% trans 'Confirmar eliminación' %}" style="width:440px;">
+    <div class="forge-modal__header">
+      <div class="min-w-0 flex-1">
+        <div class="forge-modal__title">{% blocktrans count count=count %}Eliminar {{ count }} certificado{% plural %}Eliminar {{ count }} certificados{% endblocktrans %}</div>
+        <div class="forge-modal__subtitle">{% trans "Esta acción no se puede deshacer." %}</div>
+      </div>
+      <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>
+        {% icon "x" size=18 %}
+      </button>
+    </div>
+
+    <div class="forge-modal__body">
+      <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary); margin-bottom:10px;">
+        {% trans "Se eliminarán los siguientes certificados y todo su historial de chequeos:" %}
+      </p>
+      <ul style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow:auto;">
+        {% for c in certs %}
+        <li style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          {% icon "globe" size=14 %} {{ c.domain }}<span style="color:var(--text-tertiary); font-family:var(--font-mono);">:{{ c.port }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="forge-modal__footer">
+      <span id="bulk-delete-ids" hidden>
+        {% for c in certs %}<input type="hidden" name="ids" value="{{ c.id }}">{% endfor %}
+      </span>
+      <button type="button" class="btn-ghost" data-forge-modal-close>{% trans "Cancelar" %}</button>
+      <button type="button" class="btn-primary"
+              style="background:var(--status-exp-solid); border-color:var(--status-exp-solid);"
+              hx-post="{% url 'cert-bulk' %}"
+              hx-target="#toast-host" hx-swap="beforeend"
+              hx-include="#bulk-delete-ids input"
+              hx-vals='{"action":"delete","confirm":"1"}'>
+        {% icon "trash-2" size=16 %} {% trans "Eliminar definitivamente" %}
+      </button>
+    </div>
+  </div>
+</div>

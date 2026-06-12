@@ -1,0 +1,207 @@
+{% load static %}{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ request.LANGUAGE_CODE|default:'es' }}" data-theme="light" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}CertManager{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v=2">
+
+  {% comment %} Forge UI: fuentes self-host (Geist/Geist Mono) + tokens + Tailwind, todo en
+     el bundle forge.css. Chrome SOLO modo claro: data-theme estable en <html>. {% endcomment %}
+  <link rel="stylesheet" href="{% static 'css/forge.css' %}?v={{ forge_assets_v }}">
+
+  {# HTMX vendorizado. CSRF global por hx-headers para todas las peticiones. #}
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  {# i18n para ForgeTable (JS): textos del footer/paginador traducibles. #}
+  <script>window.CF_TABLE_I18N={perPage:"{% trans 'por página' %}",rowsPerPage:"{% trans 'Filas por página' %}",of:"{% trans 'de' %}",first:"{% trans 'Primera página' %}",prev:"{% trans 'Página anterior' %}",next:"{% trans 'Página siguiente' %}",last:"{% trans 'Última página' %}"};</script>
+  {# ForgeTable: componente de tabla propio (vanilla, sin dependencias). #}
+  <script src="{% static 'js/forge-table.js' %}" defer></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="forge-body h-full"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="forge-shell">
+    {% include "partials/_sidebar.html" %}
+
+    <div class="forge-main">
+      {% include "partials/_topbar.html" %}
+      <main class="forge-content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  {# Raíces para overlays HTMX: modal centrado, drawer lateral y toasts. #}
+  <div id="modal-root"></div>
+  <div id="drawer-root"></div>
+  <div id="toast-host" class="forge-toast-host" aria-live="polite" aria-atomic="false"></div>
+
+  {# ------------------------------------------------------------------ #}
+  {# Chrome JS (sin bundle React): menús <details>, colapso, overlays y  #}
+  {# toasts. Pequeño, delegado, tolerante a ausencia de elementos. CSP   #}
+  {# está en Report-Only en esta fase (UNSAFE_INLINE permitido).         #}
+  {# ------------------------------------------------------------------ #}
+  <script>
+  (function () {
+    // --- Cierre de menús <details data-forge-menu> al hacer click fuera ---
+    document.addEventListener("click", function (e) {
+      document.querySelectorAll("details[data-forge-menu][open]").forEach(function (d) {
+        if (!d.contains(e.target)) d.removeAttribute("open");
+      });
+    });
+    // Escape cierra menús abiertos y overlays.
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      document.querySelectorAll("details[data-forge-menu][open]").forEach(function (d) {
+        d.removeAttribute("open");
+      });
+      closeOverlays();
+    });
+    // Solo un menú abierto a la vez.
+    document.addEventListener("toggle", function (e) {
+      var d = e.target;
+      if (!d.matches || !d.matches("details[data-forge-menu]") || !d.open) return;
+      document.querySelectorAll("details[data-forge-menu][open]").forEach(function (o) {
+        if (o !== d) o.removeAttribute("open");
+      });
+      // Al abrir el panel de notificaciones, pide su lista (paso 5).
+      if (d.classList.contains("forge-notif")) {
+        var list = d.querySelector("#forge-panel-list");
+        if (list && window.htmx) window.htmx.trigger(list, "forge:panel-open");
+      }
+    }, true);
+
+    // --- Colapso del sidebar (persistido en cookie cf_sidebar) ---
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-forge-collapse]");
+      if (!btn) return;
+      var side = document.querySelector("[data-forge-sidebar]");
+      if (!side) return;
+      var collapsed = side.classList.toggle("forge-sidebar--collapsed");
+      document.cookie = "cf_sidebar=" + (collapsed ? "collapsed" : "expanded") +
+        ";path=/;max-age=31536000;samesite=Lax";
+    });
+
+    // --- Overlays (modal/drawer): cerrar por scrim, botón o Escape ---
+    function closeOverlays() {
+      ["modal-root", "drawer-root"].forEach(function (id) {
+        var r = document.getElementById(id);
+        if (r) r.innerHTML = "";
+      });
+    }
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("[data-forge-modal-close]")) closeOverlays();
+    });
+
+    // --- Toasts: cierre manual + auto-descarte ---
+    function dismissToast(t) {
+      if (!t) return;
+      t.classList.add("forge-toast--out");
+      setTimeout(function () { t.remove(); }, 200);
+    }
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-forge-toast-close]");
+      if (b) dismissToast(b.closest("[data-forge-toast]"));
+    });
+    // Auto-descarte de los toasts recién insertados (incluye los OOB de HTMX).
+    function armToasts(scope) {
+      (scope || document).querySelectorAll("[data-forge-toast]:not([data-armed])").forEach(function (t) {
+        t.setAttribute("data-armed", "1");
+        setTimeout(function () { dismissToast(t); }, 4500);
+      });
+    }
+    document.addEventListener("DOMContentLoaded", function () { armToasts(); });
+    document.body.addEventListener("htmx:afterSwap", function (e) { armToasts(); });
+    document.body.addEventListener("htmx:oobAfterSwap", function (e) { armToasts(); });
+
+    // --- Toast cliente-side reutilizable (espejo de window.cfToast) ---
+    var TONE_ICON = {
+      ok: '<path d="M20 6 9 17l-5-5"/>',
+      warn: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      err: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+      info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+    };
+    window.cfToast = function (tone, title, msg) {
+      tone = tone || "info";
+      var host = document.getElementById("toast-host");
+      if (!host) return;
+      var el = document.createElement("div");
+      el.className = "forge-toast forge-toast--" + tone;
+      el.setAttribute("data-forge-toast", "");
+      el.setAttribute("role", "status");
+      el.innerHTML =
+        '<span class="forge-toast__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        (TONE_ICON[tone] || TONE_ICON.info) + '</svg></span>' +
+        '<div class="forge-toast__body">' +
+        (title ? '<div class="forge-toast__title"></div>' : '') +
+        (msg ? '<div class="forge-toast__msg"></div>' : '') + '</div>' +
+        '<button type="button" class="forge-toast__close" aria-label="Cerrar" data-forge-toast-close>' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
+      if (title) el.querySelector(".forge-toast__title").textContent = title;
+      if (msg) el.querySelector(".forge-toast__msg").textContent = msg;
+      host.appendChild(el);
+      armToasts(host);
+    };
+
+    // Errores de validación (422): renderizar la respuesta del formulario (que
+    // trae el mensaje específico) EN LUGAR de tratarla como fallo genérico.
+    document.body.addEventListener("htmx:beforeSwap", function (e) {
+      var xhr = e.detail && e.detail.xhr;
+      if (xhr && xhr.status === 422) {
+        e.detail.shouldSwap = true;
+        e.detail.isError = false;
+      }
+    });
+
+    // Extrae un mensaje legible del cuerpo (JSON detail/error/message o el primer
+    // error de campo de DRF). Devuelve "" si no hay nada explícito.
+    function cfExtractError(xhr) {
+      if (!xhr || !xhr.responseText) return "";
+      if ((xhr.getResponseHeader("Content-Type") || "").indexOf("application/json") === -1) return "";
+      try {
+        var d = JSON.parse(xhr.responseText);
+        if (typeof d === "string") return d;
+        var m = d.detail || d.error || d.message;
+        if (typeof m === "string") return m;
+        for (var k in d) {
+          if (Array.isArray(d[k]) && d[k].length && typeof d[k][0] === "string") {
+            return (k === "non_field_errors" ? "" : k + ": ") + d[k][0];
+          }
+        }
+      } catch (err) {}
+      return "";
+    }
+
+    // --- Handler global de errores HTMX -> toast EXPLÍCITO (código + motivo + Ref) ---
+    document.body.addEventListener("htmx:responseError", function (e) {
+      var xhr = e.detail && e.detail.xhr;
+      var code = xhr ? xhr.status : 0;
+      var ref = xhr ? (xhr.getResponseHeader("X-Request-ID") || xhr.getResponseHeader("X-Correlation-ID") || "") : "";
+      var title = code ? ("Error " + code) : "Sin respuesta del servidor";
+      var msg;
+      if (code === 400) msg = "Solicitud inválida: revisa los datos enviados.";
+      else if (code === 403) msg = "No tienes permiso para realizar esta acción.";
+      else if (code === 404) msg = "El recurso solicitado no existe o fue movido.";
+      else if (code === 409) msg = "Conflicto: el recurso cambió o ya existe.";
+      else if (code === 413) msg = "El contenido enviado supera el tamaño permitido.";
+      else if (code === 429) msg = "Demasiadas solicitudes. Espera un momento e intenta de nuevo.";
+      else if (code === 503) msg = "El servicio no está disponible temporalmente. Reintenta en unos minutos.";
+      else if (code >= 500) msg = "Error interno del servidor. El incidente quedó registrado.";
+      else msg = "No se pudo completar la acción.";
+      var detail = cfExtractError(xhr);
+      if (detail) msg = detail;            // mensaje específico del servidor si lo hay
+      if (ref) msg += " · Ref: " + ref;    // referencia para soporte/trazabilidad
+      window.cfToast("err", title, msg);
+    });
+    document.body.addEventListener("htmx:sendError", function () {
+      window.cfToast("err", "Sin conexión", "No se pudo contactar el servidor. Revisa tu red e intenta de nuevo.");
+    });
+  })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

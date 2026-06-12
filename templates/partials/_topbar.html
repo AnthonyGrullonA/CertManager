@@ -1,0 +1,148 @@
+{% load forge_icons i18n %}
+{% comment %}
+Topbar de Forge UI (espejo de AppShell.jsx → Topbar): botón de colapso,
+ScopeSelector (grupos del usuario; Owner incluye "Todos los grupos"), búsqueda
+global por dominio (GET a certificate-list), campana de notificaciones con panel
+desplegable (alertas OPEN no descartadas del ámbito) + "Marcar todas leídas" y
+"Limpiar" (requisito estrella, hx-post a alert-clear-panel con fallback), y menú
+de usuario con iniciales/avatar y logout (POST).
+
+Los desplegables (panel y menú) usan <details> nativo: sin JS de bundle, cierre
+por click-fuera vía handler delegado en base.html.
+{% endcomment %}
+
+{# Resolución tolerante de URLs aún no cableadas (paso 14). 'as' no lanza. #}
+{% url 'alert-resolve-all' as resolve_all_url %}
+{% url 'alert-read-all' as read_all_url %}
+{% url 'alert-panel' as panel_url %}
+{% url 'alert-list' as alert_list_url %}
+{% url 'profile' as profile_url %}
+{% url 'settings' as settings_url %}
+
+<header class="forge-topbar">
+  <button type="button" class="forge-iconbtn" aria-label="{% trans 'Colapsar barra' %}" data-forge-collapse>
+    {% icon "panel-left" size=19 %}
+  </button>
+
+  {# ---------- Selector de ámbito (scope) ---------- #}
+  <details class="forge-scope" data-forge-menu>
+    <summary class="forge-scope__trigger" aria-label="{% trans 'Cambiar ámbito' %}">
+      {% icon "layers" size=16 %}
+      <span class="forge-scope__label">{{ forge_scope_label }}</span>
+      {% icon "chevrons-up-down" size=15 class="forge-scope__caret" %}
+    </summary>
+    <div class="forge-menu forge-menu--scope" role="menu">
+      {% if forge_is_owner %}
+      <a class="forge-menu__item{% if forge_scope == 'all' %} is-active{% endif %}"
+         href="?team=all" role="menuitem">
+        {% icon "globe" size=16 %} {% trans "Todos los grupos" %}
+        {% if forge_scope == 'all' %}{% icon "check" size=15 class="forge-menu__check" %}{% endif %}
+      </a>
+      {% endif %}
+      {% for g in forge_groups %}
+      <a class="forge-menu__item{% if forge_scope == g.id|stringformat:'s' %} is-active{% endif %}"
+         href="?team={{ g.id }}" role="menuitem">
+        {% icon "layers" size=16 %} {{ g.name }}
+        {% if forge_scope == g.id|stringformat:'s' %}{% icon "check" size=15 class="forge-menu__check" %}{% endif %}
+      </a>
+      {% empty %}
+      {% if not forge_is_owner %}
+      <span class="forge-menu__empty">{% trans "Sin grupos asignados" %}</span>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </details>
+
+  {# ---------- Búsqueda global (por dominio) ---------- #}
+  <form action="{% url 'certificate-list' %}" method="get" class="forge-search" role="search">
+    <span class="forge-search__icon">{% icon "search" size=16 %}</span>
+    <input type="search" name="q" class="forge-search__input"
+           placeholder="{% trans 'Buscar dominio…' %}" aria-label="{% trans 'Buscar dominio' %}">
+  </form>
+
+  <div class="forge-topbar__spacer"></div>
+
+  {# ---------- Campana de notificaciones ---------- #}
+  <details class="forge-notif" data-forge-menu>
+    <summary class="forge-iconbtn forge-notif__trigger" aria-label="{% trans 'Notificaciones' %}">
+      {% icon "bell" size=19 %}
+      {% if forge_panel_count %}<span id="forge-notif-badge" class="forge-notif__badge">{{ forge_panel_count }}</span>{% else %}<span id="forge-notif-badge" class="forge-notif__badge forge-notif__badge--empty" hidden></span>{% endif %}
+    </summary>
+    <div class="forge-menu forge-menu--notif" role="menu">
+      <div class="forge-menu__head">
+        <span class="forge-menu__title">{% trans "Notificaciones" %}</span>
+        {% if forge_panel_count %}
+        <span class="forge-notif__count">{% blocktrans with n=forge_panel_count %}{{ n }} nuevas{% endblocktrans %}</span>
+        {% endif %}
+        <span class="flex-1"></span>
+        <button type="button" class="forge-menu__link"
+                {% if read_all_url %}hx-post="{{ read_all_url }}" hx-swap="none"{% else %}disabled title="Disponible en el paso 5"{% endif %}>
+          {% trans "Marcar todas leídas" %}
+        </button>
+      </div>
+
+      {# Lista del panel: la inyecta el endpoint alert-panel (paso 5). #}
+      <div id="forge-panel-list" class="forge-menu__list"
+           {% if panel_url %}hx-get="{{ panel_url }}" hx-trigger="load, forge:panel-open, cf:alerts-changed from:body" hx-swap="innerHTML"{% endif %}>
+        {% if forge_panel_count %}
+        <p class="forge-menu__hint">{% blocktrans with n=forge_panel_count %}Tienes {{ n }} notificación(es) nueva(s).{% endblocktrans %}</p>
+        {% else %}
+        <p class="forge-menu__empty">{% trans "No tienes notificaciones nuevas." %}</p>
+        {% endif %}
+      </div>
+
+      <div class="forge-menu__foot">
+        {% comment %} "Resolver todas" cierra las alertas abiertas que el usuario puede
+           gestionar (Admin/Owner): vacía el panel y baja el badge al instante; el
+           Centro las conserva como "Resueltas". {% endcomment %}
+        <button type="button" class="forge-menu__link"
+                {% if resolve_all_url %}hx-post="{{ resolve_all_url }}" hx-target="#forge-panel-list" hx-swap="innerHTML"{% else %}disabled{% endif %}>
+          {% icon "check-check" size=15 %} {% trans "Resolver todas" %}
+        </button>
+        <span class="flex-1"></span>
+        <a class="forge-menu__link forge-menu__link--accent" href="{{ alert_list_url|default:'#' }}">
+          {% trans "Ver centro de alertas" %} {% icon "arrow-right" size=15 %}
+        </a>
+      </div>
+    </div>
+  </details>
+
+  <div class="forge-topbar__divider" aria-hidden="true"></div>
+
+  {# ---------- Menú de usuario ---------- #}
+  <details class="forge-user" data-forge-menu>
+    <summary class="forge-user__trigger"
+             aria-label="{{ forge_user_name }} · {{ forge_user_role }}">
+      {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email size="sm" %}
+      <span class="forge-user__meta">
+        <span class="forge-user__name">{{ forge_user_name }}</span>
+        <span class="forge-user__role">{{ forge_user_role }}</span>
+      </span>
+      {% icon "chevron-down" size=15 class="forge-user__caret" %}
+    </summary>
+    <div class="forge-menu forge-menu--user" role="menu">
+      <div class="forge-menu__profile">
+        {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email size="md" %}
+        <div class="min-w-0">
+          <div class="forge-menu__profile-name">{{ forge_user_name }}</div>
+          <div class="forge-menu__profile-mail">{{ forge_user_email }}</div>
+        </div>
+      </div>
+      <div class="forge-menu__group">
+        <a class="forge-menu__item" href="{{ profile_url|default:'#' }}">{% icon "user" size=17 %} {% trans "Perfil" %}</a>
+        {% if forge_is_owner %}
+        <a class="forge-menu__item" href="{{ settings_url|default:'#' }}">{% icon "settings" size=17 %} {% trans "Configuración" %}</a>
+        {% endif %}
+        <a class="forge-menu__item" href="{{ alert_list_url|default:'#' }}">{% icon "bell" size=17 %} {% trans "Notificaciones" %}</a>
+      </div>
+      <div class="forge-menu__group forge-menu__group--danger">
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="forge-menu__item forge-menu__item--danger">
+            {% icon "log-out" size=17 %} {% trans "Cerrar sesión" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </details>
+</header>

@@ -1,0 +1,2581 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 18:28-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Acceso total (lectura y escritura)"
+msgstr "Full access (read and write)"
+
+msgid "Solo lectura"
+msgstr "Use only"
+
+msgid "Vigente"
+msgstr "Valid"
+
+msgid "Por vencer"
+msgstr "Expiring soon"
+
+msgid "Crítico"
+msgstr "Critical"
+
+msgid "Vencido"
+msgstr "Expired"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Sin chequear"
+msgstr "unchecked"
+
+msgid "Visualizador"
+msgstr "Viewer"
+
+msgid "Colaborador"
+msgstr "Contributor"
+
+msgid "Admin de grupo"
+msgstr "Assign to group"
+
+msgid "Certificado (monitoreo)"
+msgstr "%(total)s certificate monitored"
+
+msgid "Reporte"
+msgstr "Report"
+
+msgid "Encabezado"
+msgstr "Heading"
+
+msgid "Texto"
+msgstr "Text"
+
+msgid "Campo de dato"
+msgstr "Data fields"
+
+msgid "Botón/enlace"
+msgstr "Button/link"
+
+msgid "Separador"
+msgstr "Divider"
+
+msgid "Espaciador"
+msgstr "Spacer"
+
+msgid "Pie"
+msgstr "Footer"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Abierta"
+msgstr "Open"
+
+msgid "Resuelta"
+msgstr "Resolved"
+
+msgid "Pospuesta"
+msgstr "Snoozed"
+
+msgid "Plataforma"
+msgstr "Platform"
+
+msgid "Correo"
+msgstr "Email"
+
+msgid "Webhook"
+msgstr "Webhook"
+
+msgid "SMS"
+msgstr "SMS"
+
+msgid "Pendiente"
+msgstr "Pending"
+
+msgid "Enviada"
+msgstr "Send test"
+
+msgid "Fallida"
+msgstr "Failed"
+
+msgid "Microsoft Teams"
+msgstr "Microsoft Teams"
+
+msgid "Slack"
+msgstr "Slack"
+
+msgid "Genérico"
+msgstr "Generic"
+
+msgid "Inventario de certificados"
+msgstr "Certificate health"
+
+msgid "Próximos a vencer"
+msgstr "Expiring soon"
+
+msgid "Vencidos / con error"
+msgstr "Expired / with error"
+
+msgid "Historial de chequeos"
+msgstr "Check interval"
+
+msgid "Resumen por grupo"
+msgstr "Role in groups"
+
+msgid "Diario"
+msgstr "Recipients"
+
+msgid "Semanal"
+msgstr "Channel"
+
+msgid "Mensual"
+msgstr "Monthly"
+
+msgid "Cada N días (desde una fecha)"
+msgstr "Every N days (from a date)"
+
+msgid "El día 1 de cada mes"
+msgstr "On the 1st of each month"
+
+msgid "PDF"
+msgstr "PDF"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "CSV"
+msgstr "CSV"
+
+msgid "Todos los grupos"
+msgstr "All groups"
+
+msgid "Grupo"
+msgstr "Group"
+
+msgid "Admin"
+msgstr "admin"
+
+msgid "Owner"
+msgstr "Owner"
+
+msgid "Código incorrecto. Revisa tu app y vuelve a intentar."
+msgstr "Incorrect code. Check your app and try again."
+
+msgid "Código incorrecto"
+msgstr "Incorrect code"
+
+msgid "No pudimos activar el 2FA."
+msgstr "We could not enable 2FA."
+
+msgid "2FA activado"
+msgstr "2FA enabled"
+
+msgid "Te pediremos un código al iniciar sesión."
+msgstr "We will ask for a code when you sign in."
+
+msgid "Código incorrecto."
+msgstr "Incorrect code."
+
+msgid "El 2FA sigue activo."
+msgstr "2FA is still active."
+
+msgid "2FA desactivado"
+msgstr "2FA disabled"
+
+msgid "Ya no se pedirá código al iniciar sesión."
+msgstr "No code will be required when signing in."
+
+msgid "Código incorrecto. Intenta de nuevo."
+msgstr "Incorrect code. Please try again."
+
+msgid "Alerta marcada como leída"
+msgstr "Alert marked as read"
+
+msgid "Todas marcadas como leídas"
+msgstr "All marked as read"
+
+msgid "El panel sigue mostrando tus alertas abiertas."
+msgstr "The panel still shows your open alerts."
+
+msgid "Solo Admin del grupo u Owner pueden resolver alertas."
+msgstr "Only a group Admin or Owner can resolve alerts."
+
+msgid "Alerta resuelta"
+msgstr "Alert resolved"
+
+#, python-format
+msgid "%(domain)s · queda en el histórico."
+msgstr "%(domain)s · kept in history."
+
+msgid "Alertas resueltas"
+msgstr "Alerts resolved"
+
+#, python-format
+msgid "%(count)s alerta(s) cerradas. Siguen en el centro como resueltas."
+msgstr "%(count)s alert(s) closed. They remain in the center as resolved."
+
+msgid "Solo el Owner puede gestionar claves de API."
+msgstr "Only the Owner can manage API keys."
+
+msgid "No tienes permiso para crear certificados."
+msgstr "You do not have permission to create certificates."
+
+msgid "Certificado guardado"
+msgstr "Certificate saved"
+
+msgid "Se agregó al grupo correctamente."
+msgstr "Added to the group successfully."
+
+msgid "Chequeo realizado."
+msgstr "Check completed."
+
+msgid "Guardado, pero el chequeo no pudo completarse."
+msgstr "Saved, but the check could not be completed."
+
+msgid "Sin selección"
+msgstr "No selection"
+
+msgid "No hay certificados seleccionados."
+msgstr "No certificates selected."
+
+msgid "Chequeo en curso"
+msgstr "Check in progress"
+
+#, python-format
+msgid "Se probaron %(ok)s de %(count)s certificados."
+msgstr "%(ok)s of %(count)s certificates checked."
+
+msgid "No tienes permiso para asignar a ese grupo."
+msgstr "You do not have permission to assign to that group."
+
+msgid "Grupo asignado"
+msgstr "Group assigned"
+
+#, python-format
+msgid "Se movieron %(moved)s de %(count)s certificados a %(name)s."
+msgstr "%(moved)s of %(count)s certificates moved to %(name)s."
+
+msgid "No tienes permiso sobre ese grupo."
+msgstr "You do not have permission over that group."
+
+#, python-format
+msgid "Se agregaron a %(changed)s de %(count)s certificados en %(name)s."
+msgstr "%(changed)s of %(count)s certificates added to %(name)s."
+
+#, python-format
+msgid "Se quitaron de %(changed)s de %(count)s certificados en %(name)s."
+msgstr "%(changed)s of %(count)s certificates removed from %(name)s."
+
+msgid "Grupos actualizados"
+msgstr "Groups updated"
+
+msgid "No tienes permiso para eliminar los certificados seleccionados."
+msgstr "You do not have permission to delete the selected certificates."
+
+msgid "Certificados eliminados"
+msgstr "Certificates deleted"
+
+#, python-format
+msgid "Se eliminaron %(n)s certificados."
+msgstr "%(n)s certificates deleted."
+
+msgid "Acción no reconocida"
+msgstr "Unrecognized action"
+
+msgid "La acción solicitada no es válida."
+msgstr "The requested action is not valid."
+
+msgid "No tienes permiso para gestionar este certificado."
+msgstr "You do not have permission to manage this certificate."
+
+msgid "Monitoreo activado"
+msgstr "Monitoring enabled"
+
+#, python-format
+msgid "%(domain)s: el monitoreo quedó activo."
+msgstr "%(domain)s: monitoring is now active."
+
+msgid "Monitoreo pausado"
+msgstr "Monitoring paused"
+
+#, python-format
+msgid "%(domain)s: el monitoreo quedó en pausa (no se chequeará)."
+msgstr "%(domain)s: monitoring is paused (will not be checked)."
+
+msgid "Alertas silenciadas"
+msgstr "Alerts muted"
+
+#, python-format
+msgid "%(domain)s: sin notificaciones por %(days)s día(s)."
+msgstr "%(domain)s: no notifications for %(days)s day(s)."
+
+msgid "Alertas reactivadas"
+msgstr "Alerts reactivated"
+
+#, python-format
+msgid "%(domain)s: notificaciones activas."
+msgstr "%(domain)s: notifications active."
+
+msgid "Solo el Owner puede acceder a Configuración."
+msgstr "Only the Owner can access Settings."
+
+msgid "Configura el host SMTP"
+msgstr "Configure the SMTP host"
+
+msgid "Falta el servidor de correo para enviar la prueba."
+msgstr "Mail server is missing to send the test."
+
+msgid "No se pudo enviar el correo"
+msgstr "Could not send the email"
+
+#, python-format
+msgid "Revisa la configuración SMTP: %(exc)s"
+msgstr "Check the SMTP configuration: %(exc)s"
+
+msgid "Correo de prueba enviado"
+msgstr "Test email sent"
+
+#, python-format
+msgid "Se envió a %(destino)s."
+msgstr "Sent to %(destino)s."
+
+msgid "Sin webhook configurado"
+msgstr "No webhook configured"
+
+msgid "Agrega una URL de Slack o Teams antes de probar."
+msgstr "Add a Slack or Teams URL before testing."
+
+msgid "No se pudo contactar el webhook"
+msgstr "Could not reach the webhook"
+
+msgid "Webhook contactado"
+msgstr "Webhook reached"
+
+#, python-format
+msgid "Se envió un mensaje de prueba a %(name)s."
+msgstr "A test message was sent to %(name)s."
+
+msgid "Conexión LDAP correcta"
+msgstr "LDAP connection successful"
+
+msgid "No se pudo conectar a LDAP"
+msgstr "Could not connect to LDAP"
+
+msgid "Sin gateway SMS configurado"
+msgstr "No SMS gateway configured"
+
+msgid "Configura el host FTP y el número por defecto antes de probar."
+msgstr "Configure the FTP host and default number before testing."
+
+msgid "SMS de prueba enviado"
+msgstr "Test SMS sent"
+
+msgid "No se pudo enviar el SMS"
+msgstr "Could not send the SMS"
+
+msgid "Verificando 1 certificado…"
+msgstr "Verifying 1 certificate…"
+
+#, python-format
+msgid "Verificando los %(count)s certificados…"
+msgstr "Verifying %(count)s certificates…"
+
+msgid "Algoritmo de firma"
+msgstr "Signature algorithm"
+
+msgid "Tamaño de clave"
+msgstr "Key size"
+
+msgid "Número de serie"
+msgstr "Default number"
+
+msgid "Resumen"
+msgstr "Summary"
+
+msgid "Cadena y SAN"
+msgstr "Chain & SAN"
+
+msgid "Detalles técnicos"
+msgstr "Technical details"
+
+msgid "Historial"
+msgstr "History"
+
+msgid "Alertas"
+msgstr "Alerts"
+
+msgid "Demasiadas notificaciones"
+msgstr "Too many notifications"
+
+msgid "Espera un momento antes de volver a notificar."
+msgstr "Wait a moment before sending another notification."
+
+msgid "Sin responsables"
+msgstr "No recipients"
+
+msgid "Este certificado no tiene destinatarios ni admins de grupo."
+msgstr "This certificate has no recipients or group admins."
+
+msgid "No se pudo notificar"
+msgstr "Could not send notification"
+
+msgid "Ningún canal aceptó el envío. Revisa la configuración SMTP/webhook."
+msgstr "No channel accepted the message. Check the SMTP/webhook configuration."
+
+msgid "Notificación enviada"
+msgstr "Notification sent"
+
+#, python-format
+msgid "Se notificó a los responsables de %(domain)s."
+msgstr "The responsible parties for %(domain)s were notified."
+
+#, python-format
+msgid "Se envió solo a %(email)s."
+msgstr "Sent only to %(email)s."
+
+msgid "Certificado actualizado"
+msgstr "Certificate updated"
+
+msgid "Los cambios se guardaron correctamente."
+msgstr "Changes saved successfully."
+
+msgid "Panel y navegación"
+msgstr "Dashboard and navigation"
+
+msgid "¿Qué muestra el Dashboard?"
+msgstr "What does the Dashboard show?"
+
+msgid ""
+"Un resumen del ámbito activo: los KPIs (total, vigentes, por vencer, "
+"críticos, vencidos…), la distribución por estado (gráfico de dona) y las "
+"ventanas de vencimiento. Al hacer clic en un KPI, un segmento de la dona o "
+"una barra te lleva al listado de certificados ya filtrado."
+msgstr ""
+"A summary of the active scope: KPIs (total, valid, expiring soon, critical, "
+"expired…), status distribution (donut chart) and expiration windows. "
+"Clicking a KPI, a donut segment, or a bar takes you to the filtered "
+"certificate list."
+
+msgid "¿Cómo cambio entre grupos (ámbito)?"
+msgstr "How do I switch between groups (scope)?"
+
+msgid ""
+"Con el selector «Todos los grupos» de la barra superior: filtra el "
+"dashboard, los certificados y las alertas al grupo elegido. «Todos los "
+"grupos» (sólo Owner) muestra la organización completa; el resto ve sus "
+"grupos. La selección se recuerda al navegar entre páginas."
+msgstr ""
+"Use the \"All groups\" selector in the top bar: it filters the dashboard, "
+"certificates, and alerts to the chosen group. \"All groups\" (Owner only) "
+"shows the entire organization; others see their own groups. Your selection "
+"is remembered as you navigate between pages."
+
+msgid "Certificados"
+msgstr "Certificates"
+
+msgid "¿Cómo agrego un certificado a monitorear?"
+msgstr "How do I add a certificate to monitor?"
+
+msgid ""
+"Entra a Certificados → «Nuevo certificado» e indica el dominio (host) y el "
+"puerto (443 por defecto), el grupo dueño y, opcionalmente, grupos "
+"adicionales, destinatarios y una plantilla de correo. Con «Guardar y probar» "
+"se hace un chequeo en el momento."
+msgstr ""
+"Go to Certificates → \"New certificate\" and enter the domain (host) and "
+"port (443 by default), the owner group, and optionally additional groups, "
+"recipients, and an email template. \"Save and test\" runs a check "
+"immediately."
+
+msgid "¿Por qué no me deja agregar un dominio?"
+msgstr "Why can't I add a domain?"
+
+msgid ""
+"Si ese dominio:puerto ya existe (en tu grupo o en otro) se bloquea para "
+"evitar duplicidad y se te indica en qué grupos está. Si el certificado "
+"existente está pausado, el mismo aviso te ofrece reactivarlo en vez de crear "
+"un duplicado."
+msgstr ""
+"If that domain:port already exists (in your group or another) it is blocked "
+"to avoid duplicates and you are shown which groups have it. If the existing "
+"certificate is paused, the same notice offers to reactivate it instead of "
+"creating a duplicate."
+
+msgid "¿Qué significan los estados y colores?"
+msgstr "What do the statuses and colors mean?"
+
+msgid ""
+"Vigente (verde), Por vencer (ámbar), Crítico (rojo), Vencido (rojo), Error "
+"(naranja, no se pudo evaluar) y Sin chequear (gris, aún no evaluado)."
+msgstr ""
+"Valid (green), Expiring soon (amber), Critical (red), Expired (red), Error "
+"(orange, could not be evaluated), and Unchecked (gray, not yet evaluated)."
+
+msgid "¿Cada cuánto se revisan?"
+msgstr "How often are they checked?"
+
+msgid ""
+"Automáticamente, según el intervalo de monitoreo (lo ves en el pie del menú "
+"y en Configuración → Monitoreo). No necesitas dispararlo a mano."
+msgstr ""
+"Automatically, according to the monitoring interval (visible in the menu "
+"footer and in Settings → Monitoring). You do not need to trigger it manually."
+
+msgid "¿Cómo lo pruebo ahora mismo?"
+msgstr "How do I test it right now?"
+
+msgid ""
+"En el detalle del certificado, «Probar ahora» ejecuta un chequeo real y te "
+"muestra el resultado paso a paso."
+msgstr ""
+"In the certificate detail, \"Test now\" runs a real check and shows you the "
+"result step by step."
+
+msgid "¿Cómo pauso o reanudo el monitoreo?"
+msgstr "How do I pause or resume monitoring?"
+
+msgid ""
+"En el detalle, «Pausar monitoreo» (o «Reanudar»). Un certificado pausado no "
+"se chequea hasta reactivarlo y se marca con la etiqueta «Monitoreo pausado»."
+msgstr ""
+"In the detail, \"Pause monitoring\" (or \"Resume\"). A paused certificate is "
+"not checked until reactivated and is labeled \"Monitoring paused\"."
+
+msgid "¿Cómo exporto los certificados a CSV?"
+msgstr "How do I export certificates to CSV?"
+
+msgid ""
+"En Certificados, el botón «Exportar» descarga un archivo CSV con el listado "
+"tal como lo tienes filtrado en ese momento (los mismos filtros de búsqueda, "
+"estado, grupo y ventana de días se aplican a la exportación). El CSV incluye "
+"dominio, puerto, grupos, estado, días restantes, vencimiento, emisor y "
+"último chequeo."
+msgstr ""
+"In Certificates, the \"Export\" button downloads a CSV file with the list as "
+"currently filtered (the same search, status, group, and day-window filters "
+"apply to the export). The CSV includes domain, port, groups, status, days "
+"remaining, expiration, issuer, and last check."
+
+msgid "Grupos y roles"
+msgstr "Groups and roles"
+
+msgid "¿Qué es un grupo?"
+msgstr "What is a group?"
+
+msgid ""
+"Una agrupación de certificados con sus miembros y valores por defecto "
+"(umbrales de alerta, canales y destinatarios) que los certificados heredan."
+msgstr ""
+"A collection of certificates with its members and default values (alert "
+"thresholds, channels, and recipients) that certificates inherit."
+
+msgid "¿Un certificado puede pertenecer a varios grupos?"
+msgstr "Can a certificate belong to multiple groups?"
+
+msgid ""
+"Sí. Tiene un grupo dueño y, además, grupos adicionales de gestión/"
+"visualización. Los agregas con el campo «Grupos adicionales» del certificado "
+"o con la acción masiva «Agregar a grupo»."
+msgstr ""
+"Yes. It has an owner group and additional management/view groups. You add "
+"them via the \"Additional groups\" field on the certificate or the bulk "
+"action \"Add to group\"."
+
+msgid "¿Qué puede hacer cada rol?"
+msgstr "What can each role do?"
+
+msgid ""
+"Visualizador: ve certificados y genera/recibe reportes. Colaborador: además "
+"crea, edita y borra certificados en sus grupos. Admin de grupo: además "
+"gestiona plantillas, miembros y alertas compartidas. Owner: acceso total a "
+"toda la organización."
+msgstr ""
+"Viewer: views certificates and generates/receives reports. Contributor: also "
+"creates, edits, and deletes certificates in their groups. Group Admin: also "
+"manages templates, members, and shared alerts. Owner: full access to the "
+"entire organization."
+
+msgid "¿Quién puede gestionar un certificado multi-grupo?"
+msgstr "Who can manage a multi-group certificate?"
+
+msgid ""
+"Cualquier usuario que sea Colaborador o Admin en alguno de los grupos del "
+"certificado (dueño o adicional)."
+msgstr ""
+"Any user who is a Contributor or Admin in any of the certificate's groups "
+"(owner or additional)."
+
+msgid "Usuarios y acceso"
+msgstr "Users and access"
+
+msgid "¿Cómo agrego o invito a una persona?"
+msgstr "How do I add or invite a person?"
+
+msgid ""
+"En Usuarios (sólo Owner) → «Nuevo usuario»: indicas el correo, los grupos a "
+"los que pertenece y su rol en esos grupos (Visualizador, Colaborador o "
+"Admin). Le das una contraseña inicial o marcas «Autenticar por LDAP»."
+msgstr ""
+"In Users (Owner only) → \"New user\": enter the email, the groups they "
+"belong to, and their role in those groups (Viewer, Contributor, or Admin). "
+"Set an initial password or check \"Authenticate via LDAP\"."
+
+msgid "¿Cómo desactivo a una persona?"
+msgstr "How do I deactivate a person?"
+
+msgid ""
+"En Usuarios, edita a la persona y desmarca «Cuenta activa» (o usa la acción "
+"de activar/desactivar). Una cuenta inactiva no puede iniciar sesión. No "
+"puedes desactivarte a ti mismo."
+msgstr ""
+"In Users, edit the person and uncheck \"Active account\" (or use the "
+"activate/deactivate action). An inactive account cannot sign in. You cannot "
+"deactivate yourself."
+
+msgid "¿Puedo usar el directorio corporativo (LDAP)?"
+msgstr "Can I use the corporate directory (LDAP)?"
+
+msgid ""
+"Sí. El Owner configura la conexión en Configuración → Seguridad (sub-panel "
+"LDAP). Al crear una persona se marca «Autenticar por LDAP»: queda sin "
+"contraseña local y el inicio de sesión valida su correo contra el "
+"directorio. El mismo formulario de login sirve para cuentas locales y LDAP, "
+"sin botón aparte."
+msgstr ""
+"Yes. The Owner configures the connection in Settings → Security (LDAP sub-"
+"panel). When creating a person, check \"Authenticate via LDAP\": they have "
+"no local password and sign-in validates their email against the directory. "
+"The same login form works for local and LDAP accounts, with no separate "
+"button."
+
+msgid "Reportes"
+msgstr "Reports"
+
+msgid "¿Cómo programo un reporte?"
+msgstr "How do I schedule a report?"
+
+msgid ""
+"En Reportes → «Nuevo» eliges la plantilla de reporte, la frecuencia, los "
+"destinatarios, los formatos (PDF, Excel o CSV) y, si quieres, una plantilla "
+"de correo para el cuerpo del email."
+msgstr ""
+"In Reports → \"New\" choose the report template, frequency, recipients, "
+"formats (PDF, Excel, or CSV) and, optionally, an email template for the "
+"message body."
+
+msgid "¿Cuándo se envían?"
+msgstr "When are they sent?"
+
+msgid ""
+"Según la frecuencia: diaria, semanal, mensual, cada N días desde una fecha o "
+"el día 1 de cada mes. Si la fecha cae en fin de semana, el envío se difiere "
+"al lunes."
+msgstr ""
+"According to the frequency: daily, weekly, monthly, every N days from a "
+"date, or the 1st of each month. If the date falls on a weekend, delivery is "
+"deferred to Monday."
+
+msgid "¿Puedo probarlo o previsualizarlo?"
+msgstr "Can I test or preview it?"
+
+msgid ""
+"Sí. «Enviar prueba» lo manda a un correo y al hacer clic en el reporte ves "
+"una vista previa de lo que saca."
+msgstr ""
+"Yes. \"Send test\" delivers it to an email, and clicking the report shows a "
+"preview of its output."
+
+msgid "¿Cuándo se generan alertas?"
+msgstr "When are alerts generated?"
+
+msgid ""
+"Cuando un certificado entra en riesgo (por vencer, crítico, vencido o con "
+"error). Se notifica por los canales activos del certificado/grupo."
+msgstr ""
+"When a certificate enters a risk state (expiring soon, critical, expired, or "
+"error). Notifications are sent via the active channels of the certificate/"
+"group."
+
+msgid "¿Cómo gestiono las alertas?"
+msgstr "How do I manage alerts?"
+
+msgid ""
+"En Alertas puedes ver el detalle, marcarlas como leídas, resolverlas, "
+"posponerlas o limpiar el panel. Resolver y posponer (acciones del recurso "
+"compartido) son de Admin del grupo u Owner."
+msgstr ""
+"In Alerts you can view details, mark them as read, resolve them, snooze "
+"them, or clear the panel. Resolve and snooze (shared resource actions) "
+"require group Admin or Owner."
+
+msgid "Plantillas de correo"
+msgstr "Email templates"
+
+msgid "¿Para qué sirven?"
+msgstr "What are they for?"
+
+msgid ""
+"Definen el cuerpo de los correos (de certificados y de reportes) con un "
+"editor por bloques: encabezado, texto, campos de dato, botón, separador y "
+"pie."
+msgstr ""
+"They define the body of emails (for certificates and reports) using a block "
+"editor: header, text, data fields, button, divider, and footer."
+
+msgid "¿Quién puede crearlas o editarlas?"
+msgstr "Who can create or edit them?"
+
+msgid ""
+"Crear: cualquier usuario autenticado. Usar/adjuntar: todos. Editar o borrar: "
+"el Owner, un Admin de grupo o quien la creó."
+msgstr ""
+"Create: any authenticated user. Use/attach: everyone. Edit or delete: the "
+"Owner, a group Admin, or whoever created it."
+
+msgid "¿Qué son los campos obligatorios (🔒)?"
+msgstr "What are required fields (🔒)?"
+
+msgid ""
+"Datos que siempre deben ir en el correo (por ejemplo dominio, estado, días "
+"restantes y vencimiento). Aparecen bloqueados en el lienzo y no se pueden "
+"quitar."
+msgstr ""
+"Data that must always appear in the email (e.g. domain, status, days "
+"remaining, and expiration). They appear locked in the canvas and cannot be "
+"removed."
+
+msgid "¿Cómo veo cómo queda una plantilla?"
+msgstr "How do I see how a template looks?"
+
+msgid ""
+"Haz clic en el nombre de la plantilla: se abre una vista previa renderizada "
+"con datos de ejemplo, y desde ahí puedes «Corregir» (editarla)."
+msgstr ""
+"Click the template name: a rendered preview opens with sample data, and from "
+"there you can \"Edit\" it."
+
+msgid "¿Qué pasa si un certificado o reporte no tiene plantilla?"
+msgstr "What happens if a certificate or report has no template?"
+
+msgid ""
+"Se usa la plantilla predeterminada de su tipo; si no hay ninguna, se envía "
+"en texto plano. Nunca se deja de enviar el correo."
+msgstr ""
+"The default template for its type is used; if there is none, it is sent as "
+"plain text. The email is never skipped."
+
+msgid "Notificaciones y configuración"
+msgstr "Notifications and settings"
+
+msgid "¿Por qué no veo la opción «Webhook»?"
+msgstr "Why don't I see the \"Webhook\" option?"
+
+msgid ""
+"El canal Webhook (Microsoft Teams / Slack) sólo aparece al crear o editar un "
+"certificado si hay webhooks configurados en Configuración → Integraciones."
+msgstr ""
+"The Webhook channel (Microsoft Teams / Slack) only appears when creating or "
+"editing a certificate if webhooks are configured in Settings → Integrations."
+
+msgid "¿Cómo configuro el webhook de Teams o Slack?"
+msgstr "How do I configure the Teams or Slack webhook?"
+
+msgid ""
+"Primero genera la URL del «webhook entrante» en tu canal: en Microsoft "
+"Teams, con un conector/Incoming Webhook del canal; en Slack, con una "
+"Incoming Webhook desde la app de Slack. Luego, en CertManager → "
+"Configuración → Integraciones (sólo Owner), pega esa URL en el campo de "
+"Teams o de Slack y guarda. Por seguridad las URLs se guardan write-only (no "
+"se muestran en claro después). Con un webhook configurado, el canal "
+"«Webhook» aparece al crear/editar certificados y las alertas se publican en "
+"ese canal."
+msgstr ""
+"First generate the \"incoming webhook\" URL in your channel: in Microsoft "
+"Teams via a channel connector/Incoming Webhook; in Slack via an Incoming "
+"Webhook from the Slack app. Then in CertManager → Settings → Integrations "
+"(Owner only), paste that URL in the Teams or Slack field and save. For "
+"security, URLs are stored write-only (not shown in plain text afterwards). "
+"Once a webhook is configured, the \"Webhook\" channel appears when creating/"
+"editing certificates and alerts are published to that channel."
+
+msgid "¿Cómo configuro el envío de correo (SMTP)?"
+msgstr "How do I configure email sending (SMTP)?"
+
+msgid ""
+"En Configuración → SMTP (sólo Owner). Si no hay SMTP, los correos de prueba "
+"degradan a la consola del servidor."
+msgstr ""
+"In Settings → SMTP (Owner only). If there is no SMTP, test emails fall back "
+"to the server console."
+
+msgid "Seguridad y cuenta"
+msgstr "Security and account"
+
+msgid "¿Cómo activo la verificación en dos pasos (2FA)?"
+msgstr "How do I enable two-step verification (2FA)?"
+
+msgid ""
+"En Perfil → «Autenticación en dos pasos»: escanea el código QR con Google "
+"Authenticator o Microsoft Authenticator y confirma el código."
+msgstr ""
+"In Profile → \"Two-step authentication\": scan the QR code with Google "
+"Authenticator or Microsoft Authenticator and confirm the code."
+
+msgid "¿Cómo cambio mi contraseña o el idioma?"
+msgstr "How do I change my password or language?"
+
+msgid ""
+"En Perfil puedes actualizar tus datos, tu contraseña y el idioma de la "
+"interfaz."
+msgstr ""
+"In Profile you can update your information, your password, and the interface "
+"language."
+
+msgid "API y tokens"
+msgstr "API and tokens"
+
+msgid "¿La aplicación tiene API?"
+msgstr "Does the application have an API?"
+
+msgid ""
+"Sí. En «API & tokens» (Owner) puedes crear claves de API de acceso total o "
+"de solo lectura y consultar la documentación de los endpoints."
+msgstr ""
+"Yes. In \"API & tokens\" (Owner) you can create full-access or read-only API "
+"keys and view the endpoint documentation."
+
+msgid "¿Qué puede hacer una clave de solo lectura?"
+msgstr "What can a read-only key do?"
+
+msgid ""
+"Sólo operaciones de lectura (GET). Las claves de acceso total permiten "
+"también crear y modificar, siempre dentro del ámbito y rol del usuario."
+msgstr ""
+"Only read operations (GET). Full-access keys also allow creating and "
+"modifying, always within the user's scope and role."
+
+msgid "Solo el Owner puede crear grupos."
+msgstr "Only the Owner can create groups."
+
+msgid "Solo el Owner o un Admin del grupo puede gestionar miembros."
+msgstr "Only the Owner or a group Admin can manage members."
+
+msgid "Selecciona un usuario válido."
+msgstr "Select a valid user."
+
+msgid "Rol inválido."
+msgstr "Invalid role."
+
+msgid "Solo el Owner o un Admin del grupo puede editarlo."
+msgstr "Only the Owner or a group Admin can edit it."
+
+msgid "Grupo actualizado"
+msgstr "Group updated"
+
+msgid "Cambios guardados"
+msgstr "Changes saved"
+
+#, python-format
+msgid "%(label)s actualizado."
+msgstr "%(label)s updated."
+
+msgid "Revisa el formulario"
+msgstr "Check the form"
+
+msgid "Hay datos por corregir."
+msgstr "There are fields to correct."
+
+msgid "Contraseña actualizada"
+msgstr "Password updated"
+
+msgid "Tu contraseña se cambió correctamente."
+msgstr "Your password was changed successfully."
+
+msgid "No se pudo cambiar"
+msgstr "Could not be changed"
+
+msgid "Revisa los datos ingresados."
+msgstr "Check the data entered."
+
+msgid "Correo inválido"
+msgstr "Invalid email"
+
+msgid "Escribe una dirección de correo válida."
+msgstr "Enter a valid email address."
+
+msgid "No se pudo enviar"
+msgstr "Could not be sent"
+
+msgid "Prueba enviada"
+msgstr "Test sent"
+
+#, python-format
+msgid "«%(name)s» (%(total)s certs) enviado a %(email)s."
+msgstr "\"%(name)s\" (%(total)s certs) sent to %(email)s."
+
+msgid "No puedes desactivar tu propia cuenta."
+msgstr "You cannot deactivate your own account."
+
+msgid "Detalle de alerta"
+msgstr "Alert detail"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "Detectada"
+msgstr "Detected"
+
+msgid "Entregas"
+msgstr "Deliveries"
+
+msgid "Solo en plataforma (sin envíos por correo/webhook registrados)."
+msgstr "Platform only (no email/webhook deliveries recorded)."
+
+msgid "Resolver alerta"
+msgstr "Resolve alert"
+
+msgid "Ir al certificado"
+msgstr "Go to certificate"
+
+msgid "Resolver"
+msgstr "Resolve"
+
+msgid "No tienes alertas abiertas."
+msgstr "You have no open alerts."
+
+msgid "Severidad"
+msgstr "Severity"
+
+msgid "Alerta"
+msgstr "Alert"
+
+msgid "Canal"
+msgstr "Channel"
+
+msgid "Recibida"
+msgstr "Received"
+
+msgid "Acciones"
+msgstr "Actions"
+
+msgid "Ver detalle"
+msgstr "View detail"
+
+msgid "Resuelta; se conserva en el histórico"
+msgstr "Resolved; kept in history"
+
+msgid "Marcar leída"
+msgstr "Mark as read"
+
+msgid "Resolver (cerrar) la alerta"
+msgstr "Resolve (close) the alert"
+
+msgid "Sin alertas en esta vista"
+msgstr "No alerts in this view"
+
+msgid "No hay alertas que coincidan con el filtro seleccionado."
+msgstr "No alerts match the selected filter."
+
+msgid "Todas"
+msgstr "All"
+
+msgid "No leídas"
+msgstr "Unread"
+
+msgid "Críticas / vencidas"
+msgstr "Critical / expired"
+
+msgid "Centro de alertas"
+msgstr "Alert center"
+
+#, python-format
+msgid "%(count)s sin leer"
+msgstr "%(count)s unread"
+
+msgid "Vencimientos y errores detectados en tu ámbito"
+msgstr "Expirations and errors detected in your scope"
+
+msgid "Marcar todas leídas"
+msgstr "Mark all as read"
+
+msgid "Resolver todas"
+msgstr "Resolve all"
+
+#, python-format
+msgid "Clave «%(name)s» creada"
+msgstr "Key \"%(name)s\" created"
+
+msgid ""
+"Copia el secreto ahora: por seguridad <strong>no se volverá a mostrar</"
+"strong>."
+msgstr ""
+"Copy the secret now: for security it <strong>will not be shown again</"
+"strong>."
+
+msgid "Copiar"
+msgstr "Copy"
+
+msgid "Cómo usarla"
+msgstr "How to use it"
+
+msgid ""
+"Envía la clave en el encabezado <code class=\"font-mono\">Authorization</"
+"code> (o <code class=\"font-mono\">X-Api-Key</code>):"
+msgstr ""
+"Send the key in the <code class=\"font-mono\">Authorization</code> header "
+"(or <code class=\"font-mono\">X-Api-Key</code>):"
+
+#, python-format
+msgid "URL base: <code class=\"font-mono\">%(api_base)s/</code>"
+msgstr "Base URL: <code class=\"font-mono\">%(api_base)s/</code>"
+
+msgid "Ver documentación completa"
+msgstr "View full documentation"
+
+msgid "Revocada"
+msgstr "Revoked"
+
+msgid "Activa"
+msgstr "Active"
+
+msgid "Ver uso"
+msgstr "View usage"
+
+msgid "Revocar"
+msgstr "Revoke"
+
+msgid "Registro de uso de API"
+msgstr "API usage log"
+
+#, python-format
+msgid "Registro de uso · %(name)s"
+msgstr "Usage log · %(name)s"
+
+msgid "Fecha"
+msgstr "Date"
+
+msgid "Método"
+msgstr "Method"
+
+msgid "Ruta"
+msgstr "Path"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "Esta clave aún no registra peticiones."
+msgstr "This key has not recorded any requests yet."
+
+msgid "API & tokens · CertManager"
+msgstr "API & tokens · CertManager"
+
+msgid "API & tokens"
+msgstr "API & tokens"
+
+msgid "Claves para consumir la API REST de CertManager."
+msgstr "Keys to consume the CertManager REST API."
+
+msgid "Documentación de la API"
+msgstr "API documentation"
+
+msgid "URL base de la API"
+msgstr "API base URL"
+
+msgid "Nueva clave"
+msgstr "New key"
+
+msgid "El secreto se muestra una sola vez. Guárdalo en un lugar seguro."
+msgstr "The secret is shown only once. Store it in a safe place."
+
+msgid "Nombre"
+msgstr "Name"
+
+msgid "Integración Teams"
+msgstr "Teams integration"
+
+msgid "Ámbito"
+msgstr "Scope"
+
+msgid "Crear clave"
+msgstr "Create key"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Último uso"
+msgstr "Last used"
+
+msgid "Estado"
+msgstr "Status"
+
+msgid "Aún no hay claves. Crea la primera arriba."
+msgstr "No keys yet. Create the first one above."
+
+msgid "Ayuda y preguntas frecuentes"
+msgstr "Help and FAQ"
+
+msgid ""
+"Cómo funciona CertManager: certificados, grupos y roles, reportes, alertas, "
+"plantillas y seguridad."
+msgstr ""
+"How CertManager works: certificates, groups and roles, reports, alerts, "
+"templates, and security."
+
+msgid "Buscar en la ayuda…"
+msgstr "Search the help…"
+
+msgid "Sin resultados para tu búsqueda."
+msgstr "No results for your search."
+
+msgid ""
+"¿No encontraste lo que buscabas? Contacta al administrador de tu "
+"organización."
+msgstr ""
+"Didn't find what you were looking for? Contact your organization's "
+"administrator."
+
+msgid "por página"
+msgstr "per page"
+
+msgid "Filas por página"
+msgstr "Rows per page"
+
+msgid "de"
+msgstr "of"
+
+msgid "Primera página"
+msgstr "First page"
+
+msgid "Página anterior"
+msgstr "Previous page"
+
+msgid "Página siguiente"
+msgstr "Next page"
+
+msgid "Última página"
+msgstr "Last page"
+
+msgid "Confirmar eliminación"
+msgstr "Confirm deletion"
+
+#, python-format
+msgid "Eliminar %(count)s certificado"
+msgid_plural "Eliminar %(count)s certificados"
+msgstr[0] "Delete %(count)s certificate"
+msgstr[1] "Delete %(count)s certificates"
+
+msgid "Esta acción no se puede deshacer."
+msgstr "This action cannot be undone."
+
+msgid ""
+"Se eliminarán los siguientes certificados y todo su historial de chequeos:"
+msgstr ""
+"The following certificates and their entire check history will be deleted:"
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Eliminar definitivamente"
+msgstr "Delete permanently"
+
+msgid "Nuevo certificado"
+msgstr "New certificate"
+
+msgid "Se chequeará al guardar si eliges \"Guardar y probar\""
+msgstr "It will be checked on save if you choose \"Save and test\""
+
+#, python-format
+msgid ""
+"En <strong>%(groups)s</strong> ya existe pero el monitoreo está "
+"<strong>pausado</strong>."
+msgstr ""
+"In <strong>%(groups)s</strong> it already exists but monitoring is "
+"<strong>paused</strong>."
+
+msgid "Activar monitoreo del existente"
+msgstr "Enable monitoring on existing"
+
+msgid "Dominio (host)"
+msgstr "Domain (host)"
+
+msgid "Puerto"
+msgstr "Port"
+
+msgid "Umbral de alerta"
+msgstr "Alert threshold"
+
+msgid "Grupo (dueño)"
+msgstr "Group (owner)"
+
+msgid "Grupos adicionales"
+msgstr "Additional groups"
+
+msgid "No hay otros grupos disponibles."
+msgstr "No other groups available."
+
+msgid "Otros grupos que también gestionan/ven este certificado (opcional)."
+msgstr "Other groups that also manage/view this certificate (optional)."
+
+msgid "Destinatarios de notificación"
+msgstr "Notification recipients"
+
+msgid "Heredan del grupo si se deja vacío"
+msgstr "Inherited from the group if left blank"
+
+msgid "Plantilla de correo"
+msgstr "Email template"
+
+msgid "Vacío = texto plano predeterminado"
+msgstr "Empty = default plain text"
+
+msgid "Canales de alerta"
+msgstr "Alert channels"
+
+msgid "Webhook (Teams / Slack)"
+msgstr "Webhook (Teams / Slack)"
+
+msgid "Guardar"
+msgstr "Save"
+
+msgid "Guardar y probar"
+msgstr "Save and test"
+
+msgid "Probar ahora"
+msgstr "Test now"
+
+msgid ""
+"Se abrirá una conexión TLS al host y se leerá el certificado del servidor."
+msgstr ""
+"A TLS connection will be opened to the host and the server certificate will "
+"be read."
+
+msgid "Esperando para iniciar el chequeo…"
+msgstr "Waiting to start the check…"
+
+#, python-format
+msgid "venció hace %(days)sd"
+msgstr "expired %(days)sd ago"
+
+#, python-format
+msgid "%(days)s días restantes"
+msgstr "%(days)s days remaining"
+
+msgid "Emisor"
+msgstr "Issuer"
+
+msgid "Vence el"
+msgstr "Expires on"
+
+msgid "Latencia"
+msgstr "Latency"
+
+msgid "El chequeo falló"
+msgstr "Check failed"
+
+msgid "Probar de nuevo"
+msgstr "Try again"
+
+#, python-format
+msgid "Ver detalle de %(domain)s"
+msgstr "View detail of %(domain)s"
+
+#, python-format
+msgid "Seleccionar %(domain)s"
+msgstr "Select %(domain)s"
+
+msgid "Grupo adicional"
+msgstr "Additional group"
+
+#, python-format
+msgid "%(days)s días"
+msgstr "%(days)s days"
+
+#, python-format
+msgid "+%(extra)s más"
+msgstr "+%(extra)s more"
+
+#, python-format
+msgid "umbral %(threshold)sd"
+msgstr "threshold %(threshold)sd"
+
+msgid "Dejar de monitorear certificado"
+msgstr "Stop monitoring certificate"
+
+msgid "Monitorear certificado"
+msgstr "Monitor certificate"
+
+#, python-format
+msgid "¿Dejar de monitorear %(domain)s? No se chequeará hasta reactivarlo."
+msgstr "Stop monitoring %(domain)s? It will not be checked until reactivated."
+
+msgid "Más acciones"
+msgstr "More actions"
+
+msgid "Sin resultados"
+msgstr "No results"
+
+msgid "Ningún certificado coincide con los filtros activos."
+msgstr "No certificate matches the active filters."
+
+#, python-format
+msgid "%(filtered)s de %(total)s certificados"
+msgstr "%(filtered)s of %(total)s certificates"
+
+#, python-format
+msgid "%(total)s certificado monitoreado"
+msgid_plural "%(total)s certificados monitoreados"
+msgstr[0] "%(total)s certificate monitored"
+msgstr[1] "%(total)s certificates monitored"
+
+#, python-format
+msgid "mostrando %(n)s; refiná los filtros para ver el resto"
+msgstr "showing %(n)s; refine the filters to see the rest"
+
+msgid "Exportar"
+msgstr "Export"
+
+msgid "Buscar dominio…"
+msgstr "Search domain…"
+
+msgid "Buscar dominio"
+msgstr "Search domain"
+
+msgid "Todos los estados"
+msgstr "All statuses"
+
+msgid "Filtros:"
+msgstr "Filters:"
+
+#, python-format
+msgid "Quitar filtro %(label)s"
+msgstr "Remove filter %(label)s"
+
+msgid "Limpiar"
+msgstr "Clear"
+
+msgid "seleccionados"
+msgstr "selected"
+
+msgid "Probar"
+msgstr "Test"
+
+msgid "Asignar a grupo"
+msgstr "Assign to group"
+
+msgid "Sin grupos disponibles"
+msgstr "No groups available"
+
+msgid "Agregar a grupo"
+msgstr "Add to group"
+
+msgid "Suma el grupo como adicional (no mueve el dueño)"
+msgstr "Adds the group as additional (does not move the owner)"
+
+msgid "Eliminar"
+msgstr "Delete"
+
+msgid "Limpiar selección"
+msgstr "Clear selection"
+
+msgid "Seleccionar todo"
+msgstr "Select all"
+
+msgid "Dominio"
+msgstr "Domain"
+
+msgid "Días restantes"
+msgstr "Days remaining"
+
+msgid "Últ. chequeo"
+msgstr "Last check"
+
+msgid "Resp."
+msgstr "Resp."
+
+#, python-format
+msgid "%(d)s días restantes"
+msgstr "%(d)s days remaining"
+
+msgid "Validez del certificado"
+msgstr "Certificate validity"
+
+msgid "Webhooks · Teams / Slack"
+msgstr "Webhooks · Teams / Slack"
+
+msgid ""
+"Envía alertas a un canal mediante webhook entrante. Las URLs nunca se "
+"muestran en claro."
+msgstr ""
+"Sends alerts to a channel via incoming webhook. URLs are never shown in "
+"plain text."
+
+msgid "URL del webhook (Slack)"
+msgstr "Webhook URL (Slack)"
+
+msgid "URL del webhook (Teams)"
+msgstr "Webhook URL (Teams)"
+
+msgid "Formato enriquecido"
+msgstr "Rich format"
+
+msgid "Incluir color de estado y barra de validez en el mensaje."
+msgstr "Include status color and validity bar in the message."
+
+msgid "Activar"
+msgstr "Enable"
+
+msgid "Probar envío"
+msgstr "Test send"
+
+msgid "Gateway SMS"
+msgstr "SMS Gateway"
+
+msgid ""
+"Envía alertas por SMS mediante el gateway FTP corporativo. La contraseña "
+"nunca se muestra en claro."
+msgstr ""
+"Sends alerts via SMS through the corporate FTP gateway. The password is "
+"never shown in plain text."
+
+msgid "Habilitar envío de SMS"
+msgstr "Enable SMS sending"
+
+msgid "Host FTP"
+msgstr "FTP host"
+
+msgid "Usuario FTP"
+msgstr "FTP user"
+
+msgid "Contraseña FTP"
+msgstr "FTP password"
+
+msgid "Número por defecto"
+msgstr "Default number"
+
+msgid "Archivo remoto"
+msgstr "Remote file"
+
+msgid "Probar SMS"
+msgstr "Test SMS"
+
+msgid "LDAP corporativo"
+msgstr "Corporate LDAP"
+
+msgid ""
+"Autentica a usuarios ya existentes contra tu directorio (Active Directory u "
+"otro). Los secretos nunca se muestran en claro."
+msgstr ""
+"Authenticates existing users against your directory (Active Directory or "
+"other). Secrets are never shown in plain text."
+
+msgid "LDAP habilitado"
+msgstr "LDAP enabled"
+
+msgid ""
+"Activa la verificación de contraseña contra el directorio al iniciar sesión."
+msgstr "Enables password verification against the directory at sign-in."
+
+msgid "Habilitar"
+msgstr "Enable"
+
+msgid "Servidor (URI)"
+msgstr "Server (URI)"
+
+msgid "ej. ldap://dc.empresa.com:389 o ldaps://dc:636"
+msgstr "e.g. ldap://dc.company.com:389 or ldaps://dc:636"
+
+msgid "Bind DN (cuenta de servicio)"
+msgstr "Bind DN (service account)"
+
+msgid "Contraseña de bind"
+msgstr "Bind password"
+
+msgid "Sin contraseña configurada."
+msgstr "No password configured."
+
+msgid "Base de búsqueda de usuarios"
+msgstr "User search base"
+
+msgid "ej. OU=Usuarios,DC=empresa,DC=com"
+msgstr "e.g. OU=Users,DC=company,DC=com"
+
+msgid "Filtro de usuario"
+msgstr "User filter"
+
+#, python-brace-format
+msgid "Usa <code class=\"font-mono\">{login}</code> como marcador."
+msgstr "Use <code class=\"font-mono\">{login}</code> as placeholder."
+
+msgid "Atributo de correo"
+msgstr "Email attribute"
+
+msgid "Timeout de conexión (s)"
+msgstr "Connection timeout (s)"
+
+msgid "Cifrado de transporte"
+msgstr "Transport encryption"
+
+msgid "Usa SSL (ldaps) o StartTLS para proteger la conexión."
+msgstr "Use SSL (ldaps) or StartTLS to secure the connection."
+
+msgid "SSL (ldaps)"
+msgstr "SSL (ldaps)"
+
+msgid "StartTLS"
+msgstr "StartTLS"
+
+#, python-format
+msgid "Última prueba: %(msg)s"
+msgstr "Last test: %(msg)s"
+
+msgid "Probar conexión"
+msgstr "Test connection"
+
+msgid "Guardar cambios"
+msgstr "Save changes"
+
+msgid "Monitoreo"
+msgstr "Monitoring"
+
+msgid "Frecuencia y parámetros del job que chequea tus certificados."
+msgstr "Frequency and parameters of the job that checks your certificates."
+
+msgid "Frecuencia de chequeo (horas)"
+msgstr "Check frequency (hours)"
+
+msgid "Cada cuántas horas se ejecuta el job de verificación."
+msgstr "How many hours between verification job runs."
+
+msgid "Ventana horaria"
+msgstr "Time window"
+
+msgid "Franja preferida para los chequeos masivos."
+msgstr "Preferred time slot for bulk checks."
+
+msgid "Reintentos"
+msgstr "Retries"
+
+msgid "Intentos ante un fallo antes de marcar error."
+msgstr "Attempts on failure before marking as error."
+
+msgid "Segundos antes de abortar un chequeo."
+msgstr "Seconds before aborting a check."
+
+msgid "Tu configuración se actualizó."
+msgstr "Your settings were updated."
+
+msgid "Seguridad"
+msgstr "Security"
+
+msgid "Políticas de acceso y sesión para toda la organización."
+msgstr "Access and session policies for the entire organization."
+
+msgid "Longitud mínima de contraseña"
+msgstr "Minimum password length"
+
+msgid "Expiración de sesión (minutos)"
+msgstr "Session expiration (minutes)"
+
+msgid "Cerrar sesión tras inactividad. 0 = sin límite."
+msgstr "Sign out after inactivity. 0 = no limit."
+
+msgid "Botón de login corporativo (LDAP)"
+msgstr "Corporate login button (LDAP)"
+
+msgid "Mostrar el acceso vía directorio en la pantalla de inicio de sesión."
+msgstr "Show directory login on the sign-in screen."
+
+msgid "Autenticación en dos pasos (2FA)"
+msgstr "Two-step authentication (2FA)"
+
+msgid "Cada usuario activa su 2FA (TOTP) desde su perfil."
+msgstr "Each user enables their 2FA (TOTP) from their profile."
+
+msgid "Gestionar en mi perfil"
+msgstr "Manage in my profile"
+
+msgid "Correo (SMTP)"
+msgstr "Email (SMTP)"
+
+msgid ""
+"Servidor de salida para notificaciones por correo. Los secretos nunca se "
+"muestran en claro."
+msgstr ""
+"Outgoing server for email notifications. Secrets are never shown in plain "
+"text."
+
+msgid "Host"
+msgstr "Host"
+
+msgid "Usuario"
+msgstr "User"
+
+msgid "Contraseña"
+msgstr "Password"
+
+msgid "Remitente (From)"
+msgstr "Sender (From)"
+
+msgid "TLS / STARTTLS"
+msgstr "TLS / STARTTLS"
+
+msgid "Cifrar la conexión con el servidor de correo."
+msgstr "Encrypt the connection to the mail server."
+
+msgid "Copia global de correos"
+msgstr "Global email BCC"
+
+msgid "Enviar prueba"
+msgstr "Send test"
+
+msgid "Configuración · CertManager"
+msgstr "Settings · CertManager"
+
+msgid "Configuración"
+msgstr "Settings"
+
+msgid "Ajustes globales de la organización · solo Owner"
+msgstr "Global organization settings · Owner only"
+
+msgid "Secciones de configuración"
+msgstr "Settings sections"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Grupo · panorama de vencimientos"
+msgstr "Group · expiration overview"
+
+msgid "Todos los grupos · panorama general de vencimientos"
+msgstr "All groups · general expiration overview"
+
+msgid "Chequear todo"
+msgstr "Check all"
+
+msgid "Distribución por estado"
+msgstr "Status distribution"
+
+msgid "Vencimientos próximos"
+msgstr "Upcoming expirations"
+
+msgid "Por ventana de días · ≤7d incluye vencidos"
+msgstr "By day window · ≤7d includes expired"
+
+msgid "Tendencia"
+msgstr "Trend"
+
+msgid "Por vencer · 8 semanas"
+msgstr "Expiring soon · 8 weeks"
+
+msgid "Vencidos"
+msgstr "Expired"
+
+msgid "Requieren atención"
+msgstr "Require attention"
+
+msgid "Ver todos"
+msgstr "View all"
+
+msgid "Sin certificados que requieran atención."
+msgstr "No certificates require attention."
+
+msgid "Actividad reciente"
+msgstr "Recent activity"
+
+msgid "No hay alertas abiertas."
+msgstr "No open alerts."
+
+msgid "Editar certificado"
+msgstr "Edit certificate"
+
+msgid "Probar correo de certificado"
+msgstr "Test certificate email"
+
+msgid "Probar correo"
+msgstr "Test email"
+
+msgid "Correo destino"
+msgstr "Destination email"
+
+msgid "Esta prueba no usa los responsables reales del certificado."
+msgstr "This test does not use the actual certificate recipients."
+
+msgid "Identidad"
+msgstr "Identity"
+
+msgid "Sujeto (CN)"
+msgstr "Subject (CN)"
+
+msgid "Emisor (CA)"
+msgstr "Issuer"
+
+msgid "Válido desde"
+msgstr "Valid from"
+
+msgid "Válido hasta"
+msgstr "Valid until"
+
+msgid "días"
+msgstr "days"
+
+msgid "Próximo chequeo"
+msgstr "Last check"
+
+msgid "Responsables y notificación"
+msgstr "Recipients and notification"
+
+#, python-format
+msgid "Umbral legacy: %(threshold)s días"
+msgstr "Legacy threshold: %(threshold)s days"
+
+msgid "admin"
+msgstr "admin"
+
+msgid "correo"
+msgstr "email"
+
+msgid ""
+"Sin responsables. Agrega destinatarios al editar el certificado o un Admin "
+"del grupo."
+msgstr ""
+"No recipients. Add recipients by editing the certificate or via a group "
+"Admin."
+
+msgid "off"
+msgstr "off"
+
+msgid "Cadena de confianza"
+msgstr "Trust chain"
+
+msgid "Subject Alternative Names"
+msgstr "Subject Alternative Names"
+
+msgid "Evolución de días restantes"
+msgstr "Days remaining over time"
+
+#, python-format
+msgid "mín · %(min)s días"
+msgstr "min · %(min)s days"
+
+#, python-format
+msgid "máx · %(max)s días"
+msgstr "max · %(max)s days"
+
+msgid "Sin coincidencias en el historial."
+msgstr "No matches in history."
+
+msgid "Alertas y notificaciones"
+msgstr "Alerts and notifications"
+
+msgid "Archivada"
+msgstr "Archived"
+
+msgid "Grupo dueño"
+msgstr "Owner group"
+
+msgid "El monitoreo está en pausa"
+msgstr "Monitoring is paused"
+
+#, python-format
+msgid "Silenciado hasta %(until)s"
+msgstr "Muted until %(until)s"
+
+msgid "Notificar"
+msgstr "Notify"
+
+msgid "Editar"
+msgstr "Edit"
+
+msgid "Silenciado"
+msgstr "Muted"
+
+msgid "Silenciar alertas"
+msgstr "Mute alerts"
+
+msgid "Reactivar alertas"
+msgstr "Reactivate alerts"
+
+msgid "Silenciar 1 día"
+msgstr "Mute for 1 day"
+
+msgid "Silenciar 7 días"
+msgstr "Mute for 7 days"
+
+msgid "Silenciar 30 días"
+msgstr "Mute for 30 days"
+
+msgid "Volver a certificados"
+msgstr "Back to certificates"
+
+msgid "sin chequear"
+msgstr "unchecked"
+
+msgid "días vencido"
+msgstr "days expired"
+
+msgid "días restantes"
+msgstr "days remaining"
+
+msgid "emitido"
+msgstr "issued"
+
+msgid "vence"
+msgstr "expires"
+
+msgid "nunca"
+msgstr "never"
+
+msgid "Secciones del certificado"
+msgstr "Certificate sections"
+
+msgid "Nuevo grupo"
+msgstr "New group"
+
+msgid "Define el equipo y sus valores por defecto"
+msgstr "Define the team and its default values"
+
+msgid "Nombre del grupo"
+msgstr "Group name"
+
+msgid "Descripción"
+msgstr "Description"
+
+msgid "Admin responsable"
+msgstr "Responsible admin"
+
+msgid "Correo por defecto"
+msgstr "Default email"
+
+msgid "Umbral por defecto"
+msgstr "Default threshold"
+
+msgid "Frecuencia"
+msgstr "Frequency"
+
+msgid "Crear grupo"
+msgstr "Create group"
+
+msgid "Editar grupo"
+msgstr "Edit group"
+
+msgid "Destinatario si el certificado no tiene correos propios."
+msgstr "Recipient if the certificate has no recipients of its own."
+
+msgid "Sin certificados"
+msgstr "No certificates"
+
+msgid "Agregar miembro"
+msgstr "Add member"
+
+msgid "Selecciona usuario…"
+msgstr "Select user…"
+
+msgid "No hay usuarios disponibles"
+msgstr "No users available"
+
+msgid "Rol"
+msgstr "Role"
+
+msgid "Agregar"
+msgstr "Add"
+
+#, python-format
+msgid "Rol de %(email)s"
+msgstr "Role of %(email)s"
+
+msgid "Quitar del grupo"
+msgstr "Remove from group"
+
+#, python-format
+msgid "¿Quitar a %(name)s del grupo %(team_name)s?"
+msgstr "Remove %(name)s from group %(team_name)s?"
+
+msgid "Este grupo no tiene miembros todavía."
+msgstr "This group has no members yet."
+
+msgid "Sin correo"
+msgstr "No email"
+
+msgid "Sin Admin"
+msgstr "No Admin"
+
+msgid "Opciones"
+msgstr "Options"
+
+msgid "Grupos"
+msgstr "Groups"
+
+msgid "Miembros"
+msgstr "Members"
+
+msgid "Salud de certificados"
+msgstr "Certificate health"
+
+msgid "Sin certificados todavía."
+msgstr "No certificates yet."
+
+msgid "Certificados del grupo"
+msgstr "Group certificates"
+
+msgid "Este grupo no tiene certificados."
+msgstr "This group has no certificates."
+
+#, python-format
+msgid "Ver los %(count)s certificados del grupo →"
+msgstr "View the %(count)s certificates of the group →"
+
+msgid "Valores por defecto"
+msgstr "Default values"
+
+msgid "Umbral crítico"
+msgstr "Critical threshold"
+
+msgid "Intervalo de chequeo"
+msgstr "Check interval"
+
+#, python-format
+msgid "cada %(interval)s h"
+msgstr "every %(interval)s h"
+
+msgid "Canales"
+msgstr "Channels"
+
+msgid "Destinatarios"
+msgstr "Recipients"
+
+msgid "Organiza certificados por equipo con control de acceso"
+msgstr "Organize certificates by team with access control"
+
+msgid "Salud"
+msgstr "Health"
+
+msgid "Correo default"
+msgstr "Default email"
+
+msgid "Admin(s)"
+msgstr "Admin(s)"
+
+msgid "Aún no hay grupos"
+msgstr "No groups yet"
+
+msgid ""
+"Crea tu primer grupo para organizar certificados por equipo y definir "
+"umbrales, frecuencia y correo de alerta por defecto."
+msgstr ""
+"Create your first group to organize certificates by team and define default "
+"thresholds, frequency, and alert email."
+
+msgid "Pide al Owner de la organización que cree un grupo."
+msgstr "Ask the organization's Owner to create a group."
+
+msgid "Plantillas"
+msgstr "Templates"
+
+msgid "Usuarios"
+msgstr "Users"
+
+msgid "Perfil"
+msgstr "Profile"
+
+msgid "Ayuda"
+msgstr "Help"
+
+#, python-format
+msgid "Monitoreo activo · cada %(h)s h"
+msgstr "Monitoring active · every %(h)s h"
+
+msgid "Colapsar barra"
+msgstr "Collapse sidebar"
+
+msgid "Cambiar ámbito"
+msgstr "Change scope"
+
+msgid "Sin grupos asignados"
+msgstr "No groups assigned"
+
+msgid "Notificaciones"
+msgstr "Notifications"
+
+#, python-format
+msgid "%(n)s nuevas"
+msgstr "%(n)s new"
+
+#, python-format
+msgid "Tienes %(n)s notificación(es) nueva(s)."
+msgstr "You have %(n)s new notification(s)."
+
+msgid "No tienes notificaciones nuevas."
+msgstr "You have no new notifications."
+
+msgid "Ver centro de alertas"
+msgstr "View alert center"
+
+msgid "Cerrar sesión"
+msgstr "Sign out"
+
+msgid "Cambiar contraseña"
+msgstr "Change password"
+
+msgid "Usa una contraseña segura y única."
+msgstr "Use a strong and unique password."
+
+msgid "Contraseña actual"
+msgstr "Current password"
+
+msgid "Nueva contraseña"
+msgstr "New password"
+
+msgid "Repetir nueva contraseña"
+msgstr "Repeat new password"
+
+msgid "Guardar contraseña"
+msgstr "Save password"
+
+msgid "Miembro"
+msgstr "Member"
+
+msgid "Elige un avatar"
+msgstr "Choose an avatar"
+
+msgid "Avatares generados, sin subir archivos."
+msgstr "Generated avatars, no file uploads."
+
+msgid "Quitar"
+msgstr "Remove"
+
+msgid "Avatares disponibles"
+msgstr "Available avatars"
+
+#, python-format
+msgid "Avatar %(num)s"
+msgstr "Avatar %(num)s"
+
+msgid "Apellido"
+msgstr "Last name"
+
+msgid "Idioma"
+msgstr "Language"
+
+msgid "Zona horaria"
+msgstr "Time zone"
+
+msgid "Código QR para 2FA"
+msgstr "QR code for 2FA"
+
+msgid ""
+"Escanea el QR con <b>Google Authenticator</b> o <b>Microsoft Authenticator</"
+"b>.\n"
+"        ¿No puedes escanear? Ingresa esta clave manualmente:"
+msgstr ""
+"Scan the QR with <b>Google Authenticator</b> or <b>Microsoft Authenticator</"
+"b>.\n"
+"        Can't scan? Enter this key manually:"
+
+msgid "Código de 6 dígitos"
+msgstr "6-digit code"
+
+msgid "Confirmar"
+msgstr "Confirm"
+
+msgid "2FA activo"
+msgstr "2FA active"
+
+msgid "Código actual"
+msgstr "Current code"
+
+msgid "Desactivar 2FA"
+msgstr "Disable 2FA"
+
+msgid ""
+"Añade un segundo factor con una app de autenticación (Google/Microsoft "
+"Authenticator)."
+msgstr ""
+"Add a second factor with an authenticator app (Google/Microsoft "
+"Authenticator)."
+
+msgid "Activar 2FA"
+msgstr "Enable 2FA"
+
+msgid "Perfil · CertManager"
+msgstr "Profile · CertManager"
+
+msgid "Tu cuenta, avatar y preferencias"
+msgstr "Your account, avatar and preferences"
+
+msgid "Datos personales"
+msgstr "Personal information"
+
+msgid "Preferencias"
+msgstr "Preferences"
+
+msgid "Mis grupos"
+msgstr "My groups"
+
+msgid "Solo lectura · contacta a un Owner para cambios."
+msgstr "Read only · contact an Owner for changes."
+
+msgid "Aún no perteneces a ningún grupo"
+msgstr "You don't belong to any group yet"
+
+msgid "Un Owner puede añadirte a un grupo para asignarte certificados."
+msgstr "An Owner can add you to a group to assign you certificates."
+
+#, python-format
+msgid "Vista previa — asunto: %(subject)s"
+msgstr "Preview — subject: %(subject)s"
+
+msgid "Vista previa del correo"
+msgstr "Email preview"
+
+msgid "Corregir"
+msgstr "Edit"
+
+msgid "Ver cómo se ve"
+msgstr "See how it looks"
+
+msgid "Predeterminada"
+msgstr "Default"
+
+msgid "Inactiva"
+msgstr "Inactive"
+
+msgid "Vista previa"
+msgstr "Preview"
+
+msgid "Solo uso"
+msgstr "Use only"
+
+msgid "Editar plantilla"
+msgstr "Edit template"
+
+msgid "Nueva plantilla"
+msgstr "New template"
+
+msgid "Nueva plantilla de correo"
+msgstr "New email template"
+
+msgid ""
+"Arrastrá bloques al lienzo y reordenálos con el asa de cada bloque. Los "
+"campos obligatorios no se pueden quitar."
+msgstr ""
+"Drag blocks onto the canvas and reorder them using each block's handle. "
+"Required fields cannot be removed."
+
+msgid "Tipo"
+msgstr "Type"
+
+msgid "Asunto"
+msgstr "Subject"
+
+msgid "Predeterminada del tipo"
+msgstr "Default for type"
+
+msgid "Bloques disponibles"
+msgstr "Available blocks"
+
+msgid "Bloques"
+msgstr "Blocks"
+
+msgid "Campos de dato"
+msgstr "Data fields"
+
+msgid "🔒 = obligatorio (siempre presente)"
+msgstr "🔒 = required (always present)"
+
+msgid "Lienzo"
+msgstr "Canvas"
+
+msgid "Arrastrá o hacé clic en un bloque para empezar."
+msgstr "Drag or click a block to start."
+
+msgid ""
+"Cuerpos de correo para certificados y reportes. Todos pueden usarlas; editan "
+"Owner, Admin o quien la creó."
+msgstr ""
+"Email bodies for certificates and reports. Everyone can use them; Owner, "
+"Admin, or the creator can edit them."
+
+msgid "Etiqueta"
+msgstr "Label"
+
+msgid "Predet."
+msgstr "Default"
+
+msgid "Aún no hay plantillas. Creá la primera."
+msgstr "No templates yet. Create the first one."
+
+msgid "Ningún certificado vence sin aviso."
+msgstr "No certificate expires without notice."
+
+msgid ""
+"Monitorea vencimientos SSL/TLS por grupo, alerta a tiempo y reporta a tu "
+"equipo."
+msgstr ""
+"Monitor SSL/TLS expirations by group, alert on time, and report to your team."
+
+msgid "Iniciar sesión"
+msgstr "Sign in"
+
+msgid "Accede a tu panel de certificados"
+msgstr "Access your certificate dashboard"
+
+msgid "Sesión cerrada correctamente. Vuelve cuando quieras."
+msgstr "Signed out successfully. Come back anytime."
+
+msgid "Credenciales inválidas. Verifica tu correo y contraseña."
+msgstr "Invalid credentials. Check your email and password."
+
+msgid "Mostrar contraseña"
+msgstr "Show password"
+
+msgid ""
+"Tu contraseña se cambió correctamente. Ya puedes iniciar sesión con ella."
+msgstr "Your password was changed successfully. You can now sign in with it."
+
+msgid "Escribe y confirma tu nueva contraseña."
+msgstr "Enter and confirm your new password."
+
+msgid "Confirmar contraseña"
+msgstr "Confirm password"
+
+msgid "Enlace no válido"
+msgstr "Invalid link"
+
+msgid "El enlace de restablecimiento ya se usó o expiró. Solicita uno nuevo."
+msgstr "The reset link has already been used or expired. Request a new one."
+
+msgid "Solicitar nuevo enlace"
+msgstr "Request new link"
+
+msgid "Revisa tu correo"
+msgstr "Check your email"
+
+msgid ""
+"Si existe una cuenta con ese correo, te enviamos instrucciones para "
+"restablecer tu contraseña. Revisa también la carpeta de no deseados."
+msgstr ""
+"If an account with that email exists, we have sent instructions to reset "
+"your password. Also check your spam folder."
+
+msgid "Volver a iniciar sesión"
+msgstr "Back to sign in"
+
+msgid "Hola,"
+msgstr "Hello,"
+
+#, python-format
+msgid ""
+"Recibimos una solicitud para restablecer la contraseña de tu cuenta en "
+"CertManager\n"
+"asociada a este correo (%(email)s)."
+msgstr ""
+"We received a request to reset the password for your CertManager account\n"
+"associated with this email (%(email)s)."
+
+msgid "Para crear una nueva contraseña, abre el siguiente enlace:"
+msgstr "To create a new password, open the following link:"
+
+msgid ""
+"Si no solicitaste este cambio, puedes ignorar este mensaje; tu contraseña "
+"actual seguirá funcionando."
+msgstr ""
+"If you did not request this change, you can ignore this message; your "
+"current password will continue to work."
+
+msgid "— Equipo de CertManager"
+msgstr "— The CertManager Team"
+
+msgid "Restablecer contraseña"
+msgstr "Reset password"
+
+msgid "Te enviaremos un enlace a tu correo para crear una nueva contraseña."
+msgstr "We will send a link to your email to create a new password."
+
+msgid "Enviar enlace"
+msgstr "Send link"
+
+msgid "Un paso más para entrar."
+msgstr "One more step to sign in."
+
+msgid "Tu cuenta tiene activada la verificación en dos pasos."
+msgstr "Your account has two-step verification enabled."
+
+msgid "Verificación en dos pasos"
+msgstr "Two-step verification"
+
+msgid "Ingresa el código de tu app de autenticación."
+msgstr "Enter the code from your authenticator app."
+
+msgid "Verificar"
+msgstr "Verify"
+
+msgid "← Volver al inicio de sesión"
+msgstr "← Back to sign in"
+
+msgid "Descarga PDF + Excel + CSV en un ZIP"
+msgstr "Download PDF + Excel + CSV in a ZIP"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Vigentes"
+msgstr "Valid"
+
+msgid "Críticos"
+msgstr "Critical"
+
+msgid "Error / s.c."
+msgstr "Error / n.c."
+
+msgid "Sin registros que coincidan con los filtros."
+msgstr "No records match the filters."
+
+msgid "Sin coincidencias"
+msgstr "No matches"
+
+msgid ""
+"Ningún certificado coincide con los filtros seleccionados. Ajusta el rango "
+"de fechas, los grupos o el estado y vuelve a generar el reporte."
+msgstr ""
+"No certificate matches the selected filters. Adjust the date range, groups, "
+"or status and regenerate the report."
+
+msgid "Envíos recurrentes por correo a tu equipo"
+msgstr "Recurring email deliveries to your team"
+
+msgid "Plantilla"
+msgstr "Template"
+
+msgid "Hora de envío"
+msgstr "Send time"
+
+msgid "Fecha de inicio"
+msgstr "Start date"
+
+msgid ""
+"Ancla del calendario. Para «cada N días» la cuenta arranca aquí; para «el "
+"día 1» es opcional."
+msgstr ""
+"Calendar anchor. For \"every N days\" the count starts here; for \"the 1st\" "
+"it is optional."
+
+msgid "Intervalo (días)"
+msgstr "Interval (days)"
+
+msgid "Solo para «Cada N días» (p.ej. 15 o 30)."
+msgstr "Only for \"Every N days\" (e.g. 15 or 30)."
+
+msgid "Si la fecha que toca cae fin de semana, el envío se difiere al lunes."
+msgstr "If the due date falls on a weekend, delivery is deferred to Monday."
+
+msgid "Formato(s) adjunto(s)"
+msgstr "Attachment format(s)"
+
+msgid "Activo"
+msgstr "Active"
+
+msgid "Formato(s)"
+msgstr "Format(s)"
+
+msgid "Ver qué saca este reporte y enviar una prueba"
+msgstr "See what this report generates and send a test"
+
+msgid "Pausado"
+msgstr "Paused"
+
+msgid "Ver y probar"
+msgstr "View and test"
+
+#, python-format
+msgid ""
+"¿Eliminar el reporte programado «%(name)s»? Esta acción no se puede deshacer."
+msgstr ""
+"Delete the scheduled report \"%(name)s\"? This action cannot be undone."
+
+msgid "Aún no hay reportes programados"
+msgstr "No scheduled reports yet"
+
+msgid ""
+"Programa un envío recurrente para recibir el estado de tus certificados por "
+"correo."
+msgstr ""
+"Schedule a recurring delivery to receive your certificate status by email."
+
+msgid "Vista previa del reporte"
+msgstr "Report preview"
+
+msgid "Enviar una prueba a un correo"
+msgstr "Send a test to an email"
+
+msgid ""
+"Genera el/los formato(s) con estos filtros y los envía ahora a ese correo."
+msgstr ""
+"Generates the format(s) with these filters and sends them now to that email."
+
+msgid "Visualiza y exporta el monitoreo de certificados"
+msgstr "View and export certificate monitoring"
+
+msgid "Constructor"
+msgstr "Builder"
+
+msgid "Constructor de reportes"
+msgstr "Report builder"
+
+msgid "Filtra la salida de reportes de CertManager"
+msgstr "Filter CertManager report output"
+
+msgid "Filtros del reporte"
+msgstr "Report filters"
+
+msgid "Rango de fechas"
+msgstr "Date range"
+
+msgid "Fechas precisas tienen prioridad sobre el rango."
+msgstr "Exact dates take priority over the range."
+
+msgid "Vacío = todos los grupos."
+msgstr "Empty = all groups."
+
+msgid "Ventana de vencimiento"
+msgstr "Expiration window"
+
+msgid "Responsable"
+msgstr "Responsible"
+
+msgid "Generar reporte"
+msgstr "Generate report"
+
+msgid "Reportes programados"
+msgstr "Scheduled reports"
+
+msgid "Programar"
+msgstr "Schedule"
+
+msgid "Reintentar"
+msgstr "Retry"
+
+msgid "Ir al inicio"
+msgstr "Go to home"
+
+msgid "Detalle para soporte"
+msgstr "Support detail"
+
+msgid "Copiar detalle"
+msgstr "Copy detail"
+
+#, python-format
+msgid "Error %(code)s"
+msgstr "Error %(code)s"
+
+msgid "Editar usuario"
+msgstr "Edit user"
+
+msgid "No hay grupos disponibles."
+msgstr "No groups available."
+
+msgid "Rol en los grupos"
+msgstr "Role in groups"
+
+msgid "Cuenta activa"
+msgstr "Active account"
+
+msgid "Crear usuario"
+msgstr "Create user"
+
+msgid "Alta local con contraseña o usuario LDAP por correo"
+msgstr "Local account with password or LDAP user by email"
+
+msgid "Autenticar por LDAP"
+msgstr "Authenticate via LDAP"
+
+msgid "Rol en el grupo"
+msgstr "Role in group"
+
+#| msgid "nunca"
+msgid "Nunca"
+msgstr "Never"
+
+msgid "Inactivo"
+msgstr "Inactive"
+
+msgid "Desactivar"
+msgstr "Deactivate"
+
+msgid "No hay usuarios que coincidan con la búsqueda."
+msgstr "No users match the search."
+
+msgid "Cuenta"
+msgstr "Account"
+
+msgid "Rol global"
+msgstr "Global role"
+
+msgid "Sin configurar"
+msgstr "Not configured"
+
+msgid "Último acceso"
+msgstr "Last access"
+
+msgid "Alta"
+msgstr "Created"
+
+msgid "Este usuario no pertenece a ningún grupo."
+msgstr "This user does not belong to any group."
+
+msgid "Gestiona personas, roles y pertenencia a grupos"
+msgstr "Manage people, roles, and group membership"
+
+msgid "Buscar persona…"
+msgstr "Search person…"
+
+msgid "Buscar persona"
+msgstr "Search person"
+
+# Expiración de contraseñas (política de seguridad)
+msgid "Expirar contraseñas"
+msgstr "Expire passwords"
+
+msgid "Obligar a cambiar la contraseña cada cierto tiempo. Apagado por defecto."
+msgstr "Require changing the password periodically. Off by default."
+
+msgid "Vigencia de la contraseña"
+msgstr "Password validity"
+
+msgid "Cada cuánto vence (solo aplica si la expiración está habilitada)."
+msgstr "How often it expires (only applies if expiration is enabled)."
+
+msgid "Cada mes"
+msgstr "Every month"
+
+msgid "Cada 3 meses"
+msgstr "Every 3 months"
+
+msgid "Cada 6 meses"
+msgstr "Every 6 months"
+
+msgid "Cada año"
+msgstr "Every year"
+
+msgid "Tu contraseña expiró"
+msgstr "Your password has expired"
+
+msgid "Por política de seguridad de la organización, debes cambiarla para continuar."
+msgstr "Per your organization's security policy, you must change it to continue."
+
+msgid "Ubicación"
+msgstr "Location"

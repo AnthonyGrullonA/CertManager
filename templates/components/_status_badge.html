@@ -1,0 +1,12 @@
+{% comment %}
+Badge de estado (protagonista de Forge UI): punto + etiqueta, color por estado.
+Nunca depende solo del color — la etiqueta textual siempre acompaña.
+
+Uso:
+  {% include "components/_status_badge.html" with status=cert.status label=cert.get_status_display %}
+  {% include "components/_status_badge.html" with status=alert.severity label=alert.get_severity_display size="sm" %}
+
+Las clases badge--<status> resuelven los tokens --status-<familia>-* (ver
+forge.css). Tamaños: sm / md(def) / lg.
+{% endcomment %}
+<span class="badge badge--{{ status|lower }}{% if size %} badge--{{ size }}{% endif %}">{{ label }}</span>

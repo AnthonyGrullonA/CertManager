@@ -1,0 +1,43 @@
+/* Forge UI — Typography tokens
+ * Geist for UI; Geist Mono for technical data (serial, fingerprint, ports).
+ * Type scale tuned for data density + scannable hierarchy.
+ */
+
+:root {
+  /* Families */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Font sizes — fluid-free, data-app scale (px) */
+  --text-display:  34px; /* page hero / big number on detail */
+  --text-h1:       26px; /* page title */
+  --text-h2:       20px; /* section title */
+  --text-h3:       16px; /* card title / table group */
+  --text-body:     14px; /* default body & table cells */
+  --text-sm:       13px; /* secondary, dense tables */
+  --text-label:    12px; /* labels, captions, badge text */
+  --text-micro:    11px; /* meta, timestamps, axis */
+
+  /* Line heights */
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;  /* display & big numbers */
+  --tracking-snug:   -0.01em;  /* headings */
+  --tracking-normal: 0;
+  --tracking-wide:   0.02em;
+  --tracking-caps:   0.06em;   /* uppercase labels / eyebrows */
+
+  /* Semantic roles */
+  --font-data: var(--font-mono);   /* numbers you compare / copy */
+  --font-ui:   var(--font-sans);
+}

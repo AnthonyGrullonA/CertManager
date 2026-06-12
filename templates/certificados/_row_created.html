@@ -1,0 +1,19 @@
+{% comment %}
+Respuesta HTMX al crear un certificado. hx-target="#modal-root" con
+hx-swap="innerHTML": el contenido no-OOB (vacío) cierra el modal. Vía hx-swap-oob:
+  - se añade la fila nueva al inicio de #cert-rows (afterbegin);
+  - se elimina el estado vacío si existía;
+  - se empuja un toast de éxito.
+Variables: cert (decorado), toast_title, toast_message.
+{% endcomment %}
+{# Contenido no-OOB: vacío -> vacía #modal-root y cierra el modal. #}
+
+{# Fila nueva, fuera de banda, al inicio del cuerpo de la tabla. #}
+<tbody id="cert-rows" hx-swap-oob="afterbegin">
+  {% include "certificados/_row.html" with cert=cert density="comodo" %}
+</tbody>
+
+{# Quitar el estado vacío si estaba presente. #}
+<tr id="certs-empty" hx-swap-oob="delete"></tr>
+
+{% include "partials/_toast.html" with tone="ok" title=toast_title message=toast_message %}

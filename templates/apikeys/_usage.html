@@ -1,0 +1,64 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Registro de uso de UNA clave de API (modal HTMX del botón «Ver uso»).
+Se inyecta por innerHTML en #modal-root; ForgeDataTable se inicializa tras el swap.
+
+Columnas: fecha, método, ruta, IP. Las filas más recientes primero (la vista ya
+ordena por -at). Solo Owner llega aquí (vista _OwnerOnly).
+{% endcomment %}
+{% if as_modal %}
+<div class="forge-modal" data-forge-modal>
+  <div class="forge-modal__scrim" data-forge-modal-close></div>
+  <div class="forge-modal__panel" role="dialog" aria-modal="true" aria-label="{% trans 'Registro de uso de API' %}" style="width:min(860px, calc(100vw - 32px));">
+{% endif %}
+<div class="card !p-0 overflow-hidden">
+  <div class="flex items-center justify-between gap-4 px-5 pt-4">
+    <div>
+      <h2 class="font-medium text-slate-900">{% blocktrans with name=key.name %}Registro de uso · {{ name }}{% endblocktrans %}</h2>
+      <p class="text-sm text-slate-500">
+        <code class="font-mono text-xs text-slate-500">{{ key.key_id }}…</code>
+      </p>
+    </div>
+    <button type="button" class="btn-ghost" data-forge-modal-close>
+      {% icon "x" size=16 %} {% trans "Cerrar" %}
+    </button>
+  </div>
+
+  <div data-forge-table data-page-size="8" data-forge-sortable class="px-5 pb-5 pt-3">
+    <div class="forge-table-scroll">
+      <table class="cf-data-source">
+        <thead>
+          <tr>
+            <th>{% trans "Fecha" %}</th>
+            <th>{% trans "Método" %}</th>
+            <th>{% trans "Ruta" %}</th>
+            <th>{% trans "IP" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usages %}
+          <tr>
+            <td class="text-slate-500 whitespace-nowrap font-mono text-xs">
+              {{ u.at|date:"Y-m-d H:i:s" }}
+            </td>
+            <td class="font-mono text-xs text-slate-700">{{ u.method }}</td>
+            <td class="font-mono text-xs text-slate-700">{{ u.path }}</td>
+            <td class="font-mono text-xs text-slate-500">{{ u.ip|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr data-empty-row>
+            <td colspan="4" class="text-center py-10 text-slate-500">
+              {% trans "Esta clave aún no registra peticiones." %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% if as_modal %}
+  </div>
+</div>
+{% endif %}

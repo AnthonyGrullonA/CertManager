@@ -1,0 +1,11 @@
+/* Forge UI — Punto de entrada de tokens.
+ * Reúne las variables CSS del design system (copiadas de
+ * "CertForge — Forge UI Design System"/tokens/). Las fuentes se cargan aparte
+ * (fonts.css, self-host) en lugar del fonts.css del DS (que usa Google Fonts).
+ * Orden: colors → typography → spacing → elevation → base.
+ */
+@import 'tokens/colors.css';
+@import 'tokens/typography.css';
+@import 'tokens/spacing.css';
+@import 'tokens/elevation.css';
+@import 'tokens/base.css';

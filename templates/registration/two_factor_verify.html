@@ -1,0 +1,71 @@
+{% load static %}{% load forge_icons i18n %}
+<!DOCTYPE html>
+<html lang="es-do" data-theme="light" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verificación en dos pasos · CertManager</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v=2">
+  <link rel="stylesheet" href="{% static 'css/forge.css' %}?v={{ forge_assets_v }}">
+</head>
+<body class="forge-body h-full" style="margin:0">
+  <div class="forge-auth" style="display:flex;min-height:100vh;background:var(--surface-page)">
+    <aside class="forge-auth__brand"
+           style="flex:1 1 46%;background:var(--slate-900);display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden">
+      <div aria-hidden="true"
+           style="position:absolute;inset:0;background:radial-gradient(circle at 82% 82%, rgba(220,38,38,0.38), transparent 52%), radial-gradient(circle at 20% 18%, rgba(220,38,38,0.10), transparent 44%), linear-gradient(140deg, #0a0a0b 0%, #140506 55%, #270909 100%)"></div>
+      <div style="display:flex;align-items:center;gap:11px;position:relative">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 2.5L26.5 6.4C27.1 6.6 27.5 7.2 27.5 7.8V15.6C27.5 22.4 22.7 27.6 16.6 29.7C16.2 29.8 15.8 29.8 15.4 29.7C9.3 27.6 4.5 22.4 4.5 15.6V7.8C4.5 7.2 4.9 6.6 5.5 6.4L16 2.5Z" fill="var(--brand-500)"/>
+          <path d="M10.5 16.2L14.3 20L21.7 12.2" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-family:var(--font-sans);font-weight:700;font-size:20px;letter-spacing:-0.02em;color:#fff">Cert<span style="color:var(--brand-400)">Manager</span></span>
+      </div>
+      <div style="position:relative;max-width:380px">
+        <h2 style="margin:0;font-family:var(--font-sans);font-weight:700;font-size:30px;line-height:1.2;letter-spacing:-0.02em;color:#fff">{% trans "Un paso más para entrar." %}</h2>
+        <p style="margin:14px 0 0;font-family:var(--font-sans);font-size:15px;line-height:1.6;color:var(--slate-400)">{% trans "Tu cuenta tiene activada la verificación en dos pasos." %}</p>
+      </div>
+      <div style="position:relative;display:flex;gap:8px" aria-hidden="true">
+        <span style="width:28px;height:6px;border-radius:var(--radius-pill);background:var(--status-ok-solid)"></span>
+        <span style="width:28px;height:6px;border-radius:var(--radius-pill);background:var(--status-warn-solid)"></span>
+        <span style="width:28px;height:6px;border-radius:var(--radius-pill);background:var(--status-crit-solid)"></span>
+        <span style="width:28px;height:6px;border-radius:var(--radius-pill);background:var(--status-exp-solid)"></span>
+      </div>
+    </aside>
+
+    <main class="forge-auth__panel"
+          style="flex:1 1 54%;display:flex;align-items:center;justify-content:center;padding:32px">
+      <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:22px">
+        <div>
+          <h1 style="margin:0;font-family:var(--font-sans);font-weight:600;font-size:var(--text-h1);letter-spacing:-0.01em;color:var(--text-primary)">{% trans "Verificación en dos pasos" %}</h1>
+          <p style="margin:6px 0 0;font-family:var(--font-sans);font-size:var(--text-body);color:var(--text-tertiary)">{% trans "Ingresa el código de tu app de autenticación." %}</p>
+        </div>
+
+        {% if error %}
+        <div role="alert"
+             style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius-md,10px);background:var(--red-softer,#fee2e2);color:var(--red-strong,#991b1b);font-family:var(--font-sans);font-size:var(--text-sm)">
+          <span style="flex:0 0 auto;margin-top:1px;color:var(--red-solid,#dc2626)">{% icon "circle-alert" size=16 %}</span>
+          <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="post" action="" style="display:flex;flex-direction:column;gap:16px" novalidate>
+          {% csrf_token %}
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label for="code" style="font-family:var(--font-sans);font-size:var(--text-sm);font-weight:500;color:var(--text-secondary)">{% trans "Código de 6 dígitos" %}</label>
+            <div style="position:relative;display:flex;align-items:center">
+              <span aria-hidden="true" style="position:absolute;left:12px;display:inline-flex;color:var(--text-tertiary);pointer-events:none">{% icon "shield-check" size=16 %}</span>
+              <input class="input" type="text" name="code" id="code"
+                     inputmode="numeric" autocomplete="one-time-code" placeholder="123456"
+                     required autofocus style="width:100%;padding-left:38px;letter-spacing:0.2em">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px">{% trans "Verificar" %}</button>
+        </form>
+
+        <a href="{% url 'login' %}" style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--text-link);text-decoration:none">{% trans "← Volver al inicio de sesión" %}</a>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# =============================================================================
+# docker-compose.app.yml — SOLO el aplicativo (web + scheduler).
+# La base de datos MySQL es EXTERNA (la provee Claro): se configura por
+# DATABASE_URL dentro de CLARO_NECESIDAD/.env. Aquí NO se levanta ninguna BD ni
+# stack de observabilidad.
+#
+# Uso:  ./install_docker.sh         (o: docker compose -f docker-compose.app.yml up -d --build)
+# =============================================================================
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        # Índice privado para obsforge (opcional). Si no aplica, se omite.
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:-}
+    image: certmanager:latest
+    env_file:
+      - CLARO_NECESIDAD/.env
+    environment:
+      RUN_MIGRATIONS: "1"        # migra + collectstatic al arrancar
+    ports:
+      # Solo expuesto al host (un NGINX/LB del host o de Claro termina el TLS).
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
+  scheduler:
+    image: certmanager:latest
+    command: ["python", "manage.py", "run_scheduler"]
+    env_file:
+      - CLARO_NECESIDAD/.env
+    environment:
+      RUN_MIGRATIONS: "0"        # web ya migró; evita carrera
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped

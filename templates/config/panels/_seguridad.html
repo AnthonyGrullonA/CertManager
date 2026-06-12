@@ -1,0 +1,91 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Panel Seguridad. Dos tarjetas:
+  1) Seguridad: políticas de contraseña/sesión + toggle rápido de LDAP en login
+     (OrganizationSettings.ldap_enabled). 2FA queda como 'Próximamente'.
+  2) LDAP corporativo: configuración real del directorio (core.LdapConfiguration),
+     con secreto bind_password write-only y botón 'Probar conexión'. Reemplaza el
+     antiguo placeholder 'SSO Próximamente'.
+{% endcomment %}
+{% include "config/panels/_saved_toast.html" %}
+<div class="flex flex-col gap-4">
+
+  {% comment %} ---------- Tarjeta 1: Seguridad ---------- {% endcomment %}
+  <form hx-post="{% url 'settings-panel' 'seguridad' %}"
+        hx-target="#settings-panel" hx-swap="innerHTML">
+    <section class="card !p-0 overflow-hidden">
+      <div class="px-6 pt-5">
+        <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "Seguridad" %}</h3>
+        <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Políticas de acceso y sesión para toda la organización." %}</p>
+      </div>
+      <div class="px-6 pb-2 pt-2">
+        {% if form.non_field_errors %}<div class="text-sm text-red-600 mb-2">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Longitud mínima de contraseña" %}</div>
+          </div>
+          <div class="settings-control-md">{{ form.password_min_length }}</div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Expiración de sesión (minutos)" %}</div>
+            <div class="settings-row__hint">{% trans "Cerrar sesión tras inactividad. 0 = sin límite." %}</div>
+          </div>
+          <div class="settings-control-sm">{{ form.session_timeout }}</div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Expirar contraseñas" %}</div>
+            <div class="settings-row__hint">{% trans "Obligar a cambiar la contraseña cada cierto tiempo. Apagado por defecto." %}</div>
+          </div>
+          <div class="settings-control-sm">
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              {{ form.password_expiry_enabled }} {% trans "Habilitar" %}
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Vigencia de la contraseña" %}</div>
+            <div class="settings-row__hint">{% trans "Cada cuánto vence (solo aplica si la expiración está habilitada)." %}</div>
+          </div>
+          <div class="settings-control-md">{{ form.password_expiry_days }}</div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Botón de login corporativo (LDAP)" %}</div>
+            <div class="settings-row__hint">{% trans "Mostrar el acceso vía directorio en la pantalla de inicio de sesión." %}</div>
+          </div>
+          <div class="settings-control-sm">
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              {{ form.ldap_enabled }} {% trans "Habilitar" %}
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row__main">
+            <div class="settings-row__label">{% trans "Autenticación en dos pasos (2FA)" %}</div>
+            <div class="settings-row__hint">{% trans "Cada usuario activa su 2FA (TOTP) desde su perfil." %}</div>
+          </div>
+          <div class="settings-control-md flex items-center gap-2">
+            <a href="{% url 'profile' %}" class="btn-outline btn-sm">{% icon "shield-check" size=15 %} {% trans "Gestionar en mi perfil" %}</a>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+        <button type="submit" class="btn-primary">{% trans "Guardar cambios" %}</button>
+      </div>
+    </section>
+  </form>
+
+  {% comment %} ---------- Tarjeta 2: LDAP corporativo ---------- {% endcomment %}
+  {% include "config/panels/_ldap.html" with form=ldap_form %}
+
+</div>

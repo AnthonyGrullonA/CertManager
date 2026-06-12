@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SECRET_KEY: ci-secret-key-not-for-production
+      OBSFORGE_ENABLED: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements/local.txt
+
+      - name: System check
+        run: python manage.py check
+
+      - name: Missing migrations check
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run test suite
+        run: python manage.py test --verbosity 1
+
+      - name: Dependency vulnerability audit (A03, no bloqueante)
+        continue-on-error: true
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements/prod.txt || true

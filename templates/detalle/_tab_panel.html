@@ -1,0 +1,188 @@
+{% load forge_icons forge_ui i18n %}
+{% comment %}
+Panel de la pestaña activa del detalle (espejo de los paneles de CertDetalle.jsx,
+pero con DATOS REALES). Se inyecta en #cert-tab-panel. Cada pestaña define su
+propio ESTADO VACÍO es-DO cuando no hay last_check (o sin datos para esa sección).
+Variables: cert, active_tab, last_check, + las propias del tab (responsables,
+channels, rows, chain, san, checks, trend, alerts).
+{% endcomment %}
+
+{# ----- helper de estado vacío (sin last_check) ----- #}
+{% if active_tab != 'alertas' and active_tab != 'historial' and not last_check %}
+  {% if active_tab == 'resumen' %}{# resumen muestra identidad parcial + vacío de chequeo #}{% endif %}
+{% endif %}
+
+{# =========================================================== RESUMEN #}
+{% if active_tab == 'resumen' %}
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" class="detalle-grid">
+  <section class="detalle-panel">
+    <h3 class="detalle-panel__title">{% trans "Identidad" %}</h3>
+    {% if last_check %}
+    {% translate "Sujeto (CN)" as l_subject %}
+    {% translate "Emisor (CA)" as l_issuer %}
+    {% translate "Válido desde" as l_from %}
+    {% translate "Válido hasta" as l_to %}
+    {% translate "Umbral de alerta" as l_threshold %}
+    {% translate "días" as l_days %}
+    {% translate "Próximo chequeo" as l_next %}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+      {% include "detalle/_field.html" with label=l_subject value=cert.subject|default:cert.domain mono=1 %}
+      {% include "detalle/_field.html" with label=l_issuer value=cert.issuer|default:"—" %}
+      {% include "detalle/_field.html" with label=l_from value=cert.valid_from|date:"d M Y"|default:"—" mono=1 %}
+      {% include "detalle/_field.html" with label=l_to value=cert.valid_to|date:"d M Y"|default:"—" mono=1 %}
+      {% include "detalle/_field.html" with label=l_threshold value=cert.effective_threshold|stringformat:"s"|add:" "|add:l_days %}
+      {% include "detalle/_field.html" with label=l_next value=cert.next_check_at|date:"d M Y · H:i"|default:"—" %}
+    </div>
+    {% else %}
+      {% include "detalle/_empty.html" with icon="search" text="Sin datos de identidad: este certificado no se ha chequeado todavía." %}
+    {% endif %}
+  </section>
+
+  <section class="detalle-panel">
+    <h3 class="detalle-panel__title">{% trans "Responsables y notificación" %}</h3>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      {% for o in responsables %}
+      <div style="display:flex; align-items:center; gap:10px;">
+        {% include "components/_avatar.html" with name=o.name email=o.email size="sm" %}
+        <span style="flex:1; min-width:0; display:flex; flex-direction:column;">
+          <span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-primary); overflow:hidden; text-overflow:ellipsis;">{{ o.email }}</span>
+          {% if o.threshold %}<span style="font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary);">{% blocktrans with threshold=o.threshold %}Umbral legacy: {{ threshold }} días{% endblocktrans %}</span>{% endif %}
+        </span>
+        <span class="forge-tag">{% if o.source == 'admin' %}{% trans "admin" %}{% else %}{% trans "correo" %}{% endif %}</span>
+      </div>
+      {% empty %}
+      <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">
+        {% trans "Sin responsables. Agrega destinatarios al editar el certificado o un Admin del grupo." %}
+      </p>
+      {% endfor %}
+      <div style="display:flex; gap:8px; margin-top:6px; padding-top:14px; border-top:1px solid var(--border-subtle); flex-wrap:wrap;">
+        {% for ch in channels %}
+        <span class="forge-tag forge-tag--{% if ch.on %}{{ ch.tone }}{% else %}off{% endif %}">
+          {% icon ch.icon size=13 %} {{ ch.label }}{% if not ch.on %} · {% trans "off" %}{% endif %}
+        </span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+{# =========================================================== CADENA + SAN #}
+{% elif active_tab == 'cadena' %}
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" class="detalle-grid">
+  <section class="detalle-panel">
+    <h3 class="detalle-panel__title">{% trans "Cadena de confianza" %}</h3>
+    {% if chain %}
+      {% for node in chain %}
+      <div class="detalle-chain__node" style="display:flex; align-items:center; gap:10px; padding:10px 0; padding-left:calc(({{ forloop.counter0 }}) * 18px); {% if not forloop.first %}border-top:1px solid var(--border-subtle);{% endif %}">
+        {% if forloop.last %}{% icon "lock" size=16 class="text-emerald-600" %}{% else %}{% icon "shield-check" size=16 %}{% endif %}
+        <span style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-primary); word-break:break-all;">{{ node }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      {% include "detalle/_empty.html" with icon="link" text="Sin cadena de confianza: el último chequeo no la registró." %}
+    {% endif %}
+  </section>
+
+  <section class="detalle-panel">
+    <h3 class="detalle-panel__title">{% trans "Subject Alternative Names" %}</h3>
+    {% if san %}
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      {% for name in san %}
+      <span class="forge-tag" style="font-family:var(--font-mono);">{{ name }}</span>
+      {% endfor %}
+    </div>
+    {% else %}
+      {% include "detalle/_empty.html" with icon="tag" text="Sin SAN registrados en el último chequeo." %}
+    {% endif %}
+  </section>
+</div>
+
+{# =========================================================== TÉCNICO #}
+{% elif active_tab == 'tecnico' %}
+<section class="detalle-panel">
+  <h3 class="detalle-panel__title">{% trans "Detalles técnicos" %}</h3>
+  {% if rows %}
+    {% for row in rows %}
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 0; {% if not forloop.first %}border-top:1px solid var(--border-subtle);{% endif %}">
+      <span style="width:160px; flex:none; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{{ row.label }}</span>
+      <span style="flex:1; font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-primary); word-break:break-all;">{{ row.value }}</span>
+    </div>
+    {% endfor %}
+  {% else %}
+    {% include "detalle/_empty.html" with icon="key-round" text="Sin detalles técnicos: este certificado no se ha chequeado todavía." %}
+  {% endif %}
+</section>
+
+{# =========================================================== HISTORIAL #}
+{% elif active_tab == 'historial' %}
+<section class="detalle-panel">
+  <h3 class="detalle-panel__title">{% trans "Evolución de días restantes" %}</h3>
+  {% if checks %}
+    {% if trend %}
+    <div style="margin-bottom:18px;">
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" style="width:100%; height:90px; display:block;" aria-hidden="true">
+        <polyline points="{{ trend.polyline }}" fill="none"
+                  stroke="var(--status-{{ cert.status|status_family }}-solid)" stroke-width="0.8"
+                  stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+      </svg>
+      <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:var(--text-micro); color:var(--text-tertiary); margin-top:2px;">
+        <span>{% blocktrans with min=trend.min %}mín · {{ min }} días{% endblocktrans %}</span>
+        <span>{% blocktrans with max=trend.max %}máx · {{ max }} días{% endblocktrans %}</span>
+      </div>
+    </div>
+    {% endif %}
+    {% comment %}
+    Historial real de chequeos como tabla ForgeDataTable ordenable/buscable.
+    Sin columnas no-ordenables (no hay checkbox/acciones/avatar aquí).
+    {% endcomment %}
+    <div data-forge-table data-forge-sortable data-page-size="8">
+      <div class="forge-table-scroll">
+        <table class="cf-data-source">
+          <thead>
+            <tr>
+              <th>{% trans "Fecha" %}</th>
+              <th>{% trans "Estado" %}</th>
+              <th class="detail-cell__th--num">{% trans "Días restantes" %}</th>
+              <th class="detail-cell__th--num">{% trans "Latencia" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in checks %}
+            <tr>
+              <td class="detail-cell__date">{{ h.checked_at|date:"d M Y · H:i" }}</td>
+              <td>{% include "components/_status_badge.html" with status=h.status label=h.get_status_display size="sm" %}</td>
+              <td class="detail-cell__num">{% if h.days_left != None %}{% blocktrans with days=h.days_left %}{{ days }} días{% endblocktrans %}{% else %}—{% endif %}</td>
+              <td class="detail-cell__num">{% if h.latency_ms != None %}{{ h.latency_ms }} ms{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+            <tr data-empty-row style="display:none;">
+              <td colspan="4" class="detail-cell__empty">{% trans "Sin coincidencias en el historial." %}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    {% include "detalle/_empty.html" with icon="history" text="Sin historial: este certificado no se ha chequeado todavía. Usa \"Probar ahora\"." %}
+  {% endif %}
+</section>
+
+{# =========================================================== ALERTAS #}
+{% elif active_tab == 'alertas' %}
+<section class="detalle-panel">
+  <h3 class="detalle-panel__title">{% trans "Alertas y notificaciones" %}</h3>
+  {% if alerts %}
+    {% for a in alerts %}
+    <div style="display:flex; align-items:center; gap:14px; padding:12px 0; {% if not forloop.first %}border-top:1px solid var(--border-subtle);{% endif %} {% if a.is_archived %}opacity:0.6;{% endif %} flex-wrap:wrap;">
+      {% include "components/_status_badge.html" with status=a.severity label=a.get_severity_display size="sm" %}
+      <span style="flex:1; min-width:200px; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-primary);">{{ a.message }}</span>
+      {% if a.is_archived %}<span class="forge-tag forge-tag--off">{% trans "Archivada" %}</span>{% endif %}
+      <span class="forge-tag">{% icon a.channel_icon size=12 %} {{ a.channel_label }}</span>
+      <span style="font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary); white-space:nowrap;">{{ a.created_at|date:"d M Y · H:i" }}</span>
+    </div>
+    {% endfor %}
+  {% else %}
+    {% include "detalle/_empty.html" with icon="bell-off" text="Sin alertas para este certificado." %}
+  {% endif %}
+</section>
+{% endif %}

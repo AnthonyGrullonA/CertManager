@@ -1,0 +1,91 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | CertManager{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+<link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v=2">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}" style="display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
+    <span style="display:inline-flex; color:#dc2626;">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 2.5L26.5 6.4C27.1 6.6 27.5 7.2 27.5 7.8V15.6C27.5 22.4 22.7 27.6 16.6 29.7C16.2 29.8 15.8 29.8 15.4 29.7C9.3 27.6 4.5 22.4 4.5 15.6V7.8C4.5 7.2 4.9 6.6 5.5 6.4L16 2.5Z" fill="currentColor"/>
+        <path d="M10.5 16.2L14.3 20L21.7 12.2" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span style="color:#ffffff; font-weight:700;">Cert<span style="color:#fca5a5;">Manager</span> · Administración</span>
+  </a>
+</div>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+/* Tema del admin alineado a la plantilla principal (Forge UI). Se aplica en
+   modo claro, oscuro y automático para que la marca sea consistente. */
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --primary: #dc2626;            /* rojo de marca */
+  --secondary: #b91c1c;
+  --accent: #dc2626;
+  --primary-fg: #ffffff;
+
+  --body-fg: #0f172a;            /* slate-900 */
+  --body-bg: #f8fafc;           /* slate-50 */
+  --body-quiet-color: #64748b;  /* slate-500 */
+  --body-loud-color: #0f172a;
+
+  --header-color: #ffffff;
+  --header-branding-color: #ffffff;
+  --header-bg: #0f172a;          /* slate-900 */
+  --header-link-color: #ffffff;
+
+  --breadcrumbs-fg: #cbd5e1;
+  --breadcrumbs-link-fg: #ffffff;
+  --breadcrumbs-bg: #1e293b;     /* slate-800 */
+
+  --link-fg: #2563eb;            /* azul de enlace */
+  --link-hover-color: #1d4ed8;
+  --link-selected-fg: #dc2626;
+
+  --hairline-color: #e2e8f0;     /* slate-200 */
+  --border-color: #e2e8f0;
+
+  --button-fg: #ffffff;
+  --button-bg: #dc2626;
+  --button-hover-bg: #b91c1c;
+  --default-button-bg: #475569;  /* slate-600 (acción secundaria) */
+  --default-button-hover-bg: #334155;
+  --close-button-bg: #64748b;
+  --close-button-hover-bg: #475569;
+  --delete-button-bg: #b91c1c;
+  --delete-button-hover-bg: #991b1b;
+
+  --object-tools-bg: #dc2626;
+  --object-tools-hover-bg: #b91c1c;
+
+  --selected-bg: #f1f5f9;
+  --selected-row: #fef2f2;       /* rojo muy suave */
+  --darkened-bg: #f1f5f9;
+
+  --message-success-bg: #dcfce7;
+  --message-error-bg: #fee2e2;
+  --message-warning-bg: #fef3c7;
+}
+
+body, #content, .module, .form-row,
+input, select, textarea, button, .button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+#site-name a { font-weight: 700; letter-spacing: -0.01em; }
+#header { box-shadow: 0 1px 0 rgba(15, 23, 42, .35); }
+.button, input[type=submit], input[type=button],
+.submit-row input, a.button { border-radius: 8px; }
+.module h2, .module caption { border-radius: 8px 8px 0 0; }
+div.breadcrumbs { font-weight: 500; }
+.object-tools a { border-radius: 8px; }
+</style>
+{% endblock %}

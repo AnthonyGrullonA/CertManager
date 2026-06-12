@@ -1,0 +1,10 @@
+{% load forge_icons %}{% load i18n %}
+{% comment %}Icono + tono (familia de estado) + código + título + mensaje.{% endcomment %}
+<div role="alert" class="card" style="display:flex;flex-direction:column;gap:13px;text-align:center;align-items:center;padding:28px 24px">
+  <span style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:var(--radius-pill);background:var(--status-{{ meta.tone }}-bg);color:var(--status-{{ meta.tone }}-fg);border:1px solid var(--status-{{ meta.tone }}-bg-soft)">{% icon meta.icon size=26 %}</span>
+  {% if meta.http_status >= 400 %}
+  <span style="font-family:var(--font-mono);font-size:var(--text-label);letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)">{% blocktrans with code=meta.http_status %}Error {{ code }}{% endblocktrans %}</span>
+  {% endif %}
+  <h1 style="margin:0;font-size:var(--text-h2);font-weight:600;letter-spacing:var(--tracking-snug);color:var(--text-primary)">{{ meta.title }}</h1>
+  <p style="margin:0;font-size:var(--text-body);color:var(--text-secondary);max-width:380px;line-height:1.6">{{ meta.message }}</p>
+</div>

@@ -1,0 +1,8 @@
+# Dependencias para la imagen Docker (stack de observabilidad).
+# Sin índices privados: base + gunicorn + driver MySQL (estándar regulatorio).
+# NO incluye obsforge (índice privado; opcional vía build-arg PIP_EXTRA_INDEX_URL)
+# ni weasyprint (el PDF usa reportlab de base.txt).
+# mysqlclient necesita deps de sistema en build-time (ver Dockerfile).
+-r base.txt
+gunicorn>=21.2
+mysqlclient>=2.2         # driver MySQL (estándar corporativo/regulatorio)

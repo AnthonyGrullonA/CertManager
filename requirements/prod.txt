@@ -1,0 +1,14 @@
+-r base.txt
+
+# Producción
+mysqlclient>=2.2          # driver MySQL (estándar corporativo; deps de sistema en Dockerfile)
+gunicorn>=21.2
+# whitenoise se declara en base.txt (middleware activo en todos los entornos)
+# Observabilidad corporativa (índice privado). OPCIONAL: el middleware solo se
+# activa si el paquete está instalado (ver config/settings/base.py). Un instalable
+# mínimo (local/standalone) no la necesita. Si tu índice no la tiene, comentá esta línea.
+obsforge[django]==0.1.3  # observabilidad/logging estructurado stdout-first
+# Exportes de reportes
+# WeasyPrint (PDF con HTML/CSS) — NO instalar aún: requiere deps de sistema
+# (pango/cairo/gdk-pixbuf). Se cablea en el chunk de Reportes (paso 13).
+weasyprint>=62.0          # PDF de reportes (deps de sistema; chunk de Reportes)

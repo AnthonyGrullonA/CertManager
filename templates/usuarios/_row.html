@@ -1,0 +1,72 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Fila de la DataTable de usuarios (espejo de Usuarios.jsx → fila). Se re-renderiza
+sola tras activar/desactivar (hx-swap outerHTML del propio <tr>).
+Variables: u (User con memberships prefetcheadas).
+{% endcomment %}
+<tr id="user-row-{{ u.pk }}"{% if oob %} hx-swap-oob="true"{% endif %}{% if not u.is_active %} class="is-muted"{% endif %} data-row-open data-href="{% url 'user-detail' u.pk %}" style="cursor:pointer;">
+  <td>
+    <div class="forge-userline">
+      {% include "components/_avatar.html" with name=u.get_full_name email=u.email avatar_choice=u.preferences.avatar_choice size="md" only %}
+      <div class="forge-userline__meta">
+        <span class="forge-userline__name">{{ u.get_full_name|default:u.email }}</span>
+        <span class="forge-userline__mail">{{ u.email }}</span>
+      </div>
+    </div>
+  </td>
+
+  {% comment %} Rol global (chip). is_owner/is_staff NUNCA editables aquí. {% endcomment %}
+  <td>
+    {% if u.is_owner %}
+      <span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} Owner</span>
+    {% elif u.is_staff %}
+      <span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} Admin</span>
+    {% else %}
+      <span class="forge-tag">{% trans "Miembro" %}</span>
+    {% endif %}
+  </td>
+
+  {% comment %} Grupos {% endcomment %}
+  <td>
+    <span class="forge-userline__groups">
+      {% for m in u.memberships.all %}{{ m.team.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="forge-umuted">—</span>{% endfor %}
+    </span>
+  </td>
+
+  {% comment %} Último acceso {% endcomment %}
+  <td class="forge-umuted cf-cell__nowrap">
+    {% translate "Nunca" as t_never %}{{ u.last_login|date:"d M Y, H:i"|default:t_never }}
+  </td>
+
+  {% comment %} Estado {% endcomment %}
+  <td>
+    <span class="forge-status-dot{% if u.is_active %} is-active{% endif %}">
+      <span class="forge-status-dot__dot" aria-hidden="true"></span>
+      {% if u.is_active %}{% trans "Activo" %}{% else %}{% trans "Inactivo" %}{% endif %}
+    </span>
+  </td>
+
+  {% comment %} Acciones de fila {% endcomment %}
+  <td class="cf-cell__td--right" data-no-open>
+    <details class="forge-rowmenu" data-forge-menu>
+      <summary aria-label="Opciones de {{ u.email }}">
+        {% icon "ellipsis" size=16 %}
+      </summary>
+      <div class="forge-menu--row" role="menu">
+        <button type="button" class="forge-umenu__item"
+                hx-post="{% url 'user-toggle-active' u.pk %}"
+                hx-target="#user-row-{{ u.pk }}"
+                hx-swap="outerHTML">
+          {% if u.is_active %}{% icon "circle-x" size=16 %} {% trans "Desactivar" %}{% else %}{% icon "circle-check" size=16 %} {% trans "Activar" %}{% endif %}
+        </button>
+        <button type="button" class="forge-umenu__item" role="menuitem"
+                hx-get="{% url 'user-edit' u.pk %}"
+                hx-target="#modal-root"
+                hx-swap="innerHTML">
+          {% icon "pencil" size=16 %} {% trans "Editar" %}
+        </button>
+      </div>
+    </details>
+  </td>
+</tr>

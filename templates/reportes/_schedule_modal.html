@@ -1,0 +1,110 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Modal HTMX del CRUD de reportes programados. Se inyecta en #modal-root. Al
+enviar con éxito, la vista devuelve el parcial OOB de la lista (#scheduled-list)
+y cierra el modal vaciando #modal-root (hx-on::after-request). Multi-formato:
+checkboxes de formato. Hora de envío: input type=time.
+
+Variables: form, action_url, title, submit_label.
+{% endcomment %}
+<div class="forge-modal" data-forge-modal>
+  <div class="forge-modal__scrim" data-forge-modal-close></div>
+  <div class="forge-modal__panel" role="dialog" aria-modal="true" aria-label="{{ title }}" style="width: 520px;">
+    <form hx-post="{{ action_url }}"
+          hx-target="#scheduled-list"
+          hx-swap="outerHTML"
+          hx-on::after-request="if(event.detail.successful && !event.detail.xhr.getResponseHeader('HX-Reswap')){ document.getElementById('modal-root').innerHTML=''; window.cfToast && window.cfToast('ok','Reporte programado','Se enviará según la frecuencia elegida.'); }">
+      <div class="forge-modal__header">
+        <div class="min-w-0 flex-1">
+          <div class="forge-modal__title">{{ title }}</div>
+          <div class="forge-modal__subtitle">{% trans "Envíos recurrentes por correo a tu equipo" %}</div>
+        </div>
+        <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>{% icon "x" size=18 %}</button>
+      </div>
+
+      <div class="forge-modal__body flex flex-col gap-4">
+        {% if form.non_field_errors %}
+        <div class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label" for="{{ form.name.id_for_label }}">{% trans "Nombre" %}</label>
+          {{ form.name }}
+          {% for e in form.name.errors %}<span class="rep-modal-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label" for="{{ form.template.id_for_label }}">{% trans "Plantilla" %}</label>
+          {{ form.template }}
+        </div>
+
+        <div class="rep-modal-grid">
+          <div class="rep-modal-field">
+            <label class="rep-modal-field__label" for="{{ form.frequency.id_for_label }}">{% trans "Frecuencia" %}</label>
+            {{ form.frequency }}
+          </div>
+          <div class="rep-modal-field">
+            <label class="rep-modal-field__label" for="{{ form.send_time.id_for_label }}">{% trans "Hora de envío" %}</label>
+            {{ form.send_time }}
+            {% for e in form.send_time.errors %}<span class="rep-modal-error">{{ e }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="rep-modal-grid">
+          <div class="rep-modal-field">
+            <label class="rep-modal-field__label" for="{{ form.start_date.id_for_label }}">{% trans "Fecha de inicio" %}</label>
+            {{ form.start_date }}
+            <span class="rep-modal-field__hint">{% trans "Ancla del calendario. Para «cada N días» la cuenta arranca aquí; para «el día 1» es opcional." %}</span>
+            {% for e in form.start_date.errors %}<span class="rep-modal-error">{{ e }}</span>{% endfor %}
+          </div>
+          <div class="rep-modal-field">
+            <label class="rep-modal-field__label" for="{{ form.interval_days.id_for_label }}">{% trans "Intervalo (días)" %}</label>
+            {{ form.interval_days }}
+            <span class="rep-modal-field__hint">{% trans "Solo para «Cada N días» (p.ej. 15 o 30)." %}</span>
+            {% for e in form.interval_days.errors %}<span class="rep-modal-error">{{ e }}</span>{% endfor %}
+          </div>
+        </div>
+        <p class="rep-modal-field__hint" style="margin-top:-6px;">
+          {% icon "info" size=13 %} {% trans "Si la fecha que toca cae fin de semana, el envío se difiere al lunes." %}
+        </p>
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label" for="{{ form.team.id_for_label }}">{% trans "Grupo" %}</label>
+          {{ form.team }}
+        </div>
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label" for="{{ form.email_template.id_for_label }}">{% trans "Plantilla de correo" %}</label>
+          {{ form.email_template }}
+          <span class="rep-modal-field__hint">{% trans "Vacío = texto plano predeterminado" %}</span>
+        </div>
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label" for="{{ form.recipients_text.id_for_label }}">{% trans "Destinatarios" %}</label>
+          {{ form.recipients_text }}
+          <span class="rep-modal-field__hint">{{ form.recipients_text.help_text }}</span>
+        </div>
+
+        <div class="rep-modal-field">
+          <label class="rep-modal-field__label">{% trans "Formato(s) adjunto(s)" %}</label>
+          <div class="rep-modal-formats">
+            {% for cb in form.formats %}
+            <label class="rep-modal-check">{{ cb.tag }} {{ cb.choice_label }}</label>
+            {% endfor %}
+          </div>
+          {% for e in form.formats.errors %}<span class="rep-modal-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <label class="rep-modal-check">
+          {{ form.is_active }} {% trans "Activo" %}
+        </label>
+      </div>
+
+      <div class="forge-modal__footer">
+        <button type="button" class="btn-ghost" data-forge-modal-close>{% trans "Cancelar" %}</button>
+        <button type="submit" class="btn-primary">{% icon "clock" size=16 %} {{ submit_label }}</button>
+      </div>
+    </form>
+  </div>
+</div>

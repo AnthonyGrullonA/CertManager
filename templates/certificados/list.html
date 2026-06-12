@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load forge_icons forge_ui i18n %}
+{% comment %}
+Pantalla Certificados (Forge UI): PageHeader con Exportar / Nuevo certificado,
+FilterBar con búsqueda en vivo (HTMX), chips removibles, BulkBar, tabla global,
+modal de alta (#modal-root) y drawer de prueba (#drawer-root).
+{% endcomment %}
+{% block title %}{% trans "Certificados" %} · CertManager{% endblock %}
+
+{% block content %}
+{% url 'certificate-list' as list_url %}
+<div style="padding:28px; max-width:var(--content-max); margin:0 auto;" id="certs-screen">
+
+  {# ---------- PageHeader ---------- #}
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight">{% trans "Certificados" %}</h1>
+      <p class="text-sm text-slate-500" id="certs-subtitle">
+        {% if chips %}{% blocktrans with filtered=filtered_count total=total_count %}{{ filtered }} de {{ total }} certificados{% endblocktrans %}{% else %}{% blocktrans count total_count=total_count with total=total_count %}{{ total }} certificado monitoreado{% plural %}{{ total }} certificados monitoreados{% endblocktrans %}{% endif %}{% if truncated %} · <span class="text-amber-600">{% blocktrans with n=rendered_count %}mostrando {{ n }}; refiná los filtros para ver el resto{% endblocktrans %}</span>{% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a class="btn-outline" href="{% url 'cert-export' %}?{{ request.GET.urlencode }}">
+        {% icon "download" size=16 %} {% trans "Exportar" %}
+      </a>
+      {% if can_create %}
+      <button type="button" class="btn-primary"
+              hx-get="{% url 'cert-create' %}"
+              hx-target="#modal-root" hx-swap="innerHTML">
+        {% icon "plus" size=16 %} {% trans "Nuevo certificado" %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ---------- FilterBar ---------- #}
+  <form id="cert-filter" class="flex items-center gap-2.5 mb-3.5 flex-wrap"
+        hx-get="{{ list_url }}" hx-target="#cert-rows" hx-swap="innerHTML"
+        hx-trigger="submit, keyup changed delay:300ms from:input[name='q']"
+        hx-push-url="true">
+    <div style="flex:1; min-width:240px; max-width:360px;">
+      <input type="search" name="q" value="{{ request.GET.q }}"
+             class="input" placeholder="{% trans 'Buscar dominio…' %}"
+             aria-label="{% trans 'Buscar dominio' %}">
+    </div>
+    <select name="status" class="input" hx-trigger="change" hx-get="{{ list_url }}"
+            hx-target="#cert-rows" hx-include="#cert-filter" aria-label="{% trans 'Estado' %}">
+      <option value="">{% trans "Todos los estados" %}</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if value == request.GET.status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <div style="flex:1;"></div>
+  </form>
+
+  {# ---------- Chips de filtros activos (removibles) ---------- #}
+  {% if chips %}
+  <div class="flex items-center gap-2 flex-wrap mb-3.5" id="cert-chips">
+    <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Filtros:" %}</span>
+    {% for chip in chips %}
+    <a class="forge-chip" href="{{ list_url }}{{ chip.remove_qs }}">
+      <span class="forge-chip__label">{{ chip.label }}:</span>
+      <span class="forge-chip__value">{{ chip.value }}</span>
+      <span class="forge-chip__x" aria-label="{% blocktrans with label=chip.label %}Quitar filtro {{ label }}{% endblocktrans %}">{% icon "x" size=13 %}</span>
+    </a>
+    {% endfor %}
+    <a href="{{ list_url }}"
+       style="border:none; background:transparent; color:var(--text-link); font-family:var(--font-sans); font-size:var(--text-sm); cursor:pointer;">{% trans "Limpiar" %}</a>
+  </div>
+  {% endif %}
+
+  {# ---------- BulkBar (aparece con selección; solo si puede editar) ---------- #}
+  {% if can_create %}
+  <div id="bulk-bar" class="cert-bulkbar" hidden
+       style="display:none; align-items:center; gap:12px; padding:10px 14px; background:var(--brand-50); border:1px solid var(--brand-200); border-radius:var(--radius-md); margin-bottom:14px;">
+    <span style="font-family:var(--font-sans); font-size:var(--text-sm); font-weight:600; color:var(--text-brand);">
+      <span id="bulk-count">0</span> {% trans "seleccionados" %}
+    </span>
+    <span style="width:1px; height:20px; background:var(--brand-200);"></span>
+    <button type="button" class="btn-ghost" data-bulk-action="test"
+            hx-post="{% url 'cert-bulk' %}" hx-target="#toast-host" hx-swap="beforeend"
+            hx-include="[name='ids']:checked" hx-vals='{"action":"test"}'>
+      {% icon "play" size=15 %} {% trans "Probar" %}
+    </button>
+    <details data-forge-menu style="position:relative;">
+      <summary class="btn-ghost" style="list-style:none; cursor:pointer;">
+        {% icon "layers" size=15 %} {% trans "Asignar a grupo" %}
+      </summary>
+      <div style="position:absolute; top:calc(100% + 6px); left:0; z-index:30; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-md); min-width:200px; padding:6px;">
+        {% for g in groups %}
+        <button type="button" class="forge-menu__item"
+                style="display:block; width:100%; text-align:left; padding:8px 10px; border:none; background:transparent; cursor:pointer; font-family:var(--font-sans); font-size:var(--text-sm); border-radius:var(--radius-sm);"
+                hx-post="{% url 'cert-bulk' %}" hx-target="#toast-host" hx-swap="beforeend"
+                hx-include="[name='ids']:checked" hx-vals='{"action":"assign","team":"{{ g.id }}"}'>
+          {{ g.name }}
+        </button>
+        {% empty %}
+        <span style="display:block; padding:8px 10px; font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Sin grupos disponibles" %}</span>
+        {% endfor %}
+      </div>
+    </details>
+    <details data-forge-menu style="position:relative;">
+      <summary class="btn-ghost" style="list-style:none; cursor:pointer;">
+        {% icon "plus" size=15 %} {% trans "Agregar a grupo" %}
+      </summary>
+      <div style="position:absolute; top:calc(100% + 6px); left:0; z-index:30; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); box-shadow:var(--shadow-md); min-width:220px; padding:6px;">
+        <span style="display:block; padding:4px 10px; font-size:var(--text-micro); color:var(--text-tertiary);">{% trans "Suma el grupo como adicional (no mueve el dueño)" %}</span>
+        {% for g in groups %}
+        <button type="button" class="forge-menu__item"
+                style="display:block; width:100%; text-align:left; padding:8px 10px; border:none; background:transparent; cursor:pointer; font-family:var(--font-sans); font-size:var(--text-sm); border-radius:var(--radius-sm);"
+                hx-post="{% url 'cert-bulk' %}" hx-target="#toast-host" hx-swap="beforeend"
+                hx-include="[name='ids']:checked" hx-vals='{"action":"add_group","team":"{{ g.id }}"}'>
+          {{ g.name }}
+        </button>
+        {% empty %}
+        <span style="display:block; padding:8px 10px; font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Sin grupos disponibles" %}</span>
+        {% endfor %}
+      </div>
+    </details>
+    <button type="button" class="btn-ghost" data-bulk-action="delete"
+            hx-post="{% url 'cert-bulk' %}" hx-target="#modal-root" hx-swap="innerHTML"
+            hx-include="[name='ids']:checked" hx-vals='{"action":"delete"}'>
+      {% icon "trash-2" size=15 %} {% trans "Eliminar" %}
+    </button>
+    <div style="flex:1;"></div>
+    <button type="button" class="forge-modal__close" id="bulk-clear" aria-label="{% trans 'Limpiar selección' %}">
+      {% icon "x" size=16 %}
+    </button>
+  </div>
+  {% endif %}
+
+  {# ---------- DataTable ---------- #}
+  {% comment %}
+  El wrapper data-forge-table envuelve el bloque que PERSISTE (la tabla completa),
+  no el <tbody> que HTMX reemplaza con los filtros en vivo. El adapter global
+  reinicializa el control tras htmx:afterSwap.
+
+  data-forge-sortable habilita orden ForgeDataTable.
+  No se añade buscador client-side: la FilterBar de arriba ya filtra server-side.
+  Las columnas de selección (checkbox), responsables (avatares) y acciones llevan
+  data-no-sort para que no sean ordenables.
+  {% endcomment %}
+  <section class="forge-table-card">
+    <div data-forge-table data-forge-sortable data-page-size="8">
+      <div class="forge-table-scroll">
+        <table class="cf-data-source" style="min-width:980px;">
+          <thead>
+            <tr>
+              <th data-no-sort style="width:38px; padding-left:16px; text-align:left;">
+                <input type="checkbox" id="select-all" aria-label="{% trans 'Seleccionar todo' %}"
+                       style="accent-color:var(--action-primary); width:16px; height:16px;">
+              </th>
+              <th>{% trans "Estado" %}</th>
+              <th>{% trans "Dominio" %}</th>
+              <th>{% trans "Grupo" %}</th>
+              <th>{% trans "Ubicación" %}</th>
+              <th style="width:180px;">{% trans "Días restantes" %}</th>
+              <th>{% trans "Vence el" %}</th>
+              <th>{% trans "Emisor" %}</th>
+              <th>{% trans "Últ. chequeo" %}</th>
+              <th data-no-sort>{% trans "Resp." %}</th>
+              <th data-no-sort style="text-align:right;"></th>
+            </tr>
+          </thead>
+          <tbody id="cert-rows"
+                 hx-get="{{ list_url }}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                 hx-trigger="cf:certs-changed from:body"
+                 hx-swap="innerHTML">
+            {% include "certificados/_rows.html" with certificates=certificates %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var screen = document.getElementById("certs-screen");
+  if (!screen) return;
+
+  // --- Selección: checkboxes de fila + select-all + BulkBar ---
+  function rows() { return Array.prototype.slice.call(document.querySelectorAll(".cert-check")); }
+  function selected() { return rows().filter(function (c) { return c.checked; }); }
+
+  function syncBulk() {
+    var bar = document.getElementById("bulk-bar");
+    var n = selected().length;
+    var countEl = document.getElementById("bulk-count");
+    if (countEl) countEl.textContent = n;
+    if (bar) {
+      bar.hidden = n === 0;
+      bar.style.display = n === 0 ? "none" : "flex";
+    }
+    var all = document.getElementById("select-all");
+    var total = rows().length;
+    if (all) {
+      all.checked = total > 0 && n === total;
+      all.indeterminate = n > 0 && n < total;
+    }
+  }
+
+  document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "select-all") {
+      var on = e.target.checked;
+      rows().forEach(function (c) { c.checked = on; });
+      syncBulk();
+    } else if (e.target && e.target.classList && e.target.classList.contains("cert-check")) {
+      syncBulk();
+    }
+  });
+
+  var clearBtn = document.getElementById("bulk-clear");
+  if (clearBtn) clearBtn.addEventListener("click", function () {
+    rows().forEach(function (c) { c.checked = false; });
+    syncBulk();
+  });
+
+  // Re-sincroniza tras recargar las filas por HTMX.
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    if (e.target && e.target.id === "cert-rows") syncBulk();
+  });
+
+  // Las filas seleccionadas se envían en el bulk como [name='ids']:checked.
+  // Damos a cada checkbox el name esperado por hx-include.
+  function nameChecks() { rows().forEach(function (c) { c.name = "ids"; }); }
+  nameChecks();
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    if (e.target && e.target.id === "cert-rows") nameChecks();
+  });
+
+  syncBulk();
+
+  // --- Click en la fila -> ver el detalle del certificado ---
+  // Ignora clics en checkbox / acciones (celdas con data-no-open) y en controles.
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-no-open]")) return;
+    if (e.target.closest("input,button,a,details,summary,label")) return;
+    var tr = e.target.closest("tr[data-row-open][data-href]");
+    if (tr) window.location.href = tr.getAttribute("data-href");
+  });
+})();
+</script>
+{% endblock %}

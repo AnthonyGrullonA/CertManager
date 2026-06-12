@@ -1,0 +1,13 @@
+{% comment %}
+Respuesta HTMX al cambiar de tab (o tras cf:alerts-changed). Sirve el mismo
+cuerpo de filas que _rows.html (que va dentro del <tbody id="alert-rows">) y,
+ADEMÁS, re-renderiza el <nav id="alert-tabs"> fuera de banda (hx-swap-oob).
+
+Por qué: el swap del tab solo reemplaza el innerHTML del <tbody>, así que el
+<nav> nunca se actualizaría por sí solo y la marca is-active quedaría pegada en
+la tab cargada al inicio (de ahí "se sombrean todas / no transiciona"). HTMX
+extrae el elemento con hx-swap-oob ANTES de inyectar el resto en el target, de
+modo que el nav se intercambia aparte y las filas entran limpias en el tbody.
+{% endcomment %}
+{% include "alerts/_tabs.html" with oob=True %}
+{% include "alerts/_rows.html" %}

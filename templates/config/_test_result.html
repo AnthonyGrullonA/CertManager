@@ -1,0 +1,5 @@
+{% comment %}
+Resultado de 'Probar envío' / 'Probar webhook'. Solo empuja un toast OOB al
+#toast-host (no reemplaza el panel). Recibe: tone, title, msg.
+{% endcomment %}
+{% include "partials/_toast.html" with tone=tone title=title message=msg %}

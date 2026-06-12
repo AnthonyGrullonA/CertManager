@@ -1,0 +1,29 @@
+{% load forge_icons %}
+{% load i18n %}
+<tr>
+  <td>
+    <button type="button" title="{% trans 'Ver cómo se ve' %}"
+            hx-get="{% url 'mailtemplate-detail-preview' t.pk %}" hx-target="#modal-root" hx-swap="innerHTML"
+            style="background:none;border:none;padding:0;cursor:pointer;font:inherit;font-weight:600;color:var(--text-link);text-align:left;">
+      {{ t.name }}
+    </button>
+  </td>
+  <td><span class="badge badge--none badge--sm">{{ t.get_kind_display }}</span></td>
+  <td>{{ t.team.name|default:"—" }}</td>
+  <td>{% if t.is_default %}<span class="badge badge--ok badge--sm">{% trans "Predeterminada" %}</span>{% else %}—{% endif %}</td>
+  <td>{% if t.is_active %}<span class="badge badge--ok badge--sm">{% trans "Activa" %}</span>{% else %}<span class="badge badge--none badge--sm">{% trans "Inactiva" %}</span>{% endif %}</td>
+  <td style="text-align:right; white-space:nowrap;">
+    <button type="button" class="btn-ghost btn-sm" aria-label="{% trans 'Vista previa' %}"
+            hx-get="{% url 'mailtemplate-detail-preview' t.pk %}" hx-target="#modal-root" hx-swap="innerHTML">{% icon "eye" size=15 %}</button>
+    {% if t.user_can_edit %}
+      <a class="btn-ghost btn-sm" href="{% url 'mailtemplate-edit' t.pk %}" aria-label="{% trans 'Editar' %}">{% icon "pencil" size=15 %}</a>
+      <form method="post" action="{% url 'mailtemplate-delete' t.pk %}" style="display:inline;"
+            onsubmit="return confirm('¿Eliminar la plantilla «{{ t.name|escapejs }}»?');">
+        {% csrf_token %}
+        <button class="btn-ghost btn-sm" type="submit" aria-label="{% trans 'Eliminar' %}">{% icon "trash-2" size=15 %}</button>
+      </form>
+    {% else %}
+      <span class="badge badge--none badge--sm">{% trans "Solo uso" %}</span>
+    {% endif %}
+  </td>
+</tr>

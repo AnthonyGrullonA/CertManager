@@ -1,0 +1,63 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Región de miembros de un grupo (se intercambia en #group-members tras agregar /
+quitar / cambiar rol). Variables: team, memberships, can_manage, available_users,
+roles, request_user_id.
+{% endcomment %}
+{% if can_manage %}
+<form hx-post="{% url 'team-member-add' team.id %}"
+      hx-target="#group-members" hx-swap="innerHTML"
+      style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle);">
+  {% csrf_token %}
+  <div style="flex:1; min-width:160px;">
+    <label class="block text-sm font-medium mb-1">{% trans "Agregar miembro" %}</label>
+    <select name="user" class="input" required>
+      <option value="">{% trans "Selecciona usuario…" %}</option>
+      {% for u in available_users %}
+      <option value="{{ u.id }}">{{ u.get_full_name|default:u.email }} · {{ u.email }}</option>
+      {% empty %}
+      <option value="" disabled>{% trans "No hay usuarios disponibles" %}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div style="width:160px;">
+    <label class="block text-sm font-medium mb-1">{% trans "Rol" %}</label>
+    <select name="role" class="input">
+      {% for value, label in roles %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn-primary">{% icon "plus" size=16 %} {% trans "Agregar" %}</button>
+</form>
+{% endif %}
+
+<div style="display:flex; flex-direction:column;">
+  {% for m in memberships %}
+  <div style="display:flex; align-items:center; gap:12px; padding:10px 2px; {% if not forloop.last %}border-bottom:1px solid var(--border-subtle);{% endif %}">
+    {% include "components/_avatar.html" with name=m.user.get_full_name email=m.user.email avatar_choice=m.user.preferences.avatar_choice size="md" only %}
+    <div style="flex:1; min-width:0;">
+      <a href="{% url 'user-detail' m.user_id %}" style="color:var(--text-primary); font-weight:600; font-size:var(--text-sm); text-decoration:none;">{{ m.user.get_full_name|default:m.user.email }}</a>
+      <div style="font-family:var(--font-mono); font-size:var(--text-micro); color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ m.user.email }}</div>
+    </div>
+    {% if can_manage %}
+    <select class="input" style="width:158px; flex:none;"
+            name="role" hx-post="{% url 'team-member-role' team.id m.user_id %}"
+            hx-target="#group-members" hx-swap="innerHTML" hx-trigger="change"
+            aria-label="{% blocktrans with email=m.user.email %}Rol de {{ email }}{% endblocktrans %}">
+      {% for value, label in roles %}<option value="{{ value }}"{% if value == m.role %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="button" class="forge-modal__close" aria-label="{% trans 'Quitar del grupo' %}" title="{% trans 'Quitar del grupo' %}"
+            hx-post="{% url 'team-member-remove' team.id m.user_id %}"
+            hx-target="#group-members" hx-swap="innerHTML"
+            hx-confirm="{% blocktrans with name=m.user.get_full_name|default:m.user.email team_name=team.name %}¿Quitar a {{ name }} del grupo {{ team_name }}?{% endblocktrans %}">
+      {% icon "trash-2" size=16 %}
+    </button>
+    {% else %}
+    <span class="forge-tag{% if m.role == 'ADMIN' %} forge-tag--brand{% endif %}">{{ m.get_role_display }}</span>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div style="color:var(--text-tertiary); font-size:var(--text-sm); padding:6px 2px;">{% trans "Este grupo no tiene miembros todavía." %}</div>
+  {% endfor %}
+</div>
+{% if oob %}<span id="group-member-count" hx-swap-oob="true">{{ memberships|length }}</span>{% endif %}

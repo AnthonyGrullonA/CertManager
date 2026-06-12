@@ -1,0 +1,74 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Modal HTMX "Nuevo grupo" (espejo de KitModal en Grupos.jsx). Se inyecta en
+#modal-root. El form hace POST a team-create con hx-target="#modal-root":
+  - éxito -> respuesta vacía cierra el modal + fila OOB + toast (ver _row_created);
+  - inválido (422) -> re-renderiza este modal con errores.
+Variable: form (TeamForm).
+{% endcomment %}
+<div class="forge-modal" data-forge-modal>
+  <div class="forge-modal__scrim" data-forge-modal-close></div>
+  <form class="forge-modal__panel"
+        method="post"
+        hx-post="{% url 'team-create' %}"
+        hx-target="#modal-root"
+        hx-swap="innerHTML"
+        role="dialog" aria-modal="true" aria-label="{% trans 'Nuevo grupo' %}"
+        style="width:480px;">
+    {% csrf_token %}
+    <div class="forge-modal__header">
+      <div class="min-w-0 flex-1">
+        <div class="forge-modal__title">{% trans "Nuevo grupo" %}</div>
+        <div class="forge-modal__subtitle">{% trans "Define el equipo y sus valores por defecto" %}</div>
+      </div>
+      <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>
+        {% icon "x" size=18 %}
+      </button>
+    </div>
+
+    <div class="forge-modal__body">
+      {% if form.non_field_errors %}
+        <div class="mb-3" style="color:var(--status-exp-solid); font-size:var(--text-sm);">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Nombre del grupo" %}</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.name.errors|join:" " }}</div>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Descripción" %}</label>
+          {{ form.description }}
+        </div>
+        <div>
+          <label for="{{ form.admin.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Admin responsable" %}</label>
+          {{ form.admin }}
+        </div>
+        <div>
+          <label for="{{ form.default_email.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Correo por defecto" %}</label>
+          {{ form.default_email }}
+          <p style="margin:4px 0 0; font-size:var(--text-micro); color:var(--text-tertiary);">{{ form.default_email.help_text }}</p>
+          {% if form.default_email.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.default_email.errors|join:" " }}</div>{% endif %}
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label for="{{ form.default_threshold_days.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Umbral por defecto" %}</label>
+            {{ form.default_threshold_days }}
+          </div>
+          <div>
+            <label for="{{ form.default_check_interval.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Frecuencia" %}</label>
+            {{ form.default_check_interval }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="forge-modal__footer">
+      <button type="button" class="btn-ghost" data-forge-modal-close>{% trans "Cancelar" %}</button>
+      <button type="submit" class="btn-primary">{% trans "Crear grupo" %}</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Detalle de un grupo (overview + gestión de miembros inline).
+Visible para miembros del grupo y el Owner. La gestión (agregar/quitar/cambiar
+rol) la ve solo Owner o Admin del grupo (can_manage). La región de miembros
+(#group-members) se intercambia vía HTMX tras cada acción.
+Variables: team (decorado), memberships, can_manage, available_users, roles,
+request_user_id, certificates.
+{% endcomment %}
+{% block title %}{{ team.name }} · Grupos · CertManager{% endblock %}
+
+{% block content %}
+<div id="team-detalle"
+     hx-trigger="cf:team-updated from:body"
+     hx-get="{% url 'team-detail' team.id %}"
+     hx-target="#team-detalle" hx-select="#team-detalle" hx-swap="outerHTML" hx-disinherit="*"
+     style="padding:28px; max-width:1120px; margin:0 auto;">
+
+  {# ---------- Breadcrumb ---------- #}
+  <nav style="font-size:var(--text-sm); margin-bottom:14px;">
+    <a href="{% url 'team-list' %}" style="color:var(--text-link); text-decoration:none;">{% trans "Grupos" %}</a>
+    <span style="color:var(--text-tertiary);"> / </span>
+    <span style="color:var(--text-primary); font-weight:600;">{{ team.name }}</span>
+  </nav>
+
+  {# ---------- Cabecera ---------- #}
+  <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:16px;">
+    <span style="flex:none; display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:var(--radius-md); background:var(--surface-hover); color:var(--text-secondary);">
+      {% icon "layers" size=22 %}
+    </span>
+    <div style="flex:1; min-width:0;">
+      <h1 style="margin:0; font-family:var(--font-sans); font-size:1.4rem; font-weight:700; color:var(--text-primary);">{{ team.name }}</h1>
+      {% if team.description %}
+      <p style="margin:4px 0 0; color:var(--text-secondary); font-size:var(--text-sm);">{{ team.description }}</p>
+      {% endif %}
+    </div>
+    {% if can_manage %}
+    <button type="button" class="btn-outline" style="flex:none;"
+            hx-get="{% url 'team-edit' team.id %}" hx-target="#modal-root" hx-swap="innerHTML">
+      {% icon "pencil" size=16 %} {% trans "Editar" %}
+    </button>
+    {% endif %}
+  </div>
+
+  {# ---------- Tira de salud / conteos ---------- #}
+  <div class="card" style="padding:18px 20px; margin-bottom:20px; display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+    <div style="text-align:center; min-width:70px;">
+      <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); font-variant-numeric:tabular-nums;">{{ team.cert_count }}</div>
+      <div style="font-size:var(--text-micro); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em;">{% trans "Certificados" %}</div>
+    </div>
+    <div style="text-align:center; min-width:70px;">
+      <div style="font-size:1.6rem; font-weight:700; color:var(--text-primary); font-variant-numeric:tabular-nums;"><span id="group-member-count">{{ team.member_count }}</span></div>
+      <div style="font-size:var(--text-micro); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em;">{% trans "Miembros" %}</div>
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <div style="font-size:var(--text-micro); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">{% trans "Salud de certificados" %}</div>
+      {% if team.health_total %}
+        {% include "grupos/_group_health_mini.html" with segments=team.health_segments total=team.health_total showCounts=True %}
+      {% else %}
+        <span style="color:var(--text-tertiary); font-size:var(--text-sm);">{% trans "Sin certificados todavía." %}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ---------- Cuerpo: miembros | (certificados + defaults) ---------- #}
+  <div style="display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:20px; align-items:start;" class="detalle-grid">
+
+    {# Miembros (con gestión inline) #}
+    <section class="card" style="padding:20px;">
+      <h2 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:1.05rem; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+        {% icon "users" size=18 %} {% trans "Miembros" %}
+      </h2>
+      <div id="group-members">
+        {% include "grupos/_members.html" %}
+      </div>
+    </section>
+
+    <div style="display:flex; flex-direction:column; gap:20px;">
+
+      {# Certificados del grupo #}
+      <section class="card" style="padding:20px;">
+        <h2 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:1.05rem; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          {% icon "shield-check" size=18 %} {% trans "Certificados del grupo" %}
+        </h2>
+        <div style="display:flex; flex-direction:column;">
+          {% for c in certificates %}
+          <a href="{% url 'cert-detail' c.id %}" style="display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--border-subtle); text-decoration:none;">
+            {% include "components/_status_badge.html" with status=c.status label=c.get_status_display size="sm" %}
+            <span style="flex:1; min-width:0; color:var(--text-primary); font-size:var(--text-sm); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.domain }}<span style="font-family:var(--font-mono); color:var(--text-tertiary);">:{{ c.port }}</span></span>
+            {% if c.days_left is not None %}<span style="font-size:var(--text-micro); color:var(--text-tertiary); white-space:nowrap;">{{ c.days_left }} d</span>{% endif %}
+          </a>
+          {% empty %}
+          <span style="color:var(--text-tertiary); font-size:var(--text-sm);">{% trans "Este grupo no tiene certificados." %}</span>
+          {% endfor %}
+          {% if cert_more %}
+          <a href="{% url 'certificate-list' %}?team={{ team.id }}" style="display:block; padding:11px 4px 2px; font-size:var(--text-sm); color:var(--text-link); text-decoration:none; font-weight:500;">{% blocktrans with count=team.cert_count %}Ver los {{ count }} certificados del grupo →{% endblocktrans %}</a>
+          {% endif %}
+        </div>
+      </section>
+
+      {# Valores por defecto #}
+      <section class="card" style="padding:20px;">
+        <h2 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:1.05rem; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          {% icon "settings" size=18 %} {% trans "Valores por defecto" %}
+        </h2>
+        <dl style="margin:0; display:grid; grid-template-columns:auto 1fr; gap:10px 16px; font-size:var(--text-sm);">
+          <dt style="color:var(--text-tertiary);">{% trans "Umbral de alerta" %}</dt>
+          <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% blocktrans with days=team.default_threshold_days %}{{ days }} días{% endblocktrans %}</dd>
+          <dt style="color:var(--text-tertiary);">{% trans "Umbral crítico" %}</dt>
+          <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% blocktrans with days=team.default_critical_days %}{{ days }} días{% endblocktrans %}</dd>
+          <dt style="color:var(--text-tertiary);">{% trans "Intervalo de chequeo" %}</dt>
+          <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% blocktrans with interval=team.default_check_interval %}cada {{ interval }} h{% endblocktrans %}</dd>
+          <dt style="color:var(--text-tertiary);">{% trans "Canales" %}</dt>
+          <dd style="margin:0; display:flex; gap:6px; flex-wrap:wrap;">
+            {% if team.notify_platform %}<span class="badge badge--none badge--sm">{% trans "Plataforma" %}</span>{% endif %}
+            {% if team.notify_email %}<span class="badge badge--none badge--sm">{% trans "Correo" %}</span>{% endif %}
+            {% if team.notify_webhook %}<span class="badge badge--none badge--sm">{% trans "Webhook" %}</span>{% endif %}
+          </dd>
+          <dt style="color:var(--text-tertiary);">{% trans "Destinatarios" %}</dt>
+          <dd style="margin:0; color:var(--text-primary);">
+            {% for r in team.default_recipients %}{{ r }}{% if not forloop.last %}, {% endif %}{% empty %}<span style="color:var(--text-tertiary);">—</span>{% endfor %}
+          </dd>
+        </dl>
+      </section>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

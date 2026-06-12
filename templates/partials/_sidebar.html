@@ -1,0 +1,79 @@
+{% load forge_icons i18n %}
+{% comment %}
+Sidebar de Forge UI (espejo de AppShell.jsx → Sidebar). Logo (mark + wordmark
+Cert/Forge), navegación con iconos Lucide inline, accesos solo-Owner ocultos al
+resto, pie con "Perfil" y estado de monitoreo. Activo por
+request.resolver_match.url_name. Colapso por cookie cf_sidebar=collapsed.
+
+Todos los destinos (dashboard/certificados/grupos/reportes/alertas/usuarios/
+config/perfil) ya apuntan a sus {% templatetag openblock %} url {% templatetag closeblock %} reales (PASO 14).
+{% endcomment %}
+{% with url_name=request.resolver_match.url_name %}
+<aside class="forge-sidebar{% if sidebar_collapsed %} forge-sidebar--collapsed{% endif %}" data-forge-sidebar>
+  {# ---------- Logo ---------- #}
+  <a href="{% url 'dashboard' %}" class="forge-logo" aria-label="CertManager">
+    <span class="forge-logo__mark">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 2.5L26.5 6.4C27.1 6.6 27.5 7.2 27.5 7.8V15.6C27.5 22.4 22.7 27.6 16.6 29.7C16.2 29.8 15.8 29.8 15.4 29.7C9.3 27.6 4.5 22.4 4.5 15.6V7.8C4.5 7.2 4.9 6.6 5.5 6.4L16 2.5Z" fill="currentColor"/>
+        <path d="M10.5 16.2L14.3 20L21.7 12.2" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="forge-logo__word">Cert<span class="forge-logo__word-accent">Manager</span></span>
+  </a>
+
+  {# ---------- Navegación ---------- #}
+  <nav class="forge-nav">
+    <a href="{% url 'dashboard' %}" title="Dashboard"
+       class="forge-nav__item{% if url_name == 'dashboard' %} is-active{% endif %}">
+      {% icon "layout-dashboard" size=19 %}<span class="forge-nav__label">{% trans "Dashboard" %}</span>
+    </a>
+    <a href="{% url 'certificate-list' %}" title="Certificados"
+       class="forge-nav__item{% if url_name == 'certificate-list' %} is-active{% endif %}">
+      {% icon "shield-check" size=19 %}<span class="forge-nav__label">{% trans "Certificados" %}</span>
+    </a>
+    <a href="{% url 'team-list' %}" title="Grupos" class="forge-nav__item{% if url_name == 'team-list' %} is-active{% endif %}">
+      {% icon "layers" size=19 %}<span class="forge-nav__label">{% trans "Grupos" %}</span>
+    </a>
+    <a href="{% url 'report-list' %}" title="Reportes" class="forge-nav__item{% if url_name == 'report-list' %} is-active{% endif %}">
+      {% icon "file-text" size=19 %}<span class="forge-nav__label">{% trans "Reportes" %}</span>
+    </a>
+    <a href="{% url 'mailtemplate-list' %}" title="Plantillas" class="forge-nav__item{% if url_name == 'mailtemplate-list' or url_name == 'mailtemplate-create' or url_name == 'mailtemplate-edit' %} is-active{% endif %}">
+      {% icon "mail" size=19 %}<span class="forge-nav__label">{% trans "Plantillas" %}</span>
+    </a>
+    <a href="{% url 'alert-list' %}" title="Alertas" class="forge-nav__item{% if url_name == 'alert-list' %} is-active{% endif %}">
+      {% icon "bell" size=19 %}<span class="forge-nav__label">{% trans "Alertas" %}</span>
+      {% if forge_panel_count %}
+        <span class="forge-nav__badge">{{ forge_panel_count }}</span>
+        <span class="forge-nav__dot" aria-hidden="true"></span>
+      {% endif %}
+    </a>
+
+    {% if forge_is_owner %}
+    <a href="{% url 'user-list' %}" title="Usuarios" class="forge-nav__item{% if url_name == 'user-list' %} is-active{% endif %}">
+      {% icon "users" size=19 %}<span class="forge-nav__label">{% trans "Usuarios" %}</span>
+    </a>
+    <a href="{% url 'settings' %}" title="Configuración" class="forge-nav__item{% if url_name == 'settings' %} is-active{% endif %}">
+      {% icon "settings" size=19 %}<span class="forge-nav__label">{% trans "Configuración" %}</span>
+    </a>
+    <a href="{% url 'api-keys' %}" title="API & tokens" class="forge-nav__item{% if url_name == 'api-keys' or url_name == 'api-docs' %} is-active{% endif %}">
+      {% icon "key" size=19 %}<span class="forge-nav__label">{% trans "API & tokens" %}</span>
+    </a>
+    {% endif %}
+
+    <div class="forge-nav__sep" aria-hidden="true"></div>
+
+    <a href="{% url 'profile' %}" title="Perfil" class="forge-nav__item{% if url_name == 'profile' %} is-active{% endif %}">
+      {% icon "user" size=19 %}<span class="forge-nav__label">{% trans "Perfil" %}</span>
+    </a>
+    <a href="{% url 'faq' %}" title="Ayuda" class="forge-nav__item{% if url_name == 'faq' %} is-active{% endif %}">
+      {% icon "info" size=19 %}<span class="forge-nav__label">{% trans "Ayuda" %}</span>
+    </a>
+  </nav>
+
+  {# ---------- Pie: estado de monitoreo ---------- #}
+  <div class="forge-sidebar__foot">
+    <span class="forge-sidebar__pulse" aria-hidden="true"></span>
+    <span class="forge-sidebar__foot-text">{% blocktrans with h=forge_check_interval_hours %}Monitoreo activo · cada {{ h }} h{% endblocktrans %}</span>
+  </div>
+</aside>
+{% endwith %}

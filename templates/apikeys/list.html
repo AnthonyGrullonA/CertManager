@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% block title %}{% trans "API & tokens · CertManager" %}{% endblock %}
+
+{% block content %}
+<div class="px-7 py-7 mx-auto" style="max-width: 980px;">
+
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight text-slate-900">{% trans "API & tokens" %}</h1>
+      <p class="text-sm text-slate-500">{% trans "Claves para consumir la API REST de CertManager." %}</p>
+    </div>
+    <a href="{{ docs_url }}" class="btn-outline">{% icon "file-text" size=16 %} {% trans "Documentación de la API" %}</a>
+  </div>
+
+  {# URL base #}
+  <div class="card mb-5">
+    <div class="text-sm text-slate-500 mb-1">{% trans "URL base de la API" %}</div>
+    <code class="font-mono text-sm text-slate-800">{{ api_base }}/</code>
+  </div>
+
+  {# Crear nueva clave #}
+  <div class="card mb-6">
+    <h2 class="font-medium text-slate-900 mb-1">{% trans "Nueva clave" %}</h2>
+    <p class="text-sm text-slate-500 mb-4">{% trans "El secreto se muestra una sola vez. Guárdalo en un lugar seguro." %}</p>
+    <form hx-post="{% url 'api-key-create' %}" hx-target="#api-key-result" hx-swap="innerHTML"
+          class="flex flex-wrap items-end gap-3">
+      {% csrf_token %}
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-slate-600" for="kname">{% trans "Nombre" %}</label>
+        <input class="input" id="kname" name="name" placeholder="{% trans 'Integración Teams' %}" required>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-slate-600" for="kscope">{% trans "Ámbito" %}</label>
+        <select class="input" id="kscope" name="scope">
+          {% for value, label in scopes %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">{% icon "plus" size=16 %} {% trans "Crear clave" %}</button>
+    </form>
+    <div id="api-key-result" class="mt-4"></div>
+  </div>
+
+  {# Claves existentes #}
+  <div class="card !p-0 overflow-hidden">
+    <div data-forge-table data-page-size="8" data-forge-sortable>
+      <div class="forge-table-scroll">
+        <table class="cf-data-source">
+          <thead>
+            <tr><th>{% trans "Nombre" %}</th><th>{% trans "ID" %}</th><th>{% trans "Ámbito" %}</th><th>{% trans "Último uso" %}</th><th>{% trans "Estado" %}</th><th data-no-sort></th></tr>
+          </thead>
+          <tbody>
+            {% for key in keys %}
+              {% include "apikeys/_row.html" with key=key %}
+            {% empty %}
+            <tr data-empty-row><td colspan="6" class="text-center py-10 text-slate-500">{% trans "Aún no hay claves. Crea la primera arriba." %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% block title %}{% trans "Grupos" %} · CertManager{% endblock %}
+
+{% block content %}
+{% comment %}
+Pantalla Grupos (espejo de Grupos.jsx). Tabla con icono+nombre del grupo,
+conteo de certificados, GroupHealthMini (salud apilada), miembros, admin(s) y
+acciones de fila. Búsqueda y orden nativos (ForgeDataTable) y modal "Nuevo grupo"
+(solo Owner). Las clases forge-grupos-* viven en el <style> de abajo para no
+depender del bundle compartido (mismo patrón que Usuarios).
+{% endcomment %}
+<div class="forge-grupos">
+
+  {% comment %} PageHeader (espejo de PageHeader del kit). {% endcomment %}
+  <div class="forge-grupos__header">
+    <div class="forge-grupos__heading">
+      <h1 class="forge-grupos__title">{% trans "Grupos" %}</h1>
+      <p class="forge-grupos__subtitle">{% trans "Organiza certificados por equipo con control de acceso" %}</p>
+    </div>
+    {% if can_create %}
+      <div class="forge-grupos__actions">
+        <button type="button" class="forge-gbtn forge-gbtn--primary"
+                hx-get="{% url 'team-create' %}"
+                hx-target="#modal-root"
+                hx-swap="innerHTML">
+          {% icon "plus" size=16 %} {% trans "Nuevo grupo" %}
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+  {% comment %}
+  DataTable de grupos con ForgeDataTable. data-forge-sortable habilita orden y
+  data-no-sort marca columnas visuales/acciones no ordenables.
+  {% endcomment %}
+  <section class="forge-grupos__card">
+    {% comment %}
+    El wrapper data-forge-table y el cuerpo #team-rows se renderizan SIEMPRE (aun
+    sin grupos) para que crear el primer grupo (OOB beforeend a #team-rows desde
+    _row_created.html) funcione. La búsqueda y el paginación solo aparecen cuando
+    hay grupos; en vacío se muestra #grupos-empty debajo.
+    {% endcomment %}
+    <div data-forge-table data-page-size="8" data-forge-sortable>
+      <div id="team-tablewrap" class="forge-table-scroll forge-grupos__tablewrap">
+        <table class="cf-data-source" style="min-width:920px;">
+          <thead>
+            <tr>
+              <th>{% trans "Grupo" %}</th>
+              <th>{% trans "Certificados" %}</th>
+              <th data-no-sort>{% trans "Salud" %}</th>
+              <th>{% trans "Miembros" %}</th>
+              <th>{% trans "Correo default" %}</th>
+              <th data-no-sort>{% trans "Admin(s)" %}</th>
+              <th class="group-cell__th--right" data-no-sort></th>
+            </tr>
+          </thead>
+          <tbody id="team-rows">{% for team in teams %}{% include "grupos/_row.html" with team=team %}{% endfor %}</tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if not teams %}
+      <div id="grupos-empty" class="forge-grupos__empty">
+        <span class="forge-grupos__empty-icon">{% icon "layers" size=26 %}</span>
+        <h2 class="forge-grupos__empty-title">{% trans "Aún no hay grupos" %}</h2>
+        <p class="forge-grupos__empty-text">
+          {% trans "Crea tu primer grupo para organizar certificados por equipo y definir umbrales, frecuencia y correo de alerta por defecto." %}
+        </p>
+        {% if can_create %}
+          <button type="button" class="forge-gbtn forge-gbtn--primary"
+                  hx-get="{% url 'team-create' %}"
+                  hx-target="#modal-root"
+                  hx-swap="innerHTML">
+            {% icon "plus" size=16 %} {% trans "Nuevo grupo" %}
+          </button>
+        {% else %}
+          <p class="forge-grupos__empty-hint">{% trans "Pide al Owner de la organización que cree un grupo." %}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<style>
+  /* ============================================================
+     Grupos (espejo de Grupos.jsx). Clases scoped a esta pantalla:
+     no dependen del bundle forge.css compartido, evitando colisiones
+     (mismo patrón que Usuarios).
+     ============================================================ */
+  .forge-grupos { padding: 28px; max-width: var(--content-max); margin: 0 auto; }
+
+  /* PageHeader */
+  .forge-grupos__header {
+    display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .forge-grupos__heading { flex: 1; min-width: 0; }
+  .forge-grupos__title {
+    margin: 0; font-family: var(--font-sans); font-weight: 600;
+    font-size: var(--text-h1); letter-spacing: var(--tracking-snug);
+    color: var(--text-primary);
+  }
+  .forge-grupos__subtitle {
+    margin: 5px 0 0; font-family: var(--font-sans);
+    font-size: var(--text-body); color: var(--text-tertiary);
+  }
+  .forge-grupos__actions { display: flex; align-items: center; gap: 10px; }
+
+  /* Botón (espejo de Button del kit) */
+  .forge-gbtn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle); background: var(--surface-card);
+    font-family: var(--font-sans); font-size: var(--text-sm); font-weight: 600;
+    color: var(--text-secondary); cursor: pointer; white-space: nowrap;
+    transition: var(--transition-colors);
+  }
+  .forge-gbtn:hover { background: var(--surface-hover); color: var(--text-primary); }
+  .forge-gbtn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+  .forge-gbtn--primary {
+    background: var(--action-primary); border-color: var(--action-primary);
+    color: var(--action-primary-fg);
+  }
+  .forge-gbtn--primary:hover {
+    background: var(--action-primary-hover); border-color: var(--action-primary-hover);
+    color: var(--action-primary-fg);
+  }
+
+  .forge-grupos__card { min-width: 0; }
+  /* Sin grupos: se oculta la cabecera de la tabla (#grupos-empty toma el relevo).
+     Al añadir la primera fila (beforeend a #team-rows) deja de estar :empty y la
+     tabla aparece automáticamente, sin JS. */
+  .forge-grupos__tablewrap:has(#team-rows:empty) { display: none; }
+
+  /* Hooks semánticos de celdas. El chrome real lo gobierna [data-forge-table]. */
+  .group-cell__th--right { text-align: right; }
+  .group-cell__td--right { text-align: right; }
+
+  /* Línea de grupo: icono + nombre */
+  .forge-groupline { display: flex; align-items: center; gap: 11px; }
+  .forge-groupline__icon {
+    width: 34px; height: 34px; border-radius: var(--radius-md);
+    background: var(--brand-50); color: var(--text-brand);
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  .forge-groupline__name {
+    font-family: var(--font-sans); font-size: var(--text-body); font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* Celdas de datos */
+  .group-cell__count {
+    font-family: var(--font-mono); font-size: var(--text-body); color: var(--text-secondary);
+  }
+  .group-cell__members {
+    font-family: var(--font-sans); font-size: var(--text-body); color: var(--text-secondary);
+  }
+  .group-cell__health { width: 220px; }
+
+  /* Admin(s): avatar + nombre */
+  .forge-adminline { display: flex; align-items: center; gap: 8px; }
+  .forge-adminline__name {
+    font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-primary);
+  }
+  .forge-adminline--empty {
+    font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-tertiary);
+  }
+
+  /* Botón de acciones de fila (espejo de IconButton del kit) */
+  .forge-grow-action {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: var(--radius-sm);
+    border: none; background: transparent; color: var(--text-tertiary);
+    cursor: pointer; transition: var(--transition-colors);
+  }
+  .forge-grow-action:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+  /* Estado vacío */
+  .forge-grupos__empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 56px 24px; text-align: center;
+  }
+  .forge-grupos__empty-icon {
+    width: 56px; height: 56px; border-radius: var(--radius-lg);
+    background: var(--brand-50); color: var(--text-brand);
+    display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px;
+  }
+  .forge-grupos__empty-title {
+    margin: 0 0 6px; font-family: var(--font-sans); font-size: var(--text-h2);
+    font-weight: 600; color: var(--text-primary);
+  }
+  .forge-grupos__empty-text {
+    margin: 0 auto 18px; max-width: 380px; font-family: var(--font-sans);
+    font-size: var(--text-sm); color: var(--text-tertiary);
+  }
+  .forge-grupos__empty-hint {
+    margin: 0; font-family: var(--font-sans); font-size: var(--text-micro); color: var(--text-tertiary);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  // Click en la fila -> detalle del grupo (ignora acciones y controles).
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-no-open]")) return;
+    if (e.target.closest("input,button,a,details,summary,label,select")) return;
+    var tr = e.target.closest("tr[data-row-open][data-href]");
+    if (tr) window.location.href = tr.getAttribute("data-href");
+  });
+})();
+</script>
+{% endblock %}

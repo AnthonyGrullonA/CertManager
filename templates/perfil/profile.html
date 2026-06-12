@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% load i18n %}
+{% block title %}{% trans "Perfil · CertManager" %}{% endblock %}
+
+{% block content %}
+{% comment %}
+Pantalla Perfil — fiel a ui_kits/certforge/Perfil.jsx. Secciones en tarjetas
+Forge con estilos por tokens (mismo patrón que grupos/list.html). Cada sección
+es un fragmento HTMX con guardado parcial + toast; "Cambiar contraseña" abre un
+modal en #modal-root.
+{% endcomment %}
+<div style="padding:28px; max-width:1000px; margin:0 auto;">
+
+  {# ---------- PageHeader ---------- #}
+  <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:22px;">
+    <div>
+      <h1 style="margin:0; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h1); letter-spacing:var(--tracking-snug); color:var(--text-primary);">{% trans "Perfil" %}</h1>
+      <p style="margin:5px 0 0; font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-tertiary);">{% trans "Tu cuenta, avatar y preferencias" %}</p>
+    </div>
+  </div>
+
+  {% if password_expired %}
+  <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:18px; padding:14px 16px; border:1px solid var(--color-amber-300,#fcd34d); background:var(--color-amber-50,#fffbeb); border-radius:var(--radius-lg);">
+    {% icon "shield-alert" size=18 %}
+    <div>
+      <div style="font-family:var(--font-sans); font-weight:600; font-size:var(--text-body); color:var(--text-primary);">{% trans "Tu contraseña expiró" %}</div>
+      <div style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Por política de seguridad de la organización, debes cambiarla para continuar." %}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ---------- Identidad + foto ---------- #}
+  {% include "perfil/_section_avatar.html" %}
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" class="perfil-grid">
+
+    {# ---------- Datos personales ---------- #}
+    <section style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px;">
+      <h3 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Datos personales" %}</h3>
+      {% include "perfil/_section_personal.html" %}
+    </section>
+
+    {# ---------- Preferencias ---------- #}
+    <section style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px;">
+      <h3 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Preferencias" %}</h3>
+      {% include "perfil/_section_preferences.html" %}
+    </section>
+
+    {# ---------- Mis grupos (solo lectura) ---------- #}
+    <section style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px;">
+      <h3 style="margin:0 0 14px; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Mis grupos" %}</h3>
+      {% if my_groups %}
+        <div style="display:flex; flex-direction:column;">
+          {% for g in my_groups %}
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 0;{% if not forloop.first %} border-top:1px solid var(--border-subtle);{% endif %}">
+              <span style="width:30px; height:30px; border-radius:var(--radius-md); background:var(--brand-50); color:var(--text-brand); display:inline-flex; align-items:center; justify-content:center; flex:none;">{% icon "layers" size=15 %}</span>
+              <span style="flex:1; font-family:var(--font-sans); font-size:var(--text-body); font-weight:600; color:var(--text-primary);">{{ g.name }}</span>
+              {% if g.role == "Owner" %}
+                <span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} {{ g.role }}</span>
+              {% elif g.role == "Admin de grupo" %}
+                <span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} {{ g.role }}</span>
+              {% else %}
+                <span class="forge-tag forge-tag--neutral">{{ g.role }}</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <p style="margin:12px 0 0; font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary);">{% trans "Solo lectura · contacta a un Owner para cambios." %}</p>
+      {% else %}
+        <div style="padding:28px 12px; text-align:center;">
+          <span style="width:44px; height:44px; border-radius:var(--radius-lg); background:var(--brand-50); color:var(--text-brand); display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;">{% icon "layers" size=22 %}</span>
+          <p style="margin:0 0 4px; font-family:var(--font-sans); font-size:var(--text-body); font-weight:600; color:var(--text-primary);">{% trans "Aún no perteneces a ningún grupo" %}</p>
+          <p style="margin:0; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Un Owner puede añadirte a un grupo para asignarte certificados." %}</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  {# ---------- Seguridad: 2FA (TOTP) ---------- #}
+  <section style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px; margin-top:16px;">
+    <h3 style="margin:0 0 4px; font-family:var(--font-sans); font-weight:600; font-size:var(--text-h3); color:var(--text-primary);">{% trans "Seguridad" %}</h3>
+    <p style="margin:0 0 16px; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Autenticación en dos pasos (2FA)" %}</p>
+    {% include "perfil/_section_security.html" %}
+  </section>
+</div>
+{% endblock %}

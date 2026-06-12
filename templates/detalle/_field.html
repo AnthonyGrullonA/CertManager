@@ -1,0 +1,9 @@
+{% comment %}
+Campo etiqueta/valor (espejo de Field en CertDetalle.jsx). mono=1 => valor en
+fuente monoespaciada. Uso:
+  {% include "detalle/_field.html" with label="Sujeto" value=cert.subject mono=1 %}
+{% endcomment %}
+<div style="display:flex; flex-direction:column; gap:4px;">
+  <span style="font-family:var(--font-sans); font-size:var(--text-label); font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-tertiary);">{{ label }}</span>
+  <span style="font-family:{% if mono %}var(--font-mono){% else %}var(--font-sans){% endif %}; font-size:var(--text-body); color:var(--text-primary); word-break:break-word;">{{ value }}</span>
+</div>

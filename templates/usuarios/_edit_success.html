@@ -1,0 +1,14 @@
+{% comment %}
+Respuesta de éxito de la edición. Se inserta en #modal-root (lo vacía: el modal
+se cierra) y refresca SOLO la fila editada vía hx-swap-oob (por su id). Lanza un
+toast es-DO. Variable: u (User con memberships prefetcheadas).
+{% endcomment %}
+{% comment %} El cuerpo (insertado en #modal-root) queda vacío -> modal cerrado. {% endcomment %}
+
+{% comment %} Refresca la fila del usuario editado fuera de banda. {% endcomment %}
+{% include "usuarios/_row.html" with u=u oob=True %}
+
+<script>
+  window.cfToast &&
+    window.cfToast("ok", "Usuario actualizado", "Se guardaron los cambios de {{ u.get_full_name|default:u.email|escapejs }}.");
+</script>

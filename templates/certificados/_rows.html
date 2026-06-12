@@ -1,0 +1,21 @@
+{% load forge_icons i18n %}
+{% comment %}
+Cuerpo de la CertTable (tbody). Se renderiza inline en list.html y también como
+respuesta a peticiones HTMX (filtros en vivo / recarga tras acciones). Variable:
+certificates (decorados).
+{% endcomment %}
+{% for cert in certificates %}
+  {% include "certificados/_row.html" with cert=cert %}
+{% empty %}
+<tr id="certs-empty" data-empty-row>
+  <td colspan="11" style="padding:56px 24px; text-align:center;">
+    <span style="width:52px; height:52px; border-radius:var(--radius-lg); background:var(--brand-50); color:var(--text-brand); display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;">
+      {% icon "search" size=24 %}
+    </span>
+    <h2 style="font-family:var(--font-sans); font-size:var(--text-h2); font-weight:600; color:var(--text-primary); margin-bottom:6px;">{% trans "Sin resultados" %}</h2>
+    <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary); max-width:380px; margin:0 auto;">
+      {% trans "Ningún certificado coincide con los filtros activos." %}
+    </p>
+  </td>
+</tr>
+{% endfor %}

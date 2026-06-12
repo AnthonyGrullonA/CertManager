@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}
+GroupHealthMini (espejo de GroupHealthMini.jsx): barra apilada compacta de la
+salud de un grupo por estado. Recibe `segments` (lista de {family, value, pct})
+y `total`. Usa tokens Forge (--status-<fam>-solid) por inline style, igual que el
+componente del DS. Si no hay certificados muestra una barra vacía (sunken).
+Variables: segments, total, showCounts (def True).
+{% endcomment %}
+<div class="forge-health" style="display:flex; flex-direction:column; gap:6px; min-width:120px;">
+  <div role="img"
+       aria-label="Salud del grupo: {% for s in segments %}{{ s.value }} {{ s.family }}{% if not forloop.last %}, {% endif %}{% empty %}sin certificados{% endfor %}"
+       style="display:flex; height:8px; border-radius:var(--radius-pill); overflow:hidden; background:var(--surface-sunken);">
+    {% for s in segments %}
+      <div title="{{ s.value }} {{ s.family }}"
+           style="width:{{ s.pct|floatformat:'4' }}%; background:var(--status-{{ s.family }}-solid);"></div>
+    {% endfor %}
+  </div>
+  {% if showCounts|default_if_none:True %}
+    <div style="display:flex; flex-wrap:wrap; gap:4px 12px; font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary);">
+      {% for s in segments %}
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          <span style="width:7px; height:7px; border-radius:50%; background:var(--status-{{ s.family }}-solid);"></span>{{ s.value }}
+        </span>
+      {% empty %}
+        <span>{% trans "Sin certificados" %}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

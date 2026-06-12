@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load forge_icons forge_ui i18n %}
+{% comment %}
+Pantalla CertDetalle (Forge UI) — espejo de ui_kits/certforge/CertDetalle.jsx,
+pero con DATOS REALES (solo cert.last_check; el kit inventa SHA-1/cadena/SAN/
+historial). PageHeader con acciones (Notificar / Editar / Probar ahora), hero
+(badge grande + días + validity_bar) y tabs HTMX con deep-link (?tab=…). El panel
+de la pestaña se inyecta en #cert-tab-panel; el deep-link se mantiene con
+hx-push-url. Cableado de urls reales = PASO 14 (names temporales).
+{% endcomment %}
+{% block title %}{{ cert.domain }} · CertManager{% endblock %}
+
+{% block content %}
+<div style="padding:28px; max-width:1120px; margin:0 auto;"
+     id="cert-detalle"
+     hx-trigger="cf:cert-updated from:body"
+     hx-get="{% url 'cert-detail' cert.id %}"
+     hx-target="#cert-detalle"
+     hx-select="#cert-detalle"
+     hx-swap="outerHTML"
+     hx-disinherit="*">
+
+  {# ---------- Breadcrumb + PageHeader ---------- #}
+  <nav aria-label="{% trans 'Ruta' %}" style="display:flex; align-items:center; gap:6px; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary); margin-bottom:10px;">
+    <a href="{% url 'certificate-list' %}" style="color:var(--text-link); text-decoration:none;">{% trans "Certificados" %}</a>
+    <span>/</span>
+    <span>{{ cert.team.name }}</span>
+    <span>/</span>
+    <span style="color:var(--text-secondary);">{{ cert.domain }}</span>
+  </nav>
+
+  <div class="flex items-start justify-between mb-2" style="gap:16px; flex-wrap:wrap;">
+    <div>
+      <h1 style="display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:var(--text-h2,1.4rem); font-weight:600; letter-spacing:var(--tracking-tight); margin:0;">
+        <span>{{ cert.domain }}</span>
+        {% include "components/_status_badge.html" with status=cert.status label=cert.get_status_display size="lg" %}
+      </h1>
+      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px;">
+        <span class="badge badge--none badge--sm" title="{% trans 'Grupo dueño' %}">{{ cert.team.name }}</span>
+        {% for g in cert.groups.all %}<span class="badge badge--none badge--sm" style="opacity:.7" title="{% trans 'Grupo adicional' %}">+ {{ g.name }}</span>{% endfor %}
+        {% if not cert.is_active %}<span class="badge badge--warn badge--sm" title="{% trans 'El monitoreo está en pausa' %}">{% icon "clock" size=12 %} {% trans "Monitoreo pausado" %}</span>{% endif %}
+        {% if cert.is_snoozed %}<span class="badge badge--none badge--sm" title="{% trans 'Alertas silenciadas' %}">{% icon "bell" size=12 %} {% blocktrans with until=cert.snoozed_until|date:"d M, H:i" %}Silenciado hasta {{ until }}{% endblocktrans %}</span>{% endif %}
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="button" class="btn-outline"
+              hx-post="{% url 'cert-notify' cert.id %}"
+              hx-target="#toast-host" hx-swap="beforeend">
+        {% icon "bell" size=16 %} {% trans "Notificar" %}
+      </button>
+      <button type="button" class="btn-outline"
+              hx-get="{% url 'cert-email-test' cert.id %}"
+              hx-target="#modal-root" hx-swap="innerHTML">
+        {% icon "mail" size=16 %} {% trans "Probar correo" %}
+      </button>
+      <button type="button" class="btn-outline"
+              hx-get="{% url 'cert-edit' cert.id %}"
+              hx-target="#modal-root" hx-swap="innerHTML">
+        {% icon "pencil" size=16 %} {% trans "Editar" %}
+      </button>
+      <button type="button" class="btn-outline"
+              hx-post="{% url 'cert-toggle-active' cert.id %}"
+              hx-target="#toast-host" hx-swap="beforeend"
+              {% if cert.is_active %}hx-confirm="{% blocktrans with domain=cert.domain %}¿Dejar de monitorear {{ domain }}? No se chequeará hasta reactivarlo.{% endblocktrans %}"{% endif %}>
+        {% if cert.is_active %}{% icon "clock" size=16 %} {% trans "Dejar de monitorear certificado" %}{% else %}{% icon "play" size=16 %} {% trans "Monitorear certificado" %}{% endif %}
+      </button>
+      {# Silenciar alertas temporalmente (snooze) #}
+      <details class="forge-notif" data-forge-menu style="position:relative;">
+        <summary class="btn-outline" style="list-style:none; cursor:pointer;">
+          {% icon "bell" size=16 %} {% if cert.is_snoozed %}{% trans "Silenciado" %}{% else %}{% trans "Silenciar alertas" %}{% endif %}
+        </summary>
+        <div role="menu" style="position:absolute; right:0; top:calc(100% + 6px); z-index:30; min-width:200px; background:var(--surface-card); border:1px solid var(--border-default); border-radius:var(--radius-md); box-shadow:var(--shadow-md); padding:6px; display:flex; flex-direction:column; gap:2px;">
+          {% if cert.is_snoozed %}
+          <button type="button" class="btn-ghost btn-sm" style="justify-content:flex-start;"
+                  hx-post="{% url 'cert-snooze' cert.id %}" hx-vals='{"days": 0}'
+                  hx-target="#toast-host" hx-swap="beforeend">{% icon "play" size=14 %} {% trans "Reactivar alertas" %}</button>
+          <div style="height:1px; background:var(--border-subtle); margin:4px 0;"></div>
+          {% endif %}
+          <button type="button" class="btn-ghost btn-sm" style="justify-content:flex-start;"
+                  hx-post="{% url 'cert-snooze' cert.id %}" hx-vals='{"days": 1}'
+                  hx-target="#toast-host" hx-swap="beforeend">{% trans "Silenciar 1 día" %}</button>
+          <button type="button" class="btn-ghost btn-sm" style="justify-content:flex-start;"
+                  hx-post="{% url 'cert-snooze' cert.id %}" hx-vals='{"days": 7}'
+                  hx-target="#toast-host" hx-swap="beforeend">{% trans "Silenciar 7 días" %}</button>
+          <button type="button" class="btn-ghost btn-sm" style="justify-content:flex-start;"
+                  hx-post="{% url 'cert-snooze' cert.id %}" hx-vals='{"days": 30}'
+                  hx-target="#toast-host" hx-swap="beforeend">{% trans "Silenciar 30 días" %}</button>
+        </div>
+      </details>
+      <button type="button" class="btn-primary"
+              hx-get="{% url 'cert-test' cert.id %}"
+              hx-target="#drawer-root" hx-swap="innerHTML">
+        {% icon "play" size=16 %} {% trans "Probar ahora" %}
+      </button>
+    </div>
+  </div>
+
+  <a href="{% url 'certificate-list' %}"
+     style="display:inline-flex; align-items:center; gap:6px; margin-bottom:18px; color:var(--text-link); font-family:var(--font-sans); font-size:var(--text-sm); text-decoration:none;">
+    {% icon "chevron-left" size=15 %} {% trans "Volver a certificados" %}
+  </a>
+
+  {# ---------- Hero strip ---------- #}
+  {% with fam=cert.status|status_family %}
+  <section style="background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:20px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:2px; padding-right:28px; border-right:1px solid var(--border-subtle); min-width:120px;">
+        <span style="font-family:var(--font-sans); font-weight:700; font-size:var(--text-display,2.4rem); line-height:1; letter-spacing:var(--tracking-tight); color:var(--status-{{ fam }}-fg); font-variant-numeric:tabular-nums;">
+          {% if cert.days_left == None %}—{% elif cert.days_left < 0 %}−{{ cert.days_left|cut:"-" }}{% else %}{{ cert.days_left }}{% endif %}
+        </span>
+        <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">
+          {% if cert.days_left == None %}{% trans "sin chequear" %}{% elif cert.days_left < 0 %}{% trans "días vencido" %}{% else %}{% trans "días restantes" %}{% endif %}
+        </span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-secondary); gap:12px; flex-wrap:wrap;">
+          <span>{% trans "emitido" %} · {% if cert.valid_from %}{{ cert.valid_from|date:"d M Y" }}{% else %}—{% endif %}</span>
+          <span>{% trans "vence" %} · {% if cert.valid_to %}{{ cert.valid_to|date:"d M Y" }}{% else %}—{% endif %}</span>
+        </div>
+        {% include "components/_validity_bar.html" with percent=cert.validity_percent status=cert.status days_left=cert.days_left %}
+        <div style="display:flex; gap:18px; margin-top:4px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Emisor" %} <b style="color:var(--text-primary); font-weight:600;">{{ cert.issuer|default:"—" }}</b></span>
+          <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Puerto" %} <b style="color:var(--text-primary); font-weight:600; font-family:var(--font-mono);">{{ cert.port }}</b></span>
+          {% if cert.location %}<span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Ubicación" %} <b style="color:var(--text-primary); font-weight:600;">{{ cert.location }}</b></span>{% endif %}
+          <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Últ. chequeo" %} <b style="color:var(--text-primary); font-weight:600;">{% if cert.last_checked_at %}{{ cert.last_checked_at|date:"d M Y · H:i" }}{% else %}{% trans "nunca" %}{% endif %}</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endwith %}
+
+  {# ---------- Tabs (deep-link ?tab=…) ---------- #}
+  <nav class="forge-tabs" role="tablist" aria-label="{% trans 'Secciones del certificado' %}"
+       style="display:flex; gap:4px; border-bottom:1px solid var(--border-subtle); margin-bottom:20px; flex-wrap:wrap;">
+    {% for t in tabs %}
+    <a class="forge-tab{% if t.value == active_tab %} is-active{% endif %}" role="tab"
+       href="{% url 'cert-detail' cert.id %}?tab={{ t.value }}"
+       hx-get="{% url 'cert-detail-tab' cert.id t.value %}"
+       hx-target="#cert-tab-panel" hx-swap="innerHTML"
+       hx-push-url="{% url 'cert-detail' cert.id %}?tab={{ t.value }}"
+       aria-selected="{% if t.value == active_tab %}true{% else %}false{% endif %}">
+      {{ t.label }}{% if t.count %}<span style="font-family:var(--font-mono); font-size:var(--text-micro); color:var(--text-tertiary); background:var(--surface-hover); padding:1px 6px; border-radius:999px;">{{ t.count }}</span>{% endif %}
+    </a>
+    {% endfor %}
+  </nav>
+
+  {# ---------- Panel de la pestaña (HTMX) ---------- #}
+  <div id="cert-tab-panel">
+    {% include "detalle/_tab_panel.html" %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  // (1) Mueve el subrayado de la tab activa al instante al hacer clic (el panel
+  //     se inyecta vía HTMX; el indicador no debe esperar a recargar).
+  document.addEventListener("click", function (e) {
+    var tab = e.target.closest(".forge-tabs .forge-tab");
+    if (!tab) return;
+    var nav = tab.closest(".forge-tabs");
+    nav.querySelectorAll(".forge-tab").forEach(function (t) {
+      var on = (t === tab);
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+  });
+  // (2) Al auto-refrescar el detalle (#cert-detalle tras cf:cert-updated),
+  //     conserva la tab actual leyéndola de la URL (que mantiene hx-push-url).
+  document.body.addEventListener("htmx:configRequest", function (e) {
+    if (e.detail && e.detail.elt && e.detail.elt.id === "cert-detalle") {
+      e.detail.parameters["tab"] = new URLSearchParams(window.location.search).get("tab") || "resumen";
+    }
+  });
+})();
+</script>
+{% endblock %}

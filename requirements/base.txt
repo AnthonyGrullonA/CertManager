@@ -1,0 +1,21 @@
+# Dependencias comunes a todos los entornos
+Django>=5.0,<5.3
+djangorestframework>=3.15
+django-filter>=24.0
+django-environ>=0.11
+cryptography>=42.0        # parsing de certificados (SAN, cadena, fingerprint)
+python-dateutil>=2.9      # recurrencia de reportes programados (rrule)
+APScheduler>=3.10,<4      # planificador en-proceso (monitoreo + reportes)
+pyotp>=2.9               # 2FA TOTP (RFC 6238)
+qrcode[pil]>=7.4         # QR de enrolamiento 2FA (usa Pillow)
+requests>=2.31           # envío de webhooks (Teams/Slack/genérico)
+Pillow>=10.0             # avatares (UserPreferences) y logo de organización
+django-csp>=4.0          # cabeceras Content-Security-Policy (report-only en esta fase)
+whitenoise[brotli]>=6.6  # servir estáticos (precomprime brotli/gzip; off-CDN)
+ldap3>=2.9               # LDAP corporativo (config en BD, sin deps de sistema)
+# obsforge es OPCIONAL y vive en un índice privado: se declara en prod.txt para
+# que un instalable mínimo (local/standalone) NO dependa de ese índice. El
+# middleware se inserta solo si el paquete está presente (config/settings/base.py).
+drf-spectacular>=0.27       # documentación OpenAPI/Swagger de la API
+reportlab>=4.0            # exportación de reportes a PDF
+openpyxl>=3.1            # exportación de reportes a Excel (.xlsx)

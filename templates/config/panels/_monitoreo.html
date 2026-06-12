@@ -1,0 +1,55 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}Panel Monitoreo. Form HTMX que se reemplaza a sí mismo en #settings-panel.{% endcomment %}
+{% include "config/panels/_saved_toast.html" %}
+<form hx-post="{% url 'settings-panel' 'monitoreo' %}"
+      hx-target="#settings-panel" hx-swap="innerHTML">
+  <section class="card !p-0 overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "Monitoreo" %}</h3>
+      <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Frecuencia y parámetros del job que chequea tus certificados." %}</p>
+    </div>
+    <div class="px-6 pb-2 pt-2">
+      {% if form.non_field_errors %}<div class="text-sm text-red-600 mb-2">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="settings-row">
+        <div class="settings-row__main">
+          <div class="settings-row__label">{% trans "Frecuencia de chequeo (horas)" %}</div>
+          <div class="settings-row__hint">{% trans "Cada cuántas horas se ejecuta el job de verificación." %}</div>
+        </div>
+        <div class="settings-control-sm">{{ form.check_interval_hours }}</div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row__main">
+          <div class="settings-row__label">{% trans "Ventana horaria" %}</div>
+          <div class="settings-row__hint">{% trans "Franja preferida para los chequeos masivos." %}</div>
+        </div>
+        <div class="settings-control-range flex items-center gap-2">
+          {{ form.preferred_check_window_start }}
+          <span class="text-slate-400">–</span>
+          {{ form.preferred_check_window_end }}
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row__main">
+          <div class="settings-row__label">{% trans "Reintentos" %}</div>
+          <div class="settings-row__hint">{% trans "Intentos ante un fallo antes de marcar error." %}</div>
+        </div>
+        <div class="settings-control-sm">{{ form.retries }}</div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row__main">
+          <div class="settings-row__label">{% trans "Timeout de conexión (s)" %}</div>
+          <div class="settings-row__hint">{% trans "Segundos antes de abortar un chequeo." %}</div>
+        </div>
+        <div class="settings-control-sm">{{ form.connect_timeout }}</div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <button type="submit" class="btn-primary">{% trans "Guardar cambios" %}</button>
+    </div>
+  </section>
+</form>

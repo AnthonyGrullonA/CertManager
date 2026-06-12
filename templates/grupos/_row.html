@@ -1,0 +1,41 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Fila de un grupo en la DataTable de Grupos (espejo de la fila en Grupos.jsx).
+Variable: team (decorado con health_segments, cert_count, member_count,
+admin_memberships). Los estilos de celdas son semánticos; el chrome de tabla lo
+gobierna el adapter global.
+{% endcomment %}
+<tr id="team-row-{{ team.id }}" data-row-open data-href="{% url 'team-detail' team.id %}" style="cursor:pointer;">
+  <td>
+    <div class="forge-groupline">
+      <span class="forge-groupline__icon">{% icon "layers" size=17 %}</span>
+      <span class="forge-groupline__name">{{ team.name }}</span>
+    </div>
+  </td>
+  <td class="group-cell__count">{{ team.cert_count }}</td>
+  <td class="group-cell__health">
+    {% include "grupos/_group_health_mini.html" with segments=team.health_segments total=team.health_total showCounts=True %}
+  </td>
+  <td class="group-cell__members">{{ team.member_count }}</td>
+  <td>
+    {% if team.default_email %}
+      <span class="forge-adminline__name">{{ team.default_email }}</span>
+    {% else %}
+      <span class="forge-adminline--empty">{% trans "Sin correo" %}</span>
+    {% endif %}
+  </td>
+  <td>
+    {% for m in team.admin_memberships %}
+      <div class="forge-adminline">
+        {% include "components/_avatar.html" with name=m.user.get_full_name email=m.user.email size="xs" %}
+        <span class="forge-adminline__name">{{ m.user.get_full_name|default:m.user.email }}</span>
+      </div>
+    {% empty %}
+      <span class="forge-adminline--empty">{% trans "Sin Admin" %}</span>
+    {% endfor %}
+  </td>
+  <td class="group-cell__td--right" data-no-open>
+    <button type="button" class="forge-grow-action" aria-label="{% trans 'Opciones' %}">{% icon "ellipsis" size=16 %}</button>
+  </td>
+</tr>

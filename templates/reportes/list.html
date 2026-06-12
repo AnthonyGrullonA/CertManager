@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Pantalla Reportes (Forge UI). La preview queda visible sin scroll lateral; el
+constructor de filtros vive en modal para no ocupar una columna permanente.
+{% endcomment %}
+{% block title %}Reportes · CertManager{% endblock %}
+
+{% block content %}
+<div style="padding:28px; max-width:var(--content-max); margin:0 auto;">
+
+  {% comment %} ---------- PageHeader ---------- {% endcomment %}
+  <div class="mb-5 flex items-start justify-between gap-3">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight">{% trans "Reportes" %}</h1>
+      <p class="text-sm text-slate-500">{% trans "Visualiza y exporta el monitoreo de certificados" %}</p>
+    </div>
+    <button type="button" class="btn-primary btn-sm" data-report-builder-open>
+      {% icon "sliders-horizontal" size=15 %} {% trans "Constructor" %}
+    </button>
+  </div>
+
+  {% comment %} ---------- Constructor (modal de filtros) ---------- {% endcomment %}
+  <div id="report-builder-modal" class="forge-modal rep-builder-modal" data-report-builder-modal hidden>
+    <div class="forge-modal__scrim" data-report-builder-close></div>
+    <div class="forge-modal__panel" role="dialog" aria-modal="true" aria-label="{% trans 'Constructor de reportes' %}" style="width: 760px;">
+      <div class="forge-modal__header">
+        <div class="min-w-0 flex-1">
+          <div class="forge-modal__title">{% trans "Constructor" %}</div>
+          <div class="forge-modal__subtitle">{% trans "Filtra la salida de reportes de CertManager" %}</div>
+        </div>
+        <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-report-builder-close>{% icon "x" size=18 %}</button>
+      </div>
+
+      <form id="report-builder"
+            hx-get="{% url 'report-list' %}"
+            hx-target="#report-preview"
+            hx-trigger="submit"
+            hx-push-url="false"
+            hx-on::after-request="if(event.detail.successful){ document.querySelector('[data-report-builder-modal]').hidden = true; }">
+        <div class="forge-modal__body">
+          <div class="rep-builder__head">
+        {% icon "sliders-horizontal" size=17 class="text-slate-500" %}
+            <h3 class="rep-builder__title">{% trans "Filtros del reporte" %}</h3>
+          </div>
+
+          <div class="rep-builder-modal__grid">
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_template">{% trans "Plantilla" %}</label>
+          {{ form.template }}
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_date_range">{% trans "Rango de fechas" %}</label>
+          {{ form.date_range }}
+          <div class="grid grid-cols-2 gap-2">
+            {{ form.date_from }}
+            {{ form.date_to }}
+          </div>
+          <span class="rep-field__hint">{% trans "Fechas precisas tienen prioridad sobre el rango." %}</span>
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_teams">{% trans "Grupos" %}</label>
+          {{ form.teams }}
+          <span class="rep-field__hint">{% trans "Vacío = todos los grupos." %}</span>
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_statuses">{% trans "Estado" %}</label>
+          {{ form.statuses }}
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_expiry_window">{% trans "Ventana de vencimiento" %}</label>
+          {{ form.expiry_window }}
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_issuer">{% trans "Emisor" %}</label>
+          {{ form.issuer }}
+        </div>
+
+        <div class="rep-field">
+          <label class="rep-field__label" for="id_recipient">{% trans "Responsable" %}</label>
+          {{ form.recipient }}
+        </div>
+          </div>
+        </div>
+        <div class="forge-modal__footer">
+          <button type="button" class="btn-ghost" data-report-builder-close>{% trans "Cancelar" %}</button>
+          <button type="submit" class="btn-primary">{% icon "file-text" size=16 %} {% trans "Generar reporte" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% comment %} ---------- Preview + programados ---------- {% endcomment %}
+  <div class="flex flex-col gap-4">
+      <div id="report-preview">
+        {% include "reportes/_preview.html" with result=result %}
+      </div>
+
+      {% comment %} ---------- Reportes programados ---------- {% endcomment %}
+      <section class="rep-card">
+        <div class="rep-section-head">
+          {% icon "clock" size=17 class="text-slate-500" %}
+          <h3 class="rep-section-head__title">{% trans "Reportes programados" %}</h3>
+          <button type="button" class="btn-outline btn-sm"
+                  hx-get="{% url 'report-create' %}"
+                  hx-target="#modal-root">
+            {% icon "plus" size=15 %} {% trans "Programar" %}
+          </button>
+        </div>
+        {% comment %} El partial ya emite su propio <div id="scheduled-list"> (target de HTMX/OOB). {% endcomment %}
+        {% include "reportes/_scheduled_list.html" with scheduled=scheduled %}
+      </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chart.umd.min.js' %}"></script>
+<script>
+(function () {
+  var modal = document.querySelector("[data-report-builder-modal]");
+  if (!modal) return;
+  document.addEventListener("click", function (event) {
+    if (event.target.closest("[data-report-builder-open]")) {
+      modal.hidden = false;
+      var first = modal.querySelector("select, input, button");
+      if (first) first.focus();
+    }
+    if (event.target.closest("[data-report-builder-close]")) {
+      modal.hidden = true;
+    }
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !modal.hidden) modal.hidden = true;
+  });
+})();
+</script>
+{% endblock %}

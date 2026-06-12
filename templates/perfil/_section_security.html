@@ -1,0 +1,59 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Sección Seguridad del Perfil — 2FA (TOTP) por usuario. Tres estados según el
+contexto que pasa views_2fa:
+  · setup=True  → muestra el QR + input para confirmar el primer código.
+  · two_factor_enabled=True → 2FA activo + formulario de desactivar.
+  · (ninguno)   → botón "Activar 2FA".
+Se re-renderiza dentro de #security-section (HTMX) tras cada acción.
+{% endcomment %}
+<div id="security-section">
+  {% if setup %}
+  {# ----- Enrolamiento: escanear QR y confirmar ----- #}
+  <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+    {% if qr_data_uri %}
+    <img src="{{ qr_data_uri }}" alt="{% trans 'Código QR para 2FA' %}" width="168" height="168"
+         style="border:1px solid var(--border-subtle); border-radius:var(--radius-md); flex:none;">
+    {% endif %}
+    <div style="flex:1; min-width:220px;">
+      <p style="margin:0 0 8px; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary);">
+        {% blocktrans %}Escanea el QR con <b>Google Authenticator</b> o <b>Microsoft Authenticator</b>.
+        ¿No puedes escanear? Ingresa esta clave manualmente:{% endblocktrans %}
+      </p>
+      <code style="display:inline-block; padding:6px 10px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--surface-sunken); font-family:var(--font-mono); font-size:var(--text-sm); word-break:break-all;">{{ totp_secret }}</code>
+      <form hx-post="{% url 'two-factor-confirm' %}" hx-target="#security-section" hx-swap="outerHTML"
+            style="margin-top:14px; display:flex; gap:8px; align-items:center;">
+        <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+               class="input" placeholder="{% trans 'Código de 6 dígitos' %}" style="width:160px;" required>
+        <button type="submit" class="btn-primary">{% icon "shield-check" size=16 %} {% trans "Confirmar" %}</button>
+      </form>
+      {% if totp_error %}<p style="margin:8px 0 0; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--status-err-fg);">{{ totp_error }}</p>{% endif %}
+    </div>
+  </div>
+
+  {% elif two_factor_enabled %}
+  {# ----- Activo: desactivar pidiendo un código vigente ----- #}
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+    <span class="forge-tag forge-tag--ok">{% icon "shield-check" size=14 %} {% trans "2FA activo" %}</span>
+    <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{% trans "Te pediremos un código al iniciar sesión." %}</span>
+  </div>
+  <form hx-post="{% url 'two-factor-disable' %}" hx-target="#security-section" hx-swap="outerHTML"
+        style="display:flex; gap:8px; align-items:center;">
+    <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+           class="input" placeholder="{% trans 'Código actual' %}" style="width:160px;" required>
+    <button type="submit" class="btn-outline">{% icon "lock" size=16 %} {% trans "Desactivar 2FA" %}</button>
+  </form>
+  {% if totp_error %}<p style="margin:8px 0 0; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--status-err-fg);">{{ totp_error }}</p>{% endif %}
+
+  {% else %}
+  {# ----- Sin 2FA: ofrecer activarlo ----- #}
+  <p style="margin:0 0 12px; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary);">
+    {% trans "Añade un segundo factor con una app de autenticación (Google/Microsoft Authenticator)." %}
+  </p>
+  <button type="button" class="btn-primary"
+          hx-get="{% url 'two-factor-setup' %}" hx-target="#security-section" hx-swap="outerHTML">
+    {% icon "shield-check" size=16 %} {% trans "Activar 2FA" %}
+  </button>
+  {% endif %}
+</div>

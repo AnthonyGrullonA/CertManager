@@ -1,0 +1,36 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}Fragmento "Preferencias": idioma y zona horaria.{% endcomment %}
+<form id="section-preferences"
+      hx-post="{% url 'profile-section' 'preferences' %}"
+      hx-target="#section-preferences"
+      hx-swap="outerHTML">
+  <div class="perfil-prefrow perfil-prefrow--last">
+    <span class="perfil-prefrow__icon">{% icon "globe" size=16 %}</span>
+    <div class="perfil-prefrow__main">
+      <div class="perfil-prefrow__label">{% trans "Idioma" %}</div>
+    </div>
+    <div class="perfil-prefrow__control">
+      <select name="language" class="perfil-select" style="min-width:130px;"
+              hx-post="{% url 'profile-section' 'preferences' %}" hx-target="#section-preferences" hx-swap="outerHTML" hx-trigger="change">
+        {% for value, label in preferences_form.language.field.choices %}
+          <option value="{{ value }}"{% if preferences_form.language.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="perfil-prefrow">
+    <span class="perfil-prefrow__icon">{% icon "calendar" size=16 %}</span>
+    <div class="perfil-prefrow__main">
+      <div class="perfil-prefrow__label">{% trans "Zona horaria" %}</div>
+    </div>
+    <div class="perfil-prefrow__control">
+      <select name="timezone" class="perfil-select" style="min-width:120px;"
+              hx-post="{% url 'profile-section' 'preferences' %}" hx-target="#section-preferences" hx-swap="outerHTML" hx-trigger="change">
+        {% for value, label in preferences_form.timezone.field.choices %}
+          <option value="{{ value }}"{% if preferences_form.timezone.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</form>

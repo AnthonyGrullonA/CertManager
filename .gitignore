@@ -1,0 +1,56 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---- Entornos / secretos ----
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+*.secret
+secret_key
+data/secret_key
+
+# Bootstrap de producción: secretos y datos sensibles (repo público)
+data_update_certs_app.env
+/cert.txt
+
+# ---- Base de datos local / datos ----
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+/media/
+/data/
+
+# ---- Estáticos compilados (se regeneran con build:css / collectstatic) ----
+/staticfiles/
+
+# ---- Node / build ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ---- Legacy (no se versiona: fuente de migración con credenciales) ----
+certapp_old/
+
+# ---- IDE / SO ----
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# ---- Logs / temporales ----
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+backups/
+data/
+/logs/

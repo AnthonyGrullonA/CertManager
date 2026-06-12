@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load forge_icons %}
+{% block title %}Documentación de la API · CertManager{% endblock %}
+
+{% block content %}
+<div class="px-7 py-7 mx-auto" style="max-width: 920px;">
+
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight text-slate-900">Documentación de la API</h1>
+      <p class="text-sm text-slate-500">API REST de CertManager — autenticación por clave de API.</p>
+    </div>
+    {% if can_manage_keys %}
+    <a href="{% url 'api-keys' %}" class="btn-primary">{% icon "plus" size=16 %} Crear clave</a>
+    {% endif %}
+  </div>
+
+  {# URL base #}
+  <section class="card mb-5">
+    <h2 class="font-medium text-slate-900 mb-1">URL base</h2>
+    <code class="font-mono text-sm text-slate-800">{{ api_base }}/</code>
+    <p class="text-sm text-slate-500 mt-1">Todas las rutas de abajo son relativas a esta URL.</p>
+  </section>
+
+  {# Autenticación #}
+  <section class="card mb-5">
+    <h2 class="font-medium text-slate-900 mb-2">Autenticación</h2>
+    <p class="text-sm text-slate-600 mb-3">
+      Cada petición debe incluir una clave de API en un encabezado. Acepta dos formas:
+    </p>
+    <pre class="bg-slate-900 text-slate-100 rounded-lg p-3 text-xs overflow-x-auto"><code>Authorization: Api-Key cf_live_xxxxxxxxxxxxxxxxxxxx
+# o, alternativamente:
+X-Api-Key: cf_live_xxxxxxxxxxxxxxxxxxxx</code></pre>
+    <ul class="text-sm text-slate-600 mt-3 space-y-1.5 list-disc pl-5">
+      <li><strong>cf_live_…</strong> — clave de <em>acceso total</em> (lectura y escritura).</li>
+      <li><strong>cf_ro_…</strong> — clave de <em>solo lectura</em>: solo permite <code class="font-mono">GET</code>.</li>
+      <li>La clave hereda los permisos (grupos/ámbito) del usuario que la creó.</li>
+      <li>Sin clave válida, la API responde <code class="font-mono">401</code>; con clave de solo lectura en escritura, <code class="font-mono">403</code>.</li>
+    </ul>
+  </section>
+
+  {# Ejemplo #}
+  <section class="card mb-5">
+    <h2 class="font-medium text-slate-900 mb-2">Ejemplo</h2>
+    <pre class="bg-slate-900 text-slate-100 rounded-lg p-3 text-xs overflow-x-auto"><code># Listar certificados por vencer
+curl -H "Authorization: Api-Key cf_live_xxx" \
+     "{{ api_base }}/certificates/?status=POR_VENCER"
+
+# Probar ahora (chequeo SSL inmediato) — requiere acceso total
+curl -X POST -H "Authorization: Api-Key cf_live_xxx" \
+     "{{ api_base }}/certificates/1/test/"</code></pre>
+  </section>
+
+  {# Endpoints #}
+  <section class="card mb-5">
+    <h2 class="font-medium text-slate-900 mb-3">Endpoints</h2>
+    <div data-forge-table data-page-size="8" data-forge-sortable>
+      <div class="forge-table-scroll">
+        <table class="cf-data-source">
+          <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
+          <tbody>
+            {% for e in endpoints %}
+            <tr>
+              <td><span class="badge {% if e.method == 'GET' %}badge--vigente{% else %}badge--por_vencer{% endif %}">{{ e.method }}</span></td>
+              <td class="font-mono text-xs text-slate-700 whitespace-nowrap">{{ e.path }}</td>
+              <td class="text-slate-600">{{ e.desc }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  {# Errores #}
+  <section class="card">
+    <h2 class="font-medium text-slate-900 mb-2">Códigos de respuesta</h2>
+    <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
+      <li><code class="font-mono">200/201</code> — éxito.</li>
+      <li><code class="font-mono">401</code> — falta la clave o es inválida/revocada.</li>
+      <li><code class="font-mono">403</code> — la clave es de solo lectura o no tiene acceso al recurso.</li>
+      <li><code class="font-mono">429</code> — límite de tasa (p. ej. en «Probar ahora»).</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

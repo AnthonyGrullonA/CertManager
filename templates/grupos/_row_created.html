@@ -1,0 +1,21 @@
+{% comment %}
+Respuesta HTMX al crear un grupo. El form apunta a hx-target="#modal-root" con
+hx-swap="innerHTML": el contenido no-OOB de abajo (vacío) cierra el modal.
+Vía hx-swap-oob:
+  - se añade la fila nueva al final de #team-rows (beforeend);
+  - se elimina el bloque de estado vacío si existía;
+  - se quita el modificador --empty del wrapper de la tabla para revelarla cuando
+    se crea el primer grupo (replica el wrapper con la fila ya dentro);
+  - se empuja un toast de éxito.
+{% endcomment %}
+{% comment %} Contenido no-OOB: vacío -> vacía #modal-root y cierra el modal. {% endcomment %}
+
+{% comment %} Fila nueva, fuera de banda, al final del cuerpo de la tabla. {% endcomment %}
+<tbody id="team-rows" hx-swap-oob="beforeend">
+  {% include "grupos/_row.html" with team=team %}
+</tbody>
+
+{% comment %} Quitar el estado vacío si estaba presente. {% endcomment %}
+<div id="grupos-empty" hx-swap-oob="delete"></div>
+
+{% include "partials/_toast.html" with tone="ok" title="Grupo creado" message="El grupo está listo para recibir certificados." %}

@@ -1,0 +1,31 @@
+<script>
+(function () {
+  // Copiar el detalle de soporte (clipboard con fallback execCommand).
+  var btn = document.querySelector('[data-copy-ref]');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var pre = document.querySelector('[data-ref-block]');
+      if (!pre) return;
+      var text = pre.textContent;
+      var label = btn.querySelector('[data-copy-label]');
+      function done() {
+        if (!label) return;
+        var prev = label.textContent;
+        label.textContent = 'Copiado';
+        setTimeout(function () { label.textContent = prev; }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  }
+  // Reintentar = recargar.
+  var retry = document.querySelector('[data-retry]');
+  if (retry) retry.addEventListener('click', function () { location.reload(); });
+})();
+</script>

@@ -1,0 +1,82 @@
+/* Forge UI — Base layer. Minimal, opinionated element defaults that consumers
+ * inherit. Sets the neutral page surface, UI font, and accessible focus. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv01', 'ss01';
+}
+
+/* Tabular figures for any number you compare or align in a column */
+.tnum,
+[data-tnum] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Monospace technical data */
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand-500) 28%, transparent);
+}
+
+/* Visible, consistent keyboard focus */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Thin, cool scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--slate-300) transparent;
+}
+[data-theme="dark"] * {
+  scrollbar-color: var(--slate-700) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: var(--slate-700);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

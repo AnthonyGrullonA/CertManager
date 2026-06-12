@@ -1,0 +1,119 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Sub-panel 'LDAP corporativo' (core.LdapConfiguration). Recibe `form` (el
+LdapConfigForm). Secreto write-only: el campo Contraseña de bind NUNCA trae el
+valor real; muestra '●●● configurado' si ya hay secreto (form.has_password) y un
+POST vacío lo conserva. El botón 'Probar conexión' hace POST a
+settings-test-ldap y empuja un toast (no reemplaza el panel).
+
+El hidden `panel=ldap` distingue este envío del de la tarjeta Seguridad, que
+comparte el endpoint settings-panel/seguridad.
+{% endcomment %}
+<form hx-post="{% url 'settings-panel' 'seguridad' %}"
+      hx-target="#settings-panel" hx-swap="innerHTML">
+  <input type="hidden" name="panel" value="ldap">
+  <section class="card !p-0 overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "LDAP corporativo" %}</h3>
+      <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Autentica a usuarios ya existentes contra tu directorio (Active Directory u otro). Los secretos nunca se muestran en claro." %}</p>
+    </div>
+    <div class="px-6 pb-2 pt-2">
+      {% if form.non_field_errors %}<div class="text-sm text-red-600 mb-2">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="flex items-center gap-6 py-4 border-b border-slate-100">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-900">{% trans "LDAP habilitado" %}</div>
+          <div class="text-xs text-slate-500 mt-0.5">{% trans "Activa la verificación de contraseña contra el directorio al iniciar sesión." %}</div>
+        </div>
+        <div class="flex-none">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            {{ form.enabled }} {% trans "Habilitar" %}
+          </label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+        <label class="flex flex-col gap-1.5 sm:col-span-2">
+          <span class="text-sm font-medium text-slate-700">{% trans "Servidor (URI)" %}</span>
+          {{ form.server_uri }}
+          <span class="text-xs text-slate-400">{% trans "ej. ldap://dc.empresa.com:389 o ldaps://dc:636" %}</span>
+          {{ form.server_uri.errors }}
+        </label>
+
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Bind DN (cuenta de servicio)" %}</span>
+          {{ form.bind_dn }}
+          {{ form.bind_dn.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Contraseña de bind" %}</span>
+          {{ form.bind_password }}
+          {% if form.has_password %}
+            <span class="text-xs text-emerald-600 inline-flex items-center gap-1">
+              {% icon "circle-check" size=13 %} ●●● configurado · deja en blanco para conservarlo
+            </span>
+          {% else %}
+            <span class="text-xs text-slate-400">{% trans "Sin contraseña configurada." %}</span>
+          {% endif %}
+          {{ form.bind_password.errors }}
+        </label>
+
+        <label class="flex flex-col gap-1.5 sm:col-span-2">
+          <span class="text-sm font-medium text-slate-700">{% trans "Base de búsqueda de usuarios" %}</span>
+          {{ form.user_search_base }}
+          <span class="text-xs text-slate-400">{% trans "ej. OU=Usuarios,DC=empresa,DC=com" %}</span>
+          {{ form.user_search_base.errors }}
+        </label>
+
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Filtro de usuario" %}</span>
+          {{ form.user_filter }}
+          <span class="text-xs text-slate-400">{% blocktrans %}Usa <code class="font-mono">{login}</code> como marcador.{% endblocktrans %}</span>
+          {{ form.user_filter.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Atributo de correo" %}</span>
+          {{ form.email_attribute }}
+          {{ form.email_attribute.errors }}
+        </label>
+
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Timeout de conexión (s)" %}</span>
+          {{ form.connect_timeout }}
+          {{ form.connect_timeout.errors }}
+        </label>
+      </div>
+
+      <div class="flex items-center gap-6 py-4 mt-2 border-t border-slate-100">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-900">{% trans "Cifrado de transporte" %}</div>
+          <div class="text-xs text-slate-500 mt-0.5">{% trans "Usa SSL (ldaps) o StartTLS para proteger la conexión." %}</div>
+        </div>
+        <div class="flex-none flex items-center gap-5">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            {{ form.use_ssl }} {% trans "SSL (ldaps)" %}
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            {{ form.start_tls }} {% trans "StartTLS" %}
+          </label>
+        </div>
+      </div>
+
+      {% if form.instance.last_test_at %}
+      <div class="flex items-center gap-2 pb-3 text-xs
+                  {% if form.instance.last_test_ok %}text-emerald-600{% else %}text-red-600{% endif %}">
+        {% if form.instance.last_test_ok %}{% icon "circle-check" size=14 %}{% else %}{% icon "circle-x" size=14 %}{% endif %}
+        <span>{% blocktrans with msg=form.instance.last_test_message %}Última prueba: {{ msg }}{% endblocktrans %}</span>
+      </div>
+      {% endif %}
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <button type="button" class="btn-outline inline-flex items-center gap-2"
+              hx-post="{% url 'settings-test-ldap' %}" hx-swap="none">
+        {% icon "server" size=16 %} {% trans "Probar conexión" %}
+      </button>
+      <button type="submit" class="btn-primary">{% trans "Guardar cambios" %}</button>
+    </div>
+  </section>
+</form>

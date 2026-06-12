@@ -1,0 +1,6 @@
+{% load i18n %}{% comment %}CTA contextual + reintentar (si aplica) + volver al inicio.{% endcomment %}
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+  {% if meta.cta %}<a class="btn-primary" href="{{ meta.cta.href }}">{{ meta.cta.label }}</a>{% endif %}
+  {% if meta.retry %}<button type="button" class="btn-outline" data-retry>{% trans "Reintentar" %}</button>{% endif %}
+  <a class="btn-ghost" href="/">{% trans "Ir al inicio" %}</a>
+</div>

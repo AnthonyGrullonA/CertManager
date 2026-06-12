@@ -1,0 +1,82 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Detalle de una alerta (drawer, inyectado en #drawer-root por hx-get alert-detail).
+Muestra severidad/estado, dominio (link al certificado), descripción, fecha,
+canal(es) de entrega y acciones (Resolver si Admin/Owner, Ir al certificado).
+Al abrirlo se marca como leída (estado personal).
+{% endcomment %}
+<div class="forge-drawer" data-forge-drawer>
+  <div class="forge-drawer__scrim" data-forge-modal-close></div>
+  <aside class="forge-drawer__panel" role="dialog" aria-modal="true" aria-label="{% trans 'Detalle de alerta' %}">
+    <div class="forge-drawer__header">
+      <div class="min-w-0 flex-1">
+        <div class="forge-drawer__title" style="display:flex; align-items:center; gap:10px;">
+          <span class="badge badge--{{ alert.family }} badge--sm">{{ alert.get_severity_display }}</span>
+          {% if alert.is_resolved %}
+          <span class="badge badge--none badge--sm">{% icon "check" size=12 %} {% trans "Resuelta" %}</span>
+          {% else %}
+          <span class="badge badge--none badge--sm">{% trans "Abierta" %}</span>
+          {% endif %}
+        </div>
+        <div class="forge-drawer__subtitle mono">{{ alert.certificate.domain }}:{{ alert.certificate.port }}</div>
+      </div>
+      <button type="button" class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>
+        {% icon "x" size=18 %}
+      </button>
+    </div>
+
+    <div class="forge-drawer__body">
+      <p style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-primary); margin:0 0 16px;">
+        {{ alert.message }}
+      </p>
+
+      <dl style="display:grid; grid-template-columns:auto 1fr; gap:8px 16px; font-family:var(--font-sans); font-size:var(--text-sm); margin:0 0 18px;">
+        <dt style="color:var(--text-tertiary);">{% trans "Grupo" %}</dt>
+        <dd style="color:var(--text-primary); margin:0;">{{ alert.certificate.team.name }}</dd>
+        <dt style="color:var(--text-tertiary);">{% trans "Detectada" %}</dt>
+        <dd style="color:var(--text-primary); margin:0;">{{ alert.created_at|date:"d M Y · H:i" }}</dd>
+        {% if alert.is_resolved and alert.resolved_at %}
+        <dt style="color:var(--text-tertiary);">{% trans "Resuelta" %}</dt>
+        <dd style="color:var(--text-primary); margin:0;">{{ alert.resolved_at|date:"d M Y · H:i" }}</dd>
+        {% endif %}
+      </dl>
+
+      <div style="font-family:var(--font-sans); font-size:var(--text-label); font-weight:600; text-transform:uppercase; letter-spacing:.02em; color:var(--text-tertiary); margin-bottom:8px;">
+        {% trans "Entregas" %}
+      </div>
+      {% if alert.deliveries_list %}
+      <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;">
+        {% for d in alert.deliveries_list %}
+        <li style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          {% icon d.icon size=15 %}
+          <span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-primary);">{{ d.get_channel_display }}</span>
+          <span style="font-family:var(--font-mono); font-size:var(--text-micro); color:var(--text-tertiary);">{{ d.target }}</span>
+          <span class="flex-1"></span>
+          <span class="badge badge--{% if d.status == 'SENT' %}none{% elif d.status == 'FAILED' %}err{% else %}warn{% endif %} badge--sm">{{ d.get_status_display }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary); margin:0;">
+        {% trans "Solo en plataforma (sin envíos por correo/webhook registrados)." %}
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="forge-drawer__footer">
+      {% if alert.can_manage and not alert.is_resolved %}
+      <button type="button" class="btn-primary"
+              hx-post="{% url 'alert-resolve' alert.id %}" hx-swap="none"
+              data-forge-modal-close>
+        {% icon "check" size=16 %} {% trans "Resolver alerta" %}
+      </button>
+      {% endif %}
+      <a class="btn-outline" href="{% url 'cert-detail' alert.certificate.id %}">
+        {% icon "arrow-right" size=16 %} {% trans "Ir al certificado" %}
+      </a>
+      <span class="flex-1"></span>
+      <button type="button" class="btn-outline" data-forge-modal-close>{% trans "Cerrar" %}</button>
+    </div>
+  </aside>
+</div>

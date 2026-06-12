@@ -1,0 +1,46 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Fragmento "Datos personales" (fiel a Perfil.jsx: Inputs Nombre/Correo + botón
+secundario "Cambiar contraseña"). Es el target del guardado parcial HTMX: la
+vista re-renderiza este mismo bloque (valores frescos o errores) y empuja toast.
+{% endcomment %}
+<form id="section-personal"
+      hx-post="{% url 'profile-section' 'personal' %}"
+      hx-target="#section-personal"
+      hx-swap="outerHTML"
+      style="display:flex; flex-direction:column; gap:14px;">
+  <div class="perfil-field">
+    <label class="perfil-field__label" for="{{ personal_form.first_name.id_for_label }}">{% trans "Nombre" %}</label>
+    <div class="perfil-control">
+      <input type="text" name="first_name" id="{{ personal_form.first_name.id_for_label }}"
+             class="perfil-input" value="{{ personal_form.first_name.value|default:'' }}">
+    </div>
+    {% for e in personal_form.first_name.errors %}<p class="perfil-field__error">{{ e }}</p>{% endfor %}
+  </div>
+  <div class="perfil-field">
+    <label class="perfil-field__label" for="{{ personal_form.last_name.id_for_label }}">{% trans "Apellido" %}</label>
+    <div class="perfil-control">
+      <input type="text" name="last_name" id="{{ personal_form.last_name.id_for_label }}"
+             class="perfil-input" value="{{ personal_form.last_name.value|default:'' }}">
+    </div>
+    {% for e in personal_form.last_name.errors %}<p class="perfil-field__error">{{ e }}</p>{% endfor %}
+  </div>
+  <div class="perfil-field">
+    <label class="perfil-field__label" for="{{ personal_form.email.id_for_label }}">{% trans "Correo" %}</label>
+    <div class="perfil-control">
+      <span class="perfil-control__lead">{% icon "mail" size=16 %}</span>
+      <input type="email" name="email" id="{{ personal_form.email.id_for_label }}"
+             class="perfil-input" value="{{ personal_form.email.value|default:'' }}">
+    </div>
+    {% for e in personal_form.email.errors %}<p class="perfil-field__error">{{ e }}</p>{% endfor %}
+  </div>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px;">
+    <button type="button" class="btn-secondary btn-sm"
+            hx-get="{% url 'password-change' %}"
+            hx-target="#modal-root" hx-swap="innerHTML">
+      {% icon "lock" size=15 %} {% trans "Cambiar contraseña" %}
+    </button>
+    <button type="submit" class="btn-primary btn-sm">{% icon "check" size=15 %} {% trans "Guardar" %}</button>
+  </div>
+</form>

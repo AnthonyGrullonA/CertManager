@@ -1,0 +1,12 @@
+{% comment %}
+Badge de la campana, reemplazado out-of-band tras cada mutación de estado
+personal. Mantiene sincronizado el contador del topbar sin recargar la página.
+
+El topbar renderiza el badge dentro de <summary>; aquí lo reemplazamos por id.
+Cuando el conteo es 0 emitimos un nodo vacío (mismo id) para que desaparezca.
+{% endcomment %}
+{% if forge_panel_count %}
+<span id="forge-notif-badge" class="forge-notif__badge" hx-swap-oob="true">{{ forge_panel_count }}</span>
+{% else %}
+<span id="forge-notif-badge" class="forge-notif__badge forge-notif__badge--empty" hidden hx-swap-oob="true"></span>
+{% endif %}

@@ -1,0 +1,19 @@
+{% load forge_icons %}
+{% load i18n %}
+<div class="forge-modal" data-forge-modal>
+  <div class="forge-modal__scrim" data-forge-modal-close></div>
+  <div class="forge-modal__panel" role="dialog" aria-modal="true" style="max-width:680px;">
+    <div class="forge-modal__header">
+      <div class="forge-modal__title">{% blocktrans with subject=rendered.subject %}Vista previa — asunto: {{ subject }}{% endblocktrans %}</div>
+      <button class="forge-modal__close" aria-label="{% trans 'Cerrar' %}" data-forge-modal-close>{% icon "x" size=16 %}</button>
+    </div>
+    <div class="forge-modal__body" style="background:var(--surface-sunken);">
+      <iframe title="{% trans 'Vista previa del correo' %}" style="width:100%;height:440px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:#fff"
+              srcdoc="{{ rendered.html }}"></iframe>
+    </div>
+    <div class="forge-modal__footer">
+      {% if tpl and can_edit %}<a class="btn-outline" href="{% url 'mailtemplate-edit' tpl.pk %}">{% icon "pencil" size=15 %} {% trans "Corregir" %}</a>{% endif %}
+      <button type="button" class="btn-ghost" data-forge-modal-close>{% trans "Cerrar" %}</button>
+    </div>
+  </div>
+</div>

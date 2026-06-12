@@ -1,0 +1,15 @@
+{% comment %}
+Respuesta de éxito del alta. Se inserta en #modal-root (lo vacía: el modal
+se cierra) y refresca la DataTable de usuarios vía hx-swap-oob. Lanza un toast es-DO.
+{% endcomment %}
+{# El cuerpo (insertado en #modal-root) queda vacío → modal cerrado. #}
+
+{# Refresca las filas de la tabla fuera de banda. #}
+<tbody id="user-rows" hx-swap-oob="innerHTML">
+  {% include "usuarios/_rows.html" %}
+</tbody>
+
+<script>
+  window.cfToast &&
+    window.cfToast("ok", "Usuario creado", "Se creó {{ invited.email|escapejs }}.");
+</script>

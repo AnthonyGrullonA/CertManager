@@ -1,0 +1,25 @@
+{% load forge_ui forge_avatars %}
+{% comment %}
+Avatar: avatar SVG generado (avatar_choice) o iniciales. NO hay subida de fotos
+(decisión: avatares SVG generados, sin storage).
+
+Uso explícito (Perfil, filas de tablas):
+  {% include "components/_avatar.html" with name=user.get_full_name email=user.email size="md" %}
+  {% include "components/_avatar.html" with name="María Reyes" avatar_choice=prefs.avatar_choice size="sm" %}
+
+Uso en el chrome (topbar/menú): no se pasa avatar_choice; cae al global del
+context_processor (forge_user_avatar_choice) para que el avatar del usuario
+actual también se vea fuera de Perfil.
+
+Tamaños: xs(22) sm(28) md(36) lg(44). Por defecto md.
+{% endcomment %}
+{% firstof avatar_choice forge_user_avatar_choice 0 as avatar_idx %}
+{% avatar_tint name as tint %}
+<span class="forge-avatar forge-avatar--{{ size|default:'md' }}{% if avatar_idx %} forge-avatar--media{% endif %}"
+      title="{{ name|default:email }}"
+      style="--avatar-tint: var({{ tint }});"
+      aria-hidden="true">
+  {% if avatar_idx %}
+    {% avatar_svg avatar_idx size=size|default:'md' %}
+  {% else %}{{ name|initials:email }}{% endif %}
+</span>

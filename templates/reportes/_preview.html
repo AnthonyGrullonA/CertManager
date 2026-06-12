@@ -1,0 +1,182 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Parcial de preview en vivo del reporte. Se reemplaza por HTMX al cambiar los
+filtros (hx-target="#report-preview"). Contiene:
+  - cabecera con título/ámbito y acciones de export (PDF/Excel/CSV/Todos),
+  - tira de KPIs por estado,
+  - donut + barras (Chart.js),
+  - DataTable de detalle con ForgeDataTable (data-forge-table) y EmptyState es-DO.
+
+Los botones de export construyen el querystring desde el formulario del
+constructor (re-cableado al final) para respetar los filtros vigentes.
+{% endcomment %}
+<section class="rep-card">
+  <div class="rep-card__head">
+    <div class="rep-card__heading">
+      <h3 class="rep-card__title">{{ result.template_label }}</h3>
+      <p class="rep-card__meta">{{ result.scope_label }} · {{ result.filters.date_range_label }} · {{ result.total }} {{ result.total_label }}</p>
+    </div>
+    <div class="rep-card__exports">
+      <a class="btn-outline btn-sm" href="{% url 'report-export' %}?format=PDF"
+         data-export="PDF">{% icon "file-text" size=15 %} PDF</a>
+      <a class="btn-outline btn-sm" href="{% url 'report-export' %}?format=EXCEL"
+         data-export="EXCEL">{% icon "download" size=15 %} Excel</a>
+      <a class="btn-outline btn-sm" href="{% url 'report-export' %}?format=CSV"
+         data-export="CSV">{% icon "download" size=15 %} CSV</a>
+      <a class="btn-primary btn-sm" href="{% url 'report-export' %}?formats=PDF&formats=EXCEL&formats=CSV"
+         data-export="ALL" title="{% trans 'Descarga PDF + Excel + CSV en un ZIP' %}">{% icon "download" size=15 %} {% trans "Todos" %}</a>
+    </div>
+  </div>
+
+  {% if result.total %}
+  {% comment %} ---------- Tira de KPIs por estado ---------- {% endcomment %}
+  <div class="rep-kpis">
+    <div class="rep-kpi rep-kpi--total">
+      <span class="rep-kpi__value">{{ result.total }}</span>
+      <span class="rep-kpi__label">{% trans "Total" %}</span>
+    </div>
+    <div class="rep-kpi">
+      <span class="rep-kpi__value">{{ result.kpis.vigente }}</span>
+      <span class="rep-kpi__label"><span class="rep-kpi__dot" style="background:#10b981"></span>{% trans "Vigentes" %}</span>
+    </div>
+    <div class="rep-kpi">
+      <span class="rep-kpi__value">{{ result.kpis.por_vencer }}</span>
+      <span class="rep-kpi__label"><span class="rep-kpi__dot" style="background:#f59e0b"></span>{% trans "Por vencer" %}</span>
+    </div>
+    <div class="rep-kpi">
+      <span class="rep-kpi__value">{{ result.kpis.critico }}</span>
+      <span class="rep-kpi__label"><span class="rep-kpi__dot" style="background:#ef4444"></span>{% trans "Críticos" %}</span>
+    </div>
+    <div class="rep-kpi">
+      <span class="rep-kpi__value">{{ result.kpis.vencido }}</span>
+      <span class="rep-kpi__label"><span class="rep-kpi__dot" style="background:#ef4444"></span>{% trans "Vencidos" %}</span>
+    </div>
+    <div class="rep-kpi">
+      <span class="rep-kpi__value">{{ result.kpis.error|add:result.kpis.sin_chequear }}</span>
+      <span class="rep-kpi__label"><span class="rep-kpi__dot" style="background:#f97316"></span>{% trans "Error / s.c." %}</span>
+    </div>
+  </div>
+
+  {% comment %} ---------- Gráficos ---------- {% endcomment %}
+  <div class="rep-charts">
+    <div class="rep-charts__donut"><canvas data-report-donut></canvas></div>
+    <div class="rep-charts__bars"><canvas data-report-bars></canvas></div>
+  </div>
+
+  {% comment %}
+    DataTable de detalle PAGINADA. Columnas y filas dependen de la PLANTILLA
+    (inventario/por-vencer/vencidos = certificados; historial = chequeos;
+    por-grupo = agregado), de modo que cada reporte muestra datos distintos.
+  {% endcomment %}
+  <div data-forge-table data-page-size="8" data-forge-sortable>
+    <div class="forge-table-scroll">
+      <table class="cf-data-source">
+        <thead>
+          <tr>
+            {% for col in result.columns %}
+            <th{% if forloop.counter >= 5 %} style="text-align:right;"{% endif %}>{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in result.rows %}
+          <tr>
+            {% for cell in row %}
+            <td{% if forloop.first %} class="rep-cell__domain"{% elif forloop.counter >= 5 %} class="rep-cell__num"{% endif %}>{{ cell|default:"—" }}</td>
+            {% endfor %}
+          </tr>
+          {% empty %}
+          <tr data-empty-row>
+            <td colspan="{{ result.columns|length }}" style="text-align:center; padding:32px; color:var(--text-tertiary);">
+              {% trans "Sin registros que coincidan con los filtros." %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {{ result.status_distribution|json_script:"report-status-data" }}
+  {{ result.expiry_windows|json_script:"report-windows-data" }}
+  <script>
+  (function () {
+    if (!window.Chart) return;
+    // Esquema global: peligro = rojo (Crítico/Vencido), atención = naranja (Error),
+    // verde = vigente, ámbar = por vencer, gris = sin chequear.
+    var STATE_COLORS = {
+      VIGENTE: "#10b981", POR_VENCER: "#f59e0b", CRITICO: "#ef4444",
+      VENCIDO: "#ef4444", ERROR: "#f97316", SIN_CHEQUEAR: "#94a3b8"
+    };
+    var statusEl = document.getElementById("report-status-data");
+    var windowsEl = document.getElementById("report-windows-data");
+    if (!statusEl || !windowsEl) return;
+    var statusData = JSON.parse(statusEl.textContent).filter(function (d) { return d.value > 0; });
+    var windowsData = JSON.parse(windowsEl.textContent);
+
+    var donut = document.querySelector("[data-report-donut]");
+    if (donut) {
+      if (donut._cfChart) donut._cfChart.destroy();
+      donut._cfChart = new Chart(donut, {
+        type: "doughnut",
+        data: {
+          labels: statusData.map(function (d) { return d.label; }),
+          datasets: [{
+            data: statusData.map(function (d) { return d.value; }),
+            backgroundColor: statusData.map(function (d) { return STATE_COLORS[d.key] || "#94a3b8"; }),
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "62%",
+          plugins: { legend: { position: "right", labels: { boxWidth: 10, font: { size: 12 } } } } }
+      });
+    }
+    var bars = document.querySelector("[data-report-bars]");
+    if (bars) {
+      if (bars._cfChart) bars._cfChart.destroy();
+      bars._cfChart = new Chart(bars, {
+        type: "bar",
+        data: {
+          labels: windowsData.map(function (d) { return d.label; }),
+          datasets: [{ data: windowsData.map(function (d) { return d.value; }),
+            backgroundColor: "#f59e0b", borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+      });
+    }
+  })();
+  </script>
+
+  {% else %}
+  {% comment %} ---------- EmptyState es-DO sin coincidencias ---------- {% endcomment %}
+  <div class="rep-empty">
+    <span class="rep-empty__icon">{% icon "file-text" size=44 %}</span>
+    <h4 class="rep-empty__title">{% trans "Sin coincidencias" %}</h4>
+    <p class="rep-empty__text">
+      {% trans "Ningún certificado coincide con los filtros seleccionados. Ajusta el rango de fechas, los grupos o el estado y vuelve a generar el reporte." %}
+    </p>
+  </div>
+  {% endif %}
+</section>
+
+{% comment %} Re-cablea los enlaces de export para que arrastren los filtros del constructor. {% endcomment %}
+<script>
+(function () {
+  var form = document.getElementById("report-builder");
+  if (!form) return;
+  function qs() {
+    return new URLSearchParams(new FormData(form)).toString();
+  }
+  document.querySelectorAll("[data-export]").forEach(function (a) {
+    var base = a.getAttribute("href").split("?")[0];
+    var own = a.getAttribute("href").split("?")[1] || "";
+    a.addEventListener("click", function () {
+      var extra = qs();
+      a.setAttribute("href", base + "?" + own + (extra ? "&" + extra : ""));
+    });
+  });
+})();
+</script>

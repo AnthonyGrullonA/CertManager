@@ -1,0 +1,114 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Panel Integraciones. URLs de webhook write-only: el GET nunca trae la URL real;
+muestra '●●● configurado' si ya hay una guardada y un POST vacío la conserva.
+{% endcomment %}
+{% include "config/panels/_saved_toast.html" %}
+<form hx-post="{% url 'settings-panel' 'integraciones' %}"
+      hx-target="#settings-panel" hx-swap="innerHTML">
+  <section class="card !p-0 overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "Webhooks · Teams / Slack" %}</h3>
+      <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Envía alertas a un canal mediante webhook entrante. Las URLs nunca se muestran en claro." %}</p>
+    </div>
+    <div class="px-6 pb-2 pt-3">
+      {% if form.non_field_errors %}<div class="text-sm text-red-600 mb-2">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="flex flex-col gap-4">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "URL del webhook (Slack)" %}</span>
+          {{ form.slack_url }}
+          {% if form.has_slack %}
+            <span class="text-xs text-emerald-600 inline-flex items-center gap-1">
+              {% icon "circle-check" size=13 %} ●●● configurado · deja en blanco para conservarlo
+            </span>
+          {% endif %}
+          {{ form.slack_url.errors }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "URL del webhook (Teams)" %}</span>
+          {{ form.teams_url }}
+          {% if form.has_teams %}
+            <span class="text-xs text-emerald-600 inline-flex items-center gap-1">
+              {% icon "circle-check" size=13 %} ●●● configurado · deja en blanco para conservarlo
+            </span>
+          {% endif %}
+          {{ form.teams_url.errors }}
+        </label>
+      </div>
+
+      <div class="flex items-center gap-6 py-4 mt-2 border-t border-slate-100">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-900">{% trans "Formato enriquecido" %}</div>
+          <div class="text-xs text-slate-500 mt-0.5">{% trans "Incluir color de estado y barra de validez en el mensaje." %}</div>
+        </div>
+        <div class="flex-none">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+            {{ form.rich_format }} {% trans "Activar" %}
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <button type="button" class="btn-outline inline-flex items-center gap-2"
+              hx-post="{% url 'settings-test-webhook' %}" hx-swap="none">
+        {% icon "webhook" size=16 %} {% trans "Probar envío" %}
+      </button>
+      <button type="submit" class="btn-primary">{% trans "Guardar" %}</button>
+    </div>
+  </section>
+</form>
+
+{% comment %} Sub-panel: Gateway SMS (FTP). Mismo patrón que webhooks; secreto write-only. {% endcomment %}
+<form hx-post="{% url 'settings-panel' 'integraciones' %}"
+      hx-target="#settings-panel" hx-swap="innerHTML" class="mt-5">
+  <input type="hidden" name="panel" value="sms">
+  <section class="card !p-0 overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="m-0 text-base font-semibold text-slate-900">{% trans "Gateway SMS" %}</h3>
+      <p class="mt-1 mb-0 text-sm text-slate-500 max-w-[560px]">{% trans "Envía alertas por SMS mediante el gateway FTP corporativo. La contraseña nunca se muestra en claro." %}</p>
+    </div>
+    <div class="px-6 pb-2 pt-3 flex flex-col gap-4">
+      <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+        {{ sms_form.enabled }} {% trans "Habilitar envío de SMS" %}
+      </label>
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-slate-700">{% trans "Host FTP" %}</span>
+        {{ sms_form.ftp_host }}
+        {{ sms_form.ftp_host.errors }}
+      </label>
+      <div class="grid grid-cols-2 gap-4">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Usuario FTP" %}</span>
+          {{ sms_form.ftp_user }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Contraseña FTP" %}</span>
+          {{ sms_form.ftp_password }}
+          {% if sms_form.has_password %}
+            <span class="text-xs text-emerald-600 inline-flex items-center gap-1">
+              {% icon "circle-check" size=13 %} ●●● configurado · deja en blanco para conservarlo
+            </span>
+          {% endif %}
+        </label>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Número por defecto" %}</span>
+          {{ sms_form.default_number }}
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-slate-700">{% trans "Archivo remoto" %}</span>
+          {{ sms_form.remote_filename }}
+        </label>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <button type="button" class="btn-outline inline-flex items-center gap-2"
+              hx-post="{% url 'settings-test-sms' %}" hx-swap="none">
+        {% icon "bell" size=16 %} {% trans "Probar SMS" %}
+      </button>
+      <button type="submit" class="btn-primary">{% trans "Guardar" %}</button>
+    </div>
+  </section>
+</form>

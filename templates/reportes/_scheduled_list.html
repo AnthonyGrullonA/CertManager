@@ -1,0 +1,87 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Lista de reportes programados (DataTable). Se renderiza dentro de
+#scheduled-list y se refresca tras crear/editar/eliminar (respuesta OOB cuando
+oob=True). El wrapper [data-forge-table] persiste con el contenedor y
+el adapter global reinicializa el control en htmx:afterSwap. Cada fila abre el modal de
+edición o dispara la eliminación con confirmación. El estado vacío usa una fila
+[data-empty-row] para que el paginación no la cuente.
+{% endcomment %}
+<div id="scheduled-list" {% if oob %}hx-swap-oob="true"{% endif %}>
+  <div data-forge-table data-page-size="8" data-forge-sortable>
+    <div class="forge-table-scroll">
+      <table class="cf-data-source">
+        <thead>
+          <tr>
+            <th>{% trans "Reporte" %}</th>
+            <th>{% trans "Formato(s)" %}</th>
+            <th>{% trans "Estado" %}</th>
+            <th data-no-sort style="text-align:right;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in scheduled %}
+          <tr>
+            <td>
+              <button type="button" class="rep-cell__sched-open"
+                      hx-get="{% url 'report-preview-scheduled' r.pk %}"
+                      hx-target="#drawer-root" hx-swap="innerHTML"
+                      title="{% trans 'Ver qué saca este reporte y enviar una prueba' %}">
+                <span class="rep-cell__sched-name">{{ r.name }}</span>
+                <span class="rep-cell__sched-meta">
+                  {{ r.get_frequency_display }}{% if r.frequency == 'EVERY_N_DAYS' and r.interval_days %} ({{ r.interval_days }}d){% endif %}{% if r.send_time %} · {{ r.send_time|time:"H:i" }}{% endif %}
+                  · {% if r.team %}{{ r.team.name }}{% else %}{% trans "Todos los grupos" %}{% endif %}
+                  {% if r.recipients %}· {{ r.recipients|join:", " }}{% endif %}
+                </span>
+              </button>
+            </td>
+            <td>
+              <span class="inline-flex flex-wrap gap-1">
+                {% for fmt in r.formats %}<span class="forge-tag forge-tag--neutral">{{ fmt }}</span>{% empty %}<span class="forge-tag forge-tag--neutral">{{ r.get_output_format_display }}</span>{% endfor %}
+              </span>
+            </td>
+            <td>
+              {% if r.is_active %}
+                <span class="badge badge--vigente">{% trans "Activo" %}</span>
+              {% else %}
+                <span class="badge badge--sin_chequear">{% trans "Pausado" %}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="rep-actions">
+                <button type="button" class="rep-iconbtn" aria-label="{% trans 'Ver y probar' %}"
+                        hx-get="{% url 'report-preview-scheduled' r.pk %}" hx-target="#drawer-root" hx-swap="innerHTML">
+                  {% icon "eye" size=16 %}
+                </button>
+                <button type="button" class="rep-iconbtn" aria-label="{% trans 'Editar' %}"
+                        hx-get="{% url 'report-edit' r.pk %}" hx-target="#modal-root">
+                  {% icon "pencil" size=16 %}
+                </button>
+                <button type="button" class="rep-iconbtn rep-iconbtn--danger" aria-label="{% trans 'Eliminar' %}"
+                        hx-post="{% url 'report-delete' r.pk %}"
+                        hx-target="#scheduled-list" hx-swap="outerHTML"
+                        hx-confirm="{% blocktrans with name=r.name %}¿Eliminar el reporte programado «{{ name }}»? Esta acción no se puede deshacer.{% endblocktrans %}">
+                  {% icon "trash-2" size=16 %}
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr data-empty-row>
+            <td colspan="4" style="padding:0;">
+              <div class="rep-empty">
+                <span class="rep-empty__icon">{% icon "clock" size=36 %}</span>
+                <h4 class="rep-empty__title">{% trans "Aún no hay reportes programados" %}</h4>
+                <p class="rep-empty__text">
+                  {% trans "Programa un envío recurrente para recibir el estado de tus certificados por correo." %}
+                </p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static forge_icons %}
+{% load i18n %}
+{% block title %}{% if form.instance.pk %}{% trans "Editar plantilla" %}{% else %}{% trans "Nueva plantilla" %}{% endif %} · CertManager{% endblock %}
+
+{% block content %}
+<div style="padding:28px; max-width:var(--content-max); margin:0 auto;">
+  <form id="tpl-form" method="post" action="">
+    {% csrf_token %}
+    {{ form.blocks_json }}
+
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-xl font-semibold tracking-tight">{% if form.instance.pk %}{% trans "Editar plantilla" %}{% else %}{% trans "Nueva plantilla de correo" %}{% endif %}</h1>
+        <p class="text-sm text-slate-500">{% trans "Arrastrá bloques al lienzo y reordenálos con el asa de cada bloque. Los campos obligatorios no se pueden quitar." %}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a class="btn-ghost" href="{% url 'mailtemplate-list' %}">{% trans "Cancelar" %}</a>
+        <button type="button" class="btn-outline"
+                hx-post="{% url 'mailtemplate-preview' %}" hx-include="#tpl-form"
+                hx-target="#modal-root" hx-swap="innerHTML">{% icon "eye" size=16 %} {% trans "Vista previa" %}</button>
+        <button type="submit" class="btn-primary">{% icon "check" size=16 %} {% trans "Guardar" %}</button>
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="card" style="border-color:var(--status-err-border);background:var(--status-err-bg);color:var(--status-err-fg);margin-bottom:12px;padding:10px 14px;font-size:var(--text-sm)">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="card" style="padding:16px;margin-bottom:16px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px 14px;align-items:end">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:var(--text-sm);color:var(--text-secondary)">{% trans "Nombre" %} {{ form.name }}{{ form.name.errors }}</label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:var(--text-sm);color:var(--text-secondary)">{% trans "Tipo" %} {{ form.kind }}</label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:var(--text-sm);color:var(--text-secondary)">{{ form.team.label }} {{ form.team }}</label>
+      <label style="grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-size:var(--text-sm);color:var(--text-secondary)">{% trans "Asunto" %} {{ form.subject }}{{ form.subject.errors }}</label>
+      <label class="flex items-center gap-2" style="font-size:var(--text-sm)">{{ form.is_default }} {% trans "Predeterminada del tipo" %}</label>
+      <label class="flex items-center gap-2" style="font-size:var(--text-sm)">{{ form.is_active }} {% trans "Activa" %}</label>
+    </div>
+
+    <div class="tpl-builder">
+      <aside class="tpl-palette card" aria-label="{% trans 'Bloques disponibles' %}">
+        <div class="tpl-pane-title">{% trans "Bloques" %}</div>
+        <div id="tpl-palette-items" class="tpl-palette-items"></div>
+        <div class="tpl-pane-title" style="margin-top:16px">{% trans "Campos de dato" %}</div>
+        <p style="font-size:var(--text-micro);color:var(--text-tertiary);margin:0 0 8px">{% trans "🔒 = obligatorio (siempre presente)" %}</p>
+        <div id="tpl-data-items" class="tpl-palette-items"></div>
+      </aside>
+      <section class="tpl-canvas-wrap card">
+        <div class="tpl-pane-title">{% trans "Lienzo" %}</div>
+        <div id="tpl-canvas" class="tpl-canvas"></div>
+        <p id="tpl-empty" class="tpl-empty">{% trans "Arrastrá o hacé clic en un bloque para empezar." %}</p>
+      </section>
+    </div>
+  </form>
+</div>
+{{ all_variables|json_script:"tpl-vars" }}
+{{ mandatory_by_kind|json_script:"tpl-mandatory" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/template-builder.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load forge_ui %}{% load i18n %}
+{% comment %}
+Barra de validez (espejo de ValidityBar.jsx). El relleno = % del periodo de
+validez restante; el color = familia del estado. Si el estado es VENCIDO el
+relleno se fuerza a 100% (rojo lleno).
+Uso:
+  {% include "components/_validity_bar.html" with percent=cert.validity_percent status=cert.status days_left=cert.days_left %}
+{% endcomment %}
+{% with fam=status|status_family %}
+<div class="forge-validity"
+     role="progressbar"
+     aria-valuemin="0" aria-valuemax="100"
+     aria-valuenow="{{ percent|default:0 }}"
+     aria-label="{% if days_left != None %}{% blocktrans with d=days_left %}{{ d }} días restantes{% endblocktrans %}{% else %}{% trans 'Validez del certificado' %}{% endif %}">
+  <div class="forge-validity__fill"
+       style="width: {% if fam == 'exp' %}100{% else %}{{ percent|default:0 }}{% endif %}%;
+              background: var(--status-{{ fam }}-solid);"></div>
+</div>
+{% endwith %}

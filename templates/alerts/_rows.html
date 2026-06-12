@@ -1,0 +1,27 @@
+{% load forge_icons %}
+{% load i18n %}
+{% comment %}
+Filas (innerHTML del <tbody id="alert-rows">) del Centro de Alertas. Es el
+target de:
+- cambio de tab (GET alert-list?tab=... con HX-Request → este parcial);
+- evento `cf:alerts-changed` (emitido tras read/dismiss/read-all/clear-panel),
+  que dispara un re-fetch del tab activo para reflejar el nuevo estado.
+
+El <tbody> se reemplaza por innerHTML; el wrapper [data-forge-table] PERSISTE en
+center.html, de modo que ForgeDataTable re-pagina en htmx:afterSwap. Las filas
+archivadas se conservan SIEMPRE (tenues + tag "Archivada"). La fila de estado
+vacío lleva data-empty-row para que la paginación no la cuente.
+{% endcomment %}
+{% for alert in rows %}
+  {% include "alerts/_row.html" with alert=alert active_tab=active_tab %}
+{% empty %}
+<tr data-empty-row>
+  <td colspan="5" class="alert-empty-cell">
+    <div class="alert-empty">
+      <span class="alert-empty__icon">{% icon "bell" size=28 %}</span>
+      <p class="alert-empty__title">{% trans "Sin alertas en esta vista" %}</p>
+      <p class="alert-empty__msg">{% trans "No hay alertas que coincidan con el filtro seleccionado." %}</p>
+    </div>
+  </td>
+</tr>
+{% endfor %}

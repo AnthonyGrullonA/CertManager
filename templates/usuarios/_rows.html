@@ -1,0 +1,15 @@
+{% load forge_icons %}
+{% load i18n %}
+{% for u in users %}
+  {% include "usuarios/_row.html" with u=u %}
+{% empty %}
+<tr data-empty-row>
+  <td colspan="6">
+    <div class="forge-usuarios__empty">
+      <span class="forge-usuarios__empty-icon">{% icon "users" size=26 %}</span>
+      <p class="forge-usuarios__empty-title">{% trans "Sin resultados" %}</p>
+      <p class="forge-usuarios__empty-text">{% trans "No hay usuarios que coincidan con la búsqueda." %}</p>
+    </div>
+  </td>
+</tr>
+{% endfor %}
