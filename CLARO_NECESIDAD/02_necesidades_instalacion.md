@@ -71,9 +71,13 @@ CertManager **no instala** la base de datos. Se debe solicitar:
 | Conectividad | El servidor de app debe **alcanzar el MySQL por TCP 3306** |
 | `sql_mode` | la app fuerza `STRICT_TRANS_TABLES` por conexión |
 
-Cadena resultante (en el `.env`):
+Configuración resultante (en el `.env`, valores **por separado**):
 ```
-DATABASE_URL=mysql://USUARIO:CONTRASEÑA@HOST_MYSQL:3306/certmanager
+DB_NAME=certmanager
+DB_USER=certmanager
+DB_PASSWORD=<contraseña de Claro>
+DB_HOST=<host/IP del MySQL>
+DB_PORT=3306
 ```
 
 ---
@@ -155,7 +159,7 @@ Todas viven en el `.env` (ver `CLARO_NECESIDAD/.env.example` y el documento
 | `DJANGO_SETTINGS_MODULE` | `config.settings.prod` |
 | `DJANGO_SECRET_KEY` | Clave secreta (generar, ver doc 03) |
 | `ALLOWED_HOSTS` | FQDN(s) del aplicativo |
-| `DATABASE_URL` | MySQL externa (de Claro) |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | MySQL externa (de Claro), valores por separado |
 | `CSRF_TRUSTED_ORIGINS` | `https://<fqdn>` |
 
 Opcionales: `EMAIL_*` (SMTP), `LOG_DIR`, `SECURE_*`, `OBSFORGE_*`, `CF_OWNER_*`.

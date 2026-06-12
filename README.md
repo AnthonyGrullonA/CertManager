@@ -14,7 +14,7 @@ planificador en-proceso.
 ## Stack
 
 - **Django 5** · **DRF** (API con API keys) · server-rendered (**Forge UI** + Tailwind + **HTMX**)
-- **MySQL 8** (producción) · **SQLite** (local / pruebas) vía `DATABASE_URL`
+- **MySQL 8** (producción, vars `DB_*` por separado) · **SQLite** (local / pruebas)
 - Monitoreo, reportes y backups por **APScheduler** en-proceso (o `cron`)
 - `cryptography` (parseo de certs) · `ldap3` (LDAP) · `pyotp` (2FA TOTP) · `reportlab`/`openpyxl` (PDF/Excel)
 - **WhiteNoise** (estáticos, sin CDN) · **django-csp** · logging JSON (opcionalmente vía obsforge → Loki)
@@ -67,8 +67,9 @@ cp CLARO_NECESIDAD/.env.example CLARO_NECESIDAD/.env   # completar (BD externa, 
 ./install_docker.sh           # build + up (web + scheduler)
 ./install_docker.sh logs      # ver logs   ·   ./install_docker.sh down
 ```
-Usa `docker-compose.app.yml`: **no** levanta BD; la toma de `DATABASE_URL` en el
-`.env`. Publica en `127.0.0.1:8000` (poné un NGINX/LB con TLS delante).
+Usa `docker-compose.app.yml`: **no** levanta BD; la toma de las vars `DB_*`
+(`DB_HOST`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_PORT`) del `.env`. Publica en
+`127.0.0.1:8000` (poné un NGINX/LB con TLS delante).
 
 ### 3) Servidor Linux como servicio
 
@@ -125,8 +126,9 @@ infraestructura:
 - **`03_cambios_para_produccion.md`** — checklist + carga del `cert.txt`.
 - **`.env.example`** — plantilla; el `.env` real va gitignored (secretos).
 
-`config.settings.prod` exige `DJANGO_SECRET_KEY`, `ALLOWED_HOSTS` y `DATABASE_URL`,
-y fuerza HTTPS (HSTS, cookies `Secure`) tras un proxy con `X-Forwarded-Proto`.
+`config.settings.prod` exige `DJANGO_SECRET_KEY`, `ALLOWED_HOSTS` y los datos de
+BD (`DB_NAME`/`DB_USER`/`DB_PASSWORD`/`DB_HOST`), y fuerza HTTPS (HSTS, cookies
+`Secure`) tras un proxy con `X-Forwarded-Proto`.
 Healthcheck sin auth en `GET /health/` (200 si la BD responde, 503 si no).
 
 ---

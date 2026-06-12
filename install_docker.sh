@@ -3,7 +3,7 @@
 # install_docker.sh — Levanta SOLO el contenedor del aplicativo con Docker.
 #
 # La base de datos MySQL es EXTERNA (la provee Claro): se configura por
-# DATABASE_URL en CLARO_NECESIDAD/.env. Este script NO levanta ninguna BD.
+# las vars DB_* en CLARO_NECESIDAD/.env. Este script NO levanta ninguna BD.
 #
 # Requisitos: Docker + Docker Compose v2. Completar antes CLARO_NECESIDAD/.env.
 # El TLS lo termina un NGINX/balanceador delante (el contenedor publica en
@@ -26,7 +26,7 @@ case "${1:-up}" in
   down)  $COMPOSE down ;;
   logs)  $COMPOSE logs -f --tail=100 ;;
   up|"")
-    echo ">> Construyendo y levantando el aplicativo (DB externa vía DATABASE_URL)…"
+    echo ">> Construyendo y levantando el aplicativo (DB externa vía vars DB_*)…"
     $COMPOSE up -d --build
     echo ""
     echo ">> Estado:"; $COMPOSE ps

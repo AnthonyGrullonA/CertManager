@@ -5,7 +5,7 @@
 #   · Gunicorn (web) + run_scheduler (tareas) como unidades systemd.
 #   · NGINX como reverse proxy con terminación TLS (redirección 80->443).
 #   · Solo el APLICATIVO: la base de datos MySQL es EXTERNA (la provee Claro,
-#     vía DATABASE_URL en CLARO_NECESIDAD/.env).
+#     vía las vars DB_* en CLARO_NECESIDAD/.env).
 #
 # Requisitos: ejecutar como root en RHEL/Rocky/Debian/Ubuntu. Completar antes el
 # archivo CLARO_NECESIDAD/.env (copia de .env.example) y, si vas a terminar TLS

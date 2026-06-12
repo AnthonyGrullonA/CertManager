@@ -34,7 +34,7 @@ Cambios obligatorios respecto al ejemplo:
 | `DJANGO_SECRET_KEY` | `<GENERAR>` | la clave generada (paso 1.4) — **secreto** |
 | `ALLOWED_HOSTS` | `certmanager.claro.com.do` | el/los FQDN reales |
 | `CSRF_TRUSTED_ORIGINS` | `https://certmanager.claro.com.do` | `https://<fqdn real>` |
-| `DATABASE_URL` | `mysql://USER:PASS@HOST:3306/certmanager` | credenciales reales de Claro — **secreto** |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | valores de ejemplo | credenciales reales de Claro (valores por separado) — `DB_PASSWORD` es **secreto** |
 | `EMAIL_HOST` / `EMAIL_*` | vacío | datos del SMTP corporativo (si se usa correo) |
 | `DEFAULT_FROM_EMAIL` | `certificados@claro.com.do` | remitente real |
 | `LOG_DIR` | `/var/log/certmanager` | (dejar, o ruta permitida) |

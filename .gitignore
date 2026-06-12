@@ -37,9 +37,6 @@ node_modules/
 npm-debug.log*
 yarn-error.log*
 
-# ---- Legacy (no se versiona: fuente de migración con credenciales) ----
-certapp_old/
-
 # ---- IDE / SO ----
 .idea/
 .vscode/

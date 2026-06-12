@@ -1,7 +1,7 @@
 # =============================================================================
 # docker-compose.app.yml — SOLO el aplicativo (web + scheduler).
 # La base de datos MySQL es EXTERNA (la provee Claro): se configura por
-# DATABASE_URL dentro de CLARO_NECESIDAD/.env. Aquí NO se levanta ninguna BD ni
+# las vars DB_* dentro de CLARO_NECESIDAD/.env. Aquí NO se levanta ninguna BD ni
 # stack de observabilidad.
 #
 # Uso:  ./install_docker.sh         (o: docker compose -f docker-compose.app.yml up -d --build)

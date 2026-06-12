@@ -10,18 +10,23 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-# MySQL obligatorio vía DATABASE_URL (p.ej. mysql://user:pass@db:3306/certforge).
-# Estándar corporativo: MySQL 8 en contenedor. django-environ deriva el ENGINE
-# del esquema de la URL.
-DATABASES = {"default": env.db("DATABASE_URL")}
-
-# Opciones específicas de MySQL: utf8mb4 (Unicode completo) y modo estricto.
-if "mysql" in DATABASES["default"].get("ENGINE", ""):
-    DATABASES["default"].setdefault("OPTIONS", {})
-    DATABASES["default"]["OPTIONS"].update({
-        "charset": "utf8mb4",
-        "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-    })
+# MySQL 8 (estándar corporativo) con los valores POR SEPARADO (no DATABASE_URL).
+# Obligatorios: DB_NAME, DB_USER, DB_PASSWORD, DB_HOST. DB_PORT por defecto 3306.
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT", default="3306"),
+        # utf8mb4 (Unicode completo) + modo estricto.
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
 
 # --- Estáticos (WhiteNoise + manifest) ------------------------------------
 # ManifestStaticFilesStorage (con hash de contenido) SOLO en prod. WhiteNoise
