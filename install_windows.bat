@@ -1,13 +1,16 @@
 @echo off
 REM ============================================================================
-REM install_windows.bat - CertManager para PRUEBAS en Windows con SQLite.
+REM install_windows.bat - CertManager para PRUEBAS / MIGRACION local (SQLite).
 REM
-REM   - Perfil standalone (SQLite automatico, sin MySQL, sin secretos).
-REM   - Crea un virtualenv, instala dependencias, migra y arranca el servidor
-REM     de desarrollo en http://127.0.0.1:8000/
-REM   - NO usar en produccion: es solo para validar el aplicativo localmente.
+REM   - Perfil standalone (SQLite automatico, sin MySQL).
+REM   - venv + dependencias + migra la BD SQLite.
+REM   - Carga Owner + configuracion por defecto Y MIGRA EL MONITOREO desde el
+REM     cert.txt si esta en la raiz (data_update_certs_app).
+REM   - Arranca el server de desarrollo en http://127.0.0.1:8000/
+REM   - NO usar en produccion: es para validar/migrar localmente.
 REM
-REM Requisitos: Python 3.11+ en el PATH. (Node.js es opcional, para el CSS.)
+REM Requisitos: Python 3.11+ en el PATH. (Node.js opcional, para el CSS.)
+REM Coloca tu cert.txt en la raiz ANTES de correr para migrar todo el monitoreo.
 REM Uso:  doble clic, o en una consola:  install_windows.bat
 REM ============================================================================
 setlocal
@@ -55,11 +58,23 @@ if errorlevel 1 ( echo ERROR en migrate. & exit /b 1 )
 echo ^>^> Recolectando estaticos ...
 python manage.py collectstatic --no-input
 
+REM --- Owner + configuracion (+ migracion del monitoreo desde cert.txt) -------
+if "%CF_OWNER_EMAIL%"=="" set "CF_OWNER_EMAIL=jairol_grullon@claro.com.do"
+if "%CF_OWNER_PASSWORD%"=="" set /p "CF_OWNER_PASSWORD=Contrasena para el Owner (%CF_OWNER_EMAIL%): "
+
+if exist "cert.txt" (
+  echo ^>^> Migrando el monitoreo desde cert.txt ^(Owner + configuracion + certificados^) ...
+  python manage.py data_update_certs_app --source cert.txt
+) else (
+  echo ^>^> No hay cert.txt en la raiz: cargo solo Owner + configuracion.
+  echo    Coloca tu cert.txt en la raiz y vuelve a correr para MIGRAR el monitoreo.
+  python manage.py data_update_certs_app --skip-certs
+)
+if errorlevel 1 ( echo ERROR cargando datos. & exit /b 1 )
+
 echo.
-echo ^>^> Si es la primera vez, crea un usuario administrador en otra consola:
-echo        .venv\Scripts\activate.bat ^&^& python manage.py createsuperuser
-echo.
-echo ^>^> Arrancando en http://127.0.0.1:8000/  (Ctrl+C para detener)
+echo ^>^> Listo. Entra en http://127.0.0.1:8000/ con el Owner %CF_OWNER_EMAIL%.
+echo ^>^> Arrancando ^(Ctrl+C para detener^) ...
 python manage.py runserver 127.0.0.1:8000
 
 endlocal

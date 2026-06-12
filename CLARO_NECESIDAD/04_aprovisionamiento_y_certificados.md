@@ -112,11 +112,12 @@ Pasos completos (imagen, ConfigMap, Secret de app, Ingress, bootstrap) en
 
 ---
 
-## 6. Datos: la carga de `cert.txt` es OPCIONAL (para más adelante)
+## 6. Datos: migración del monitoreo (`cert.txt`)
 
-El aprovisionamiento (Owner + configuración) **no** requiere `cert.txt`. Ese
-archivo es **solo para migrar la data de certificados** desde el sistema legacy
-**cuando se tenga la versión actualizada**. Todo queda **listo** para ese momento:
+La carga del `cert.txt` **es la migración de todo el monitoreo** (dominios,
+umbrales, correos de soporte) al aplicativo — no es un paso opcional, solo está
+**pendiente del `cert.txt` actualizado**. Mientras tanto se puede aprovisionar
+Owner + configuración con `--skip-certs` y completar la migración después:
 
 ```bash
 # bootstrap mínimo (Owner + configuración por defecto), SIN certificados:

@@ -100,13 +100,14 @@ Al usar `DJANGO_SETTINGS_MODULE=config.settings.prod`, automáticamente:
 
 ---
 
-## 7. Carga de certificados (`cert.txt`) — OPCIONAL / PARA MÁS ADELANTE
+## 7. Migración del monitoreo (`cert.txt`)
 
-> **No es necesario para aprovisionar.** El Owner y la configuración se cargan con
-> `data_update_certs_app --skip-certs`. El `cert.txt` es **solo para migrar la
-> data de certificados del sistema legacy** cuando se tenga la versión
-> actualizada; todo queda listo para ese momento. Lo coloca el responsable del
-> despliegue en la raíz (no viene en el repo; está en `.gitignore`).
+> Esta es **la migración de toda la data de monitoreo** al aplicativo (no es un
+> paso opcional): el `cert.txt` trae los dominios, umbrales y correos de soporte.
+> Solo está **pendiente del `cert.txt` actualizado**. Mientras no se tenga, se
+> puede aprovisionar Owner + configuración con `--skip-certs` y completar la
+> migración después. El `cert.txt` lo coloca el responsable en la raíz (no viene
+> en el repo; está en `.gitignore`).
 
 ### 7.1 Colocar el archivo
 Copiar el `cert.txt` en la **raíz del repo** (junto a `manage.py` y a
