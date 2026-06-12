@@ -29,6 +29,12 @@ k8s/*-secret.yaml
 data_update_certs_app.env
 /cert.txt
 
+# Artefactos del build de PDFs (los .pdf y package.json SÍ se versionan;
+# node_modules/lock se regeneran con build_pdfs.sh)
+CLARO_NECESIDAD/docs_pdf/node_modules/
+CLARO_NECESIDAD/docs_pdf/.build/
+CLARO_NECESIDAD/docs_pdf/package-lock.json
+
 # ---- Base de datos local / datos ----
 db.sqlite3
 db.sqlite3-journal

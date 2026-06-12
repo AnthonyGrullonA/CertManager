@@ -1,0 +1,79 @@
+/* Plantilla de impresión para los documentos de entrega de CertManager. */
+:root {
+  --brand: #DA291C;        /* rojo Claro */
+  --brand-dark: #A81F15;
+  --ink: #1f2733;
+  --muted: #5b6675;
+  --line: #e3e7ec;
+  --soft: #f6f8fa;
+}
+
+@page { size: A4; }   /* los márgenes los fija puppeteer (con footer de página) */
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  font-size: 11pt;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Banda de marca arriba del documento */
+.doc-head {
+  border-top: 6px solid var(--brand);
+  padding-top: 10px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+.doc-head .brand { font-weight: 800; color: var(--brand); letter-spacing: .3px; }
+.doc-head .meta { font-size: 8.5pt; color: var(--muted); text-align: right; }
+
+.doc-foot {
+  margin-top: 26px; padding-top: 8px; border-top: 1px solid var(--line);
+  font-size: 8pt; color: var(--muted); text-align: center;
+}
+
+h1 {
+  color: var(--brand-dark);
+  font-size: 20pt; margin: 4px 0 10px; line-height: 1.15;
+  border-bottom: 2px solid var(--brand); padding-bottom: 6px;
+}
+h2 { color: var(--brand-dark); font-size: 14pt; margin: 20px 0 8px; }
+h3 { color: var(--ink); font-size: 12pt; margin: 16px 0 6px; }
+h2, h3, tr, li { page-break-inside: avoid; }
+
+p { margin: 8px 0; }
+a { color: var(--brand-dark); text-decoration: none; }
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 9.5pt;
+  background: var(--soft); padding: 1px 4px; border-radius: 3px;
+}
+pre {
+  background: #0f1722; color: #e6edf3; padding: 10px 12px; border-radius: 6px;
+  font-size: 8.5pt; overflow: hidden; line-height: 1.45;
+}
+pre code { background: none; color: inherit; padding: 0; }
+
+blockquote {
+  margin: 10px 0; padding: 8px 12px; background: var(--soft);
+  border-left: 4px solid var(--brand); color: var(--muted); border-radius: 0 4px 4px 0;
+}
+
+table {
+  width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 9.5pt;
+}
+th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: var(--brand); color: #fff; font-weight: 600; }
+tbody tr:nth-child(even) { background: var(--soft); }
+
+ul, ol { margin: 8px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }

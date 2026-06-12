@@ -1,36 +1,73 @@
-# CLARO_NECESIDAD — Documentación de despliegue (Aplicativo N1: CertManager)
+# CertManager — Paquete de entrega y gobierno (Aplicativo N1)
 
-Carpeta con todo lo que el equipo de Claro necesita para instalar y aprobar el
-despliegue de **CertManager** (monitoreo de certificados SSL/TLS).
+Documentación de control normativo para la **entrega del aplicativo CertManager**
+(monitoreo de certificados SSL/TLS) al equipo/cliente. Todos los documentos están
+aterrizados en esta aplicación real.
 
-## Contenido
+- **Aplicativo:** CertManager · **Versión de entrega:** 1.0.0
+- **Tipo:** Aplicación web (Django) + API REST · monitoreo de certificados
+- **Propietario funcional (Owner):** `jairol_grullon@claro.com.do`
+- **Criticidad:** Media (operativo/seguridad; no transaccional)
 
-| Archivo | Qué es |
-|---------|--------|
-| [`01_diagrama_flujo_datos.md`](01_diagrama_flujo_datos.md) | Diagrama de alto nivel del flujo de datos (Mermaid + ASCII + detalle). |
-| [`02_necesidades_instalacion.md`](02_necesidades_instalacion.md) | Alcance, requisitos del servidor, paquetes, **egress/ingress (firewall)**, BD externa. |
-| [`03_cambios_para_produccion.md`](03_cambios_para_produccion.md) | Checklist de cambios y configuración para producción. |
-| [`04_aprovisionamiento_y_certificados.md`](04_aprovisionamiento_y_certificados.md) | **Manual del equipo:** servir en 443/TLS con el wildcard `*.claro.com.do` y **dónde colocar el certificado** (Linux/Docker/K8s). |
-| [`../k8s/`](../k8s/) | Manifiestos de Kubernetes (Deployments, Service, Ingress TLS, Job de migración). |
-| [`.env.example`](.env.example) | Plantilla del `.env` de producción (cópiala a `.env` y complétala). |
-| `.env` | Configuración real (NO versionada — contiene secretos). |
+---
 
-## Scripts de instalación (en la raíz del repo)
+## Índice de documentos
 
-| Script | Para qué |
-|--------|----------|
-| `install_server.sh` | Instala en un **servidor Linux** como servicio (Gunicorn + Scheduler vía systemd, NGINX con TLS). DB externa. |
-| `install_docker.sh` + `docker-compose.app.yml` | Levanta **solo el contenedor** del aplicativo con Docker. DB externa. |
-| `install_windows.bat` | Arranca local en **Windows con SQLite** para **pruebas**. |
-| `data_update_certs_app.sh` | Bootstrap: Owner + configuración por defecto + carga de certificados (`cert.txt`). |
+### A. Identificación y arquitectura
+| Doc | Contenido |
+|-----|-----------|
+| [`05_ficha_tecnica.md`](05_ficha_tecnica.md) | Ficha técnica del aplicativo (datos clave en una página). |
+| [`06_arquitectura.md`](06_arquitectura.md) | Arquitectura, componentes e integraciones. |
+| [`01_diagrama_flujo_datos.md`](01_diagrama_flujo_datos.md) | Diagrama de alto nivel del flujo de datos. |
 
-> **`cert.txt` es un paso manual:** lo coloca el responsable en la raíz del repo
-> (no se versiona). Formato y ejecución documentados en
-> [`03_cambios_para_produccion.md` §7](03_cambios_para_produccion.md).
+### B. Despliegue
+| Doc | Contenido |
+|-----|-----------|
+| [`02_necesidades_instalacion.md`](02_necesidades_instalacion.md) | Requisitos de servidor, paquetes, **egress/ingress (firewall)**, BD externa. |
+| [`03_cambios_para_produccion.md`](03_cambios_para_produccion.md) | Checklist de configuración para producción + carga de datos. |
+| [`04_aprovisionamiento_y_certificados.md`](04_aprovisionamiento_y_certificados.md) | Servir en 443/TLS con `*.claro.com.do`; dónde colocar el certificado (Linux/Docker/K8s). |
+| [`../k8s/`](../k8s/) | Manifiestos de Kubernetes. |
+| [`.env.example`](.env.example) | Plantilla de configuración de producción. |
 
-## Resumen de aprobaciones a solicitar
+### C. Operación y continuidad
+| Doc | Contenido |
+|-----|-----------|
+| [`07_manual_operacion.md`](07_manual_operacion.md) | Runbook: arranque/parada, monitoreo, tareas, troubleshooting. |
+| [`08_respaldo_recuperacion_continuidad.md`](08_respaldo_recuperacion_continuidad.md) | Respaldo, recuperación (RTO/RPO) y continuidad. |
 
-1. **Base de datos MySQL 8** externa (host/usuario/clave/BD) — ver doc 02 §3.
-2. **Aperturas de firewall**: egress (hosts a monitorear :443, SMTP, LDAP, SMS-FTP, webhooks) e ingress (:443) — doc 02 §4 y §6.
-3. **Certificado TLS** del FQDN del aplicativo — doc 02 §7.
-4. (Opcional) acceso al **índice privado** para `obsforge` y a mirrors PyPI/npm — doc 02 §5.
+### D. Seguridad y cumplimiento
+| Doc | Contenido |
+|-----|-----------|
+| [`09_seguridad_y_cumplimiento.md`](09_seguridad_y_cumplimiento.md) | Controles de seguridad, OWASP Top 10, matriz de cumplimiento. |
+| [`10_gestion_accesos_y_roles.md`](10_gestion_accesos_y_roles.md) | RBAC, políticas de acceso/contraseña/2FA, matriz RACI. |
+| [`11_proteccion_de_datos.md`](11_proteccion_de_datos.md) | Datos personales tratados, retención y privacidad. |
+
+### E. Calidad y requisitos
+| Doc | Contenido |
+|-----|-----------|
+| [`12_plan_y_evidencias_de_pruebas.md`](12_plan_y_evidencias_de_pruebas.md) | Plan de pruebas y evidencias (suite + e2e). |
+| [`13_requisitos.md`](13_requisitos.md) | Requisitos funcionales y no funcionales (RNF). |
+
+### F. Gobierno y entrega
+| Doc | Contenido |
+|-----|-----------|
+| [`14_gestion_de_cambios_y_versiones.md`](14_gestion_de_cambios_y_versiones.md) | Control de versiones, ramas, releases y cambios. |
+| [`15_sbom_y_licencias.md`](15_sbom_y_licencias.md) | Inventario de dependencias (SBOM) y licencias. |
+| [`17_soporte_y_sla.md`](17_soporte_y_sla.md) | Niveles de soporte, contacto y escalamiento. |
+| [`18_acta_de_entrega.md`](18_acta_de_entrega.md) | Acta de entrega-recepción (para firmar). |
+
+### G. Usuario y referencia
+| Doc | Contenido |
+|-----|-----------|
+| [`16_manual_de_usuario.md`](16_manual_de_usuario.md) | Manual de usuario (pantallas, roles, tareas). |
+| [`19_glosario.md`](19_glosario.md) | Glosario de términos. |
+| [`../PRESENTACION_VDI.md`](../PRESENTACION_VDI.md) | Primera visibilidad en VDI sin admin. |
+
+---
+
+## Aprobaciones a solicitar (resumen)
+
+1. **MySQL 8** externa (host/usuario/clave/BD) — doc 02 §3.
+2. **Aperturas de firewall** egress/ingress — doc 02 §4 y §6.
+3. **Certificado TLS** `*.claro.com.do` — doc 04 §2.
+4. (Opcional) índice privado `obsforge` + mirrors PyPI/npm — doc 02 §5.

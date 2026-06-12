@@ -1,0 +1,14 @@
+{
+  "name": "certmanager-docs-pdf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generador de PDFs del paquete de entrega (CLARO_NECESIDAD) con la plantilla de marca.",
+  "type": "module",
+  "scripts": {
+    "build": "bash build_pdfs.sh"
+  },
+  "dependencies": {
+    "markdown-it": "^14.2.0",
+    "puppeteer-core": "^25.1.0"
+  }
+}
