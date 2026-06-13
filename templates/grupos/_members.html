@@ -8,10 +8,10 @@ roles, request_user_id.
 {% if can_manage %}
 <form hx-post="{% url 'team-member-add' team.id %}"
       hx-target="#group-members" hx-swap="innerHTML"
-      style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle);">
+      style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border-subtle);">
   {% csrf_token %}
-  <div style="flex:1; min-width:160px;">
-    <label class="block text-sm font-medium mb-1">{% trans "Agregar miembro" %}</label>
+  <div style="flex:1; min-width:180px;">
+    <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Agregar miembro" %}</label>
     <select name="user" class="input" required>
       <option value="">{% trans "Selecciona usuario…" %}</option>
       {% for u in available_users %}
@@ -22,7 +22,7 @@ roles, request_user_id.
     </select>
   </div>
   <div style="width:160px;">
-    <label class="block text-sm font-medium mb-1">{% trans "Rol" %}</label>
+    <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Rol" %}</label>
     <select name="role" class="input">
       {% for value, label in roles %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
     </select>
