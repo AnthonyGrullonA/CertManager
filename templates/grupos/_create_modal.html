@@ -35,27 +35,27 @@ Variable: form (TeamForm).
       {% endif %}
       <div style="display:flex; flex-direction:column; gap:16px;">
         <div>
-          <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Nombre del grupo" %}</label>
+          <label for="{{ form.name.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Nombre del grupo" %}</label>
           {{ form.name }}
           {% if form.name.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.name.errors|join:" " }}</div>{% endif %}
         </div>
         <div>
-          <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Descripción" %}</label>
+          <label for="{{ form.description.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Descripción" %}</label>
           {{ form.description }}
         </div>
         <div>
-          <label for="{{ form.default_email.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Correo por defecto" %}</label>
+          <label for="{{ form.default_email.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Correo por defecto" %}</label>
           {{ form.default_email }}
           <p style="margin:4px 0 0; font-size:var(--text-micro); color:var(--text-tertiary);">{{ form.default_email.help_text }}</p>
           {% if form.default_email.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.default_email.errors|join:" " }}</div>{% endif %}
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div>
-            <label for="{{ form.default_threshold_days.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Umbral por defecto" %}</label>
+            <label for="{{ form.default_threshold_days.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Umbral por defecto" %}</label>
             {{ form.default_threshold_days }}
           </div>
           <div>
-            <label for="{{ form.default_check_interval.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Frecuencia" %}</label>
+            <label for="{{ form.default_check_interval.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Frecuencia" %}</label>
             {{ form.default_check_interval }}
           </div>
         </div>

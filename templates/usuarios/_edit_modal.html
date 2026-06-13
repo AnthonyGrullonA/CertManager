@@ -34,19 +34,19 @@ Variables: form (UserEditForm), target (User).
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
-              <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Nombre" %}</label>
+              <label for="{{ form.first_name.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Nombre" %}</label>
               {{ form.first_name }}
               {% if form.first_name.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.first_name.errors|join:" " }}</div>{% endif %}
             </div>
             <div>
-              <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Apellido" %}</label>
+              <label for="{{ form.last_name.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Apellido" %}</label>
               {{ form.last_name }}
               {% if form.last_name.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.last_name.errors|join:" " }}</div>{% endif %}
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">{% trans "Grupos" %}</label>
+            <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Grupos" %}</label>
             <div class="cf-checkgroup">
               {% for cb in form.groups %}
               <label class="cf-checkitem">{{ cb.tag }} {{ cb.choice_label }}</label>
@@ -58,7 +58,7 @@ Variables: form (UserEditForm), target (User).
           </div>
 
           <div>
-            <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Rol en los grupos" %}</label>
+            <label for="{{ form.role.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Rol en los grupos" %}</label>
             {{ form.role }}
             <div style="color:var(--text-tertiary); font-size:var(--text-micro); margin-top:4px;">{{ form.role.help_text }}</div>
           </div>

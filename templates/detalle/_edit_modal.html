@@ -34,28 +34,28 @@ Variables: form (CertificateForm), cert.
       {% endif %}
       <div style="display:flex; flex-direction:column; gap:16px;">
         <div>
-          <label for="{{ form.domain.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Dominio (host)" %}</label>
+          <label for="{{ form.domain.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Dominio (host)" %}</label>
           {{ form.domain }}
           {% if form.domain.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.domain.errors|join:" " }}</div>{% endif %}
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div>
-            <label for="{{ form.port.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Puerto" %}</label>
+            <label for="{{ form.port.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Puerto" %}</label>
             {{ form.port }}
             {% if form.port.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.port.errors|join:" " }}</div>{% endif %}
           </div>
           <div>
-            <label for="{{ form.alert_threshold_days.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Umbral de alerta" %}</label>
+            <label for="{{ form.alert_threshold_days.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Umbral de alerta" %}</label>
             {{ form.alert_threshold_days }}
           </div>
         </div>
         <div>
-          <label for="{{ form.team.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Grupo (dueño)" %}</label>
+          <label for="{{ form.team.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Grupo (dueño)" %}</label>
           {{ form.team }}
           {% if form.team.errors %}<div style="color:var(--status-exp-solid); font-size:var(--text-micro); margin-top:4px;">{{ form.team.errors|join:" " }}</div>{% endif %}
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">{% trans "Grupos adicionales" %}</label>
+          <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Grupos adicionales" %}</label>
           <div class="cf-checkgroup">
             {% for cb in form.groups %}
             <label class="cf-checkitem">{{ cb.tag }} {{ cb.choice_label }}</label>
@@ -66,12 +66,12 @@ Variables: form (CertificateForm), cert.
           <div style="color:var(--text-tertiary); font-size:var(--text-micro); margin-top:4px;">{% trans "Otros grupos que también gestionan/ven este certificado (opcional)." %}</div>
         </div>
         <div>
-          <label for="{{ form.recipients.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Destinatarios de notificación" %}</label>
+          <label for="{{ form.recipients.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Destinatarios de notificación" %}</label>
           {{ form.recipients }}
           <div style="color:var(--text-tertiary); font-size:var(--text-micro); margin-top:4px;">{% trans "Heredan del grupo si se deja vacío" %}</div>
         </div>
         <div>
-          <label for="{{ form.email_template.id_for_label }}" class="block text-sm font-medium mb-1">{% trans "Plantilla de correo" %}</label>
+          <label for="{{ form.email_template.id_for_label }}" style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Plantilla de correo" %}</label>
           {{ form.email_template }}
           <div style="color:var(--text-tertiary); font-size:var(--text-micro); margin-top:4px;">{% trans "Vacío = texto plano predeterminado" %}</div>
         </div>
