@@ -55,6 +55,20 @@ class RenderTests(TestCase):
         self.assertIn("404", body)            # status
         self.assertIn("Copiar", body)         # botón copiar
 
+    def test_actions_single_red_home_button(self):
+        # Toda página de error muestra UN solo botón rojo "Ir al inicio",
+        # centrado, sin "Reintentar" ni botón duplicado.
+        for key in ["http-404", "http-500", "webhook-error", "http-403"]:
+            body = render_status(rf.get("/x/"), key).content.decode()
+            # Sin botón Reintentar (data-retry es su marcador; la palabra puede
+            # aparecer en el texto del mensaje, p.ej. "Reintentaremos").
+            self.assertNotIn("data-retry", body, key)
+            self.assertNotIn("btn-ghost", body, key)  # sin botón duplicado
+            self.assertEqual(body.count(">Ir al inicio<"), 1, key)
+            self.assertRegex(
+                body, r'<a class="btn-primary" href="/"[^>]*>Ir al inicio</a>'
+            )
+
     def test_reference_id_uses_request_reference_id(self):
         req = rf.get("/x/")
         req.reference_id = "abc123def456"
