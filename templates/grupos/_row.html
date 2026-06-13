@@ -28,7 +28,7 @@ gobierna el adapter global.
   <td>
     {% for m in team.admin_memberships %}
       <div class="forge-adminline">
-        {% include "components/_avatar.html" with name=m.user.get_full_name email=m.user.email size="xs" %}
+        {% include "components/_avatar.html" with name=m.user.get_full_name email=m.user.email avatar_choice=m.user.preferences.avatar_choice size="xs" only %}
         <span class="forge-adminline__name">{{ m.user.get_full_name|default:m.user.email }}</span>
       </div>
     {% empty %}

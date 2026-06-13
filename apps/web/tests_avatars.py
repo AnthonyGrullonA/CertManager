@@ -74,9 +74,12 @@ class AvatarComponentTests(TestCase):
         self.assertNotIn("<svg", html)
         self.assertIn("MR", html)
 
-    def test_uses_context_global_choice(self):
-        # El chrome (topbar) no pasa avatar_choice explícito: cae al global.
+    def test_ignores_global_chrome_choice(self):
+        # SIN fallback global: el avatar del usuario autenticado
+        # (forge_user_avatar_choice) NO debe pintarse sobre otra persona.
+        # El topbar pasa su avatar explícito como avatar_choice.
         html = self._render(
-            name="Ana", email="a@x.io", forge_user_avatar_choice=9
+            name="Ana Mota", email="a@x.io", forge_user_avatar_choice=9
         )
-        self.assertIn("<svg", html)
+        self.assertNotIn("<svg", html)
+        self.assertIn("AM", html)

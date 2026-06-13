@@ -35,6 +35,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
 
+from apps.accounts.models import default_avatar_choice
 from apps.alerts.models import Alert, AlertUserState
 from apps.certificates.forms import CertificateForm
 from apps.certificates.models import Certificate
@@ -91,11 +92,22 @@ def _get_cert(request, pk):
 # Responsables: destinatarios explícitos del certificado; si no hay, Admins del
 # grupo como fallback.
 # ---------------------------------------------------------------------------
+def _avatar_for(user, email):
+    """Avatar de la persona pintada: el elegido si es usuario; si es un correo
+    externo (o un legado sin elección), el derivado determinista por email."""
+    if user is not None:
+        prefs = getattr(user, "preferences", None)
+        choice = getattr(prefs, "avatar_choice", 0)
+        if choice:
+            return choice
+    return default_avatar_choice(email)
+
+
 def _responsables(cert):
     people: list[dict] = []
     seen: set = set()
 
-    for r in cert.recipients.all():
+    for r in cert.recipients.select_related("user__preferences"):
         key = r.email.lower()
         if key not in seen:
             seen.add(key)
@@ -105,10 +117,11 @@ def _responsables(cert):
                 "email": r.email,
                 "source": "recipient",
                 "threshold": r.alert_threshold_days,
+                "avatar_choice": _avatar_for(r.user if r.user_id else None, r.email),
             })
 
     if not people:
-        for m in cert.team.memberships.all():
+        for m in cert.team.memberships.select_related("user__preferences"):
             key = m.user.email.lower()
             if m.role == MembershipRole.ADMIN and key not in seen:
                 seen.add(key)
@@ -117,6 +130,7 @@ def _responsables(cert):
                         "name": m.user.get_full_name() or m.user.email,
                         "email": m.user.email,
                         "source": "admin",
+                        "avatar_choice": _avatar_for(m.user, m.user.email),
                     }
                 )
     return people

@@ -69,7 +69,7 @@ def _decorate_team(team):
     team.cert_count = team.health_total
     team.member_count = team.memberships.count()
     team.admin_memberships = [
-        m for m in team.memberships.select_related("user")
+        m for m in team.memberships.select_related("user__preferences")
         if m.role == MembershipRole.ADMIN
     ]
     team.default_email = (team.default_recipients or [""])[0] if team.default_recipients else ""

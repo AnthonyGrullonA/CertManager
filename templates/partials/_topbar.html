@@ -113,7 +113,7 @@ por click-fuera vía handler delegado en base.html.
   <details class="forge-user" data-forge-menu>
     <summary class="forge-user__trigger"
              aria-label="{{ forge_user_name }} · {{ forge_user_role }}">
-      {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email size="sm" %}
+      {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email avatar_choice=forge_user_avatar_choice size="sm" only %}
       <span class="forge-user__meta">
         <span class="forge-user__name">{{ forge_user_name }}</span>
         <span class="forge-user__role">{{ forge_user_role }}</span>
@@ -122,7 +122,7 @@ por click-fuera vía handler delegado en base.html.
     </summary>
     <div class="forge-menu forge-menu--user" role="menu">
       <div class="forge-menu__profile">
-        {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email size="md" %}
+        {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email avatar_choice=forge_user_avatar_choice size="md" only %}
         <div class="min-w-0">
           <div class="forge-menu__profile-name">{{ forge_user_name }}</div>
           <div class="forge-menu__profile-mail">{{ forge_user_email }}</div>

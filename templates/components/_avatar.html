@@ -3,17 +3,16 @@
 Avatar: avatar SVG generado (avatar_choice) o iniciales. NO hay subida de fotos
 (decisión: avatares SVG generados, sin storage).
 
-Uso explícito (Perfil, filas de tablas):
-  {% include "components/_avatar.html" with name=user.get_full_name email=user.email size="md" %}
-  {% include "components/_avatar.html" with name="María Reyes" avatar_choice=prefs.avatar_choice size="sm" %}
+SIEMPRE pasa el avatar_choice de la persona pintada (con `only`):
+  {% include "components/_avatar.html" with name=u.get_full_name email=u.email avatar_choice=u.preferences.avatar_choice size="md" only %}
 
-Uso en el chrome (topbar/menú): no se pasa avatar_choice; cae al global del
-context_processor (forge_user_avatar_choice) para que el avatar del usuario
-actual también se vea fuera de Perfil.
+NO hay fallback al avatar del usuario autenticado: pintaría su avatar sobre
+otra persona. El topbar pasa forge_user_avatar_choice explícito. Sin
+avatar_choice se pintan iniciales (solo para no-usuarios sin correo derivable).
 
 Tamaños: xs(22) sm(28) md(36) lg(44). Por defecto md.
 {% endcomment %}
-{% firstof avatar_choice forge_user_avatar_choice 0 as avatar_idx %}
+{% firstof avatar_choice 0 as avatar_idx %}
 {% avatar_tint name as tint %}
 <span class="forge-avatar forge-avatar--{{ size|default:'md' }}{% if avatar_idx %} forge-avatar--media{% endif %}"
       title="{{ name|default:email }}"

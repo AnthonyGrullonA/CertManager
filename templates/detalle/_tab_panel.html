@@ -43,7 +43,7 @@ channels, rows, chain, san, checks, trend, alerts).
     <div style="display:flex; flex-direction:column; gap:12px;">
       {% for o in responsables %}
       <div style="display:flex; align-items:center; gap:10px;">
-        {% include "components/_avatar.html" with name=o.name email=o.email size="sm" %}
+        {% include "components/_avatar.html" with name=o.name email=o.email avatar_choice=o.avatar_choice size="sm" only %}
         <span style="flex:1; min-width:0; display:flex; flex-direction:column;">
           <span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-primary); overflow:hidden; text-overflow:ellipsis;">{{ o.email }}</span>
           {% if o.threshold %}<span style="font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary);">{% blocktrans with threshold=o.threshold %}Umbral legacy: {{ threshold }} días{% endblocktrans %}</span>{% endif %}
