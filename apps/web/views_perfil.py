@@ -75,6 +75,11 @@ class ProfileView(TemplateView):
         ctx["two_factor_enabled"] = user_has_2fa(user)
         # Banner cuando PasswordExpiryMiddleware redirige por contraseña vencida.
         ctx["password_expired"] = self.request.GET.get("password_expired") == "1"
+        # Banner cuando la contraseña vigente es temporal (reset del Owner).
+        ctx["password_reset"] = (
+            self.request.GET.get("password_reset") == "1"
+            or self.request.user.must_change_password
+        )
         return ctx
 
 
@@ -144,6 +149,10 @@ def password_change(request):
     form = ProfilePasswordChangeForm(user=request.user, data=request.POST)
     if form.is_valid():
         form.save()
+        # La nueva contraseña ya es del usuario: levanta el forzado del reset.
+        if form.user.must_change_password:
+            form.user.must_change_password = False
+            form.user.save(update_fields=["must_change_password"])
         # Mantener la sesión activa tras cambiar la contraseña.
         update_session_auth_hash(request, form.user)
         # Vaciar el modal y empujar el toast de éxito.

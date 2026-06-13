@@ -11,6 +11,7 @@ from .views_usuarios import (
     UserEditView,
     UserInviteView,
     UserListView,
+    UserResetPasswordView,
     UserToggleActiveView,
 )
 
@@ -23,5 +24,10 @@ urlpatterns = [
         "users/<int:pk>/toggle-active/",
         UserToggleActiveView.as_view(),
         name="user-toggle-active",
+    ),
+    path(
+        "users/<int:pk>/reset-password/",
+        UserResetPasswordView.as_view(),
+        name="user-reset-password",
     ),
 ]

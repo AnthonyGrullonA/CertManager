@@ -36,10 +36,18 @@ Variables: target (User), memberships, two_factor_on.
         {% if target.is_active %}<span class="badge badge--ok badge--sm">{% trans "Activo" %}</span>{% else %}<span class="badge badge--exp badge--sm">{% trans "Inactivo" %}</span>{% endif %}
       </div>
     </div>
-    <button type="button" class="btn-outline"
-            hx-get="{% url 'user-edit' target.pk %}" hx-target="#modal-root" hx-swap="innerHTML">
-      {% icon "pencil" size=16 %} {% trans "Editar" %}
-    </button>
+    <div style="display:flex; gap:8px;">
+      {% if target.pk != request.user.pk and target.has_usable_password %}
+      <button type="button" class="btn-outline"
+              hx-get="{% url 'user-reset-password' target.pk %}" hx-target="#modal-root" hx-swap="innerHTML">
+        {% icon "key" size=16 %} {% trans "Restablecer contraseña" %}
+      </button>
+      {% endif %}
+      <button type="button" class="btn-outline"
+              hx-get="{% url 'user-edit' target.pk %}" hx-target="#modal-root" hx-swap="innerHTML">
+        {% icon "pencil" size=16 %} {% trans "Editar" %}
+      </button>
+    </div>
   </div>
 
   {# ---------- Cuerpo: cuenta | grupos ---------- #}

@@ -211,6 +211,91 @@ class UserEditView(OwnerRequiredMixin, View):
         )
 
 
+class UserResetPasswordView(OwnerRequiredMixin, View):
+    """Restablece la contraseña de un usuario con una temporal (solo Owner).
+
+    GET devuelve el modal de confirmación (checkbox opcional "enviar por
+    correo"). POST genera la temporal, la fija con ``must_change_password`` (el
+    middleware fuerza el cambio en el siguiente login) y devuelve el partial de
+    éxito que la muestra UNA vez; nunca se persiste en claro. Si se pidió el
+    correo, se envía en esta misma petición SIN la copia BCC de auditoría
+    (filtraría la contraseña).
+
+    Guardas: a uno mismo no (para eso está Perfil) y a usuarios LDAP tampoco
+    (su credencial vive en el directorio, no aquí).
+    """
+
+    def get(self, request, pk, *args, **kwargs):
+        target = get_object_or_404(User, pk=pk)
+        return render(request, "usuarios/_reset_modal.html", {"target": target})
+
+    def post(self, request, pk, *args, **kwargs):
+        from apps.accounts.passwords import generate_temp_password
+
+        target = get_object_or_404(User, pk=pk)
+        if target.pk == request.user.pk:
+            return HttpResponse(
+                _("No puedes restablecer tu propia contraseña aquí; usa tu Perfil."),
+                status=400,
+            )
+        if not target.has_usable_password():
+            return HttpResponse(
+                _("Este usuario inicia sesión por LDAP: su credencial se gestiona en el directorio."),
+                status=400,
+            )
+
+        temp = generate_temp_password()
+        target.set_password(temp)
+        target.must_change_password = True
+        target.save()
+
+        mail_sent = mail_error = False
+        if request.POST.get("send_email"):
+            mail_sent = self._send_temp_password(target, temp)
+            mail_error = not mail_sent
+
+        return render(
+            request,
+            "usuarios/_reset_success.html",
+            {
+                "target": target,
+                "temp_password": temp,
+                "mail_sent": mail_sent,
+                "mail_error": mail_error,
+            },
+        )
+
+    @staticmethod
+    def _send_temp_password(target, temp) -> bool:
+        """Correo con la temporal. SIN BCC de auditoría (no filtrar la clave)."""
+        from django.core.mail import EmailMessage
+
+        from apps.core.mail import default_from_email, smtp_connection
+
+        body = _(
+            "Hola,\n\n"
+            "Un administrador restableció tu contraseña de CertManager.\n\n"
+            "Contraseña temporal: %(temp)s\n\n"
+            "Al iniciar sesión se te pedirá definir una contraseña propia.\n"
+        ) % {"temp": temp}
+        try:
+            EmailMessage(
+                subject=_("CertManager — contraseña temporal"),
+                body=body,
+                from_email=default_from_email(),
+                to=[target.email],
+                connection=smtp_connection(),
+            ).send()
+            return True
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception(
+                "No se pudo enviar la contraseña temporal a %s", target.email
+            )
+            return False
+
+
 class UserDetailView(OwnerRequiredMixin, View):
     """Overview de lectura de un usuario (solo Owner): cuenta, rol global,
     grupos/roles, último acceso y estado de 2FA. Para cambios, reusa el modal de

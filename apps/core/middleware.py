@@ -212,12 +212,16 @@ _PWEXPIRY_EXEMPT_PREFIXES = (
 
 
 class PasswordExpiryMiddleware:
-    """Si la organización activa la expiración de contraseñas
-    (``OrganizationSettings.password_expiry_enabled``) y la contraseña local del
-    usuario superó la vigencia, lo redirige a su perfil a cambiarla antes de
-    seguir usando la app. Exime al superusuario (acceso de emergencia), las rutas
-    de perfil/login/logout y los usuarios LDAP/SSO (sin contraseña local usable).
-    (OWASP A07 — Authentication Failures.)"""
+    """Fuerza el cambio de contraseña local antes de seguir usando la app:
+
+    - si la organización activa la expiración de contraseñas
+      (``OrganizationSettings.password_expiry_enabled``) y la contraseña venció, o
+    - si el Owner le restableció la contraseña (``user.must_change_password``):
+      la vigente es temporal.
+
+    Redirige al perfil a cambiarla. Exime al superusuario (acceso de
+    emergencia), las rutas de perfil/login/logout y los usuarios LDAP/SSO (sin
+    contraseña local usable). (OWASP A07 — Authentication Failures.)"""
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -232,6 +236,8 @@ class PasswordExpiryMiddleware:
             and not path.startswith(_PWEXPIRY_EXEMPT_PREFIXES)
             and not path.startswith(ADMIN_PREFIX)
         ):
+            if getattr(user, "must_change_password", False):
+                return redirect(f"{reverse('profile')}?password_reset=1")
             from apps.core.models import OrganizationSettings
 
             org = OrganizationSettings.load()

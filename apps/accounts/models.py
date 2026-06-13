@@ -36,6 +36,12 @@ class User(AbstractUser):
         "Contraseña cambiada", null=True, blank=True
     )
 
+    # Activo tras un reset del Owner: la contraseña vigente es temporal y el
+    # middleware fuerza a definir una propia antes de seguir usando la app.
+    must_change_password = models.BooleanField(
+        "Debe cambiar contraseña", default=False
+    )
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
