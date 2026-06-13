@@ -113,11 +113,10 @@ class MustChangePasswordFlowTests(TestCase):
         self.user.save(update_fields=["must_change_password"])
         self.client.force_login(self.user)
 
-    def test_any_page_redirects_to_profile(self):
+    def test_any_page_redirects_to_force_change_screen(self):
         resp = self.client.get(reverse("certificate-list"))
         self.assertEqual(resp.status_code, 302)
-        self.assertIn(reverse("profile"), resp["Location"])
-        self.assertIn("password_reset=1", resp["Location"])
+        self.assertEqual(resp["Location"], reverse("password-force-change"))
 
     def test_profile_itself_is_exempt_and_shows_banner(self):
         resp = self.client.get(reverse("profile") + "?password_reset=1")

@@ -50,11 +50,13 @@
           <thead>
             <tr><th>{% trans "Nombre" %}</th><th>{% trans "ID" %}</th><th>{% trans "Ámbito" %}</th><th>{% trans "Último uso" %}</th><th>{% trans "Estado" %}</th><th data-no-sort></th></tr>
           </thead>
-          <tbody>
+          {% comment %} id="key-rows": ancla del OOB de _created.html (la clave
+          nueva aparece sin recargar). El estado vacío se elimina por OOB. {% endcomment %}
+          <tbody id="key-rows">
             {% for key in keys %}
               {% include "apikeys/_row.html" with key=key %}
             {% empty %}
-            <tr data-empty-row><td colspan="6" class="text-center py-10 text-slate-500">{% trans "Aún no hay claves. Crea la primera arriba." %}</td></tr>
+            <tr id="keys-empty" data-empty-row><td colspan="6" class="text-center py-10 text-slate-500">{% trans "Aún no hay claves. Crea la primera arriba." %}</td></tr>
             {% endfor %}
           </tbody>
         </table>

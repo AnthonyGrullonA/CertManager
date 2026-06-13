@@ -205,6 +205,7 @@ _PWEXPIRY_EXEMPT_PREFIXES = (
     "/perfil/",
     "/accounts/login",
     "/accounts/logout",
+    "/accounts/cambiar-contrasena",  # pantalla del cambio forzado (sin bucle)
     "/static/",
     "/media/",
     "/health",
@@ -237,7 +238,9 @@ class PasswordExpiryMiddleware:
             and not path.startswith(ADMIN_PREFIX)
         ):
             if getattr(user, "must_change_password", False):
-                return redirect(f"{reverse('profile')}?password_reset=1")
+                # Contraseña temporal: pantalla del flujo de login para definir
+                # la propia (con validadores en vivo), no el Perfil.
+                return redirect(reverse("password-force-change"))
             from apps.core.models import OrganizationSettings
 
             org = OrganizationSettings.load()

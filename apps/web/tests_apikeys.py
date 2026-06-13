@@ -90,6 +90,24 @@ class ApiKeyProvisioningTests(TestCase):
         self.assertContains(r, "Authorization: Api-Key")
         self.assertEqual(ApiKey.objects.count(), 1)
 
+    def test_create_refreshes_table_via_oob_row(self):
+        # La clave nueva debe aparecer en "Claves existentes" SIN recargar:
+        # la respuesta inserta la fila fuera de banda y quita el estado vacío.
+        self.client.force_login(self.owner)
+        r = self.client.post(reverse("api-key-create"), {"name": "Teams", "scope": "full"})
+        html = r.content.decode()
+        self.assertIn('id="key-rows"', html)
+        self.assertIn('hx-swap-oob', html)
+        key = ApiKey.objects.get()
+        self.assertIn(f'id="api-key-row-{key.pk}"', html)
+        self.assertIn('id="keys-empty"', html)  # OOB delete del estado vacío
+
+    def test_list_has_oob_anchors(self):
+        self.client.force_login(self.owner)
+        r = self.client.get(reverse("api-keys"))
+        self.assertContains(r, 'id="key-rows"')
+        self.assertContains(r, 'id="keys-empty"')  # sin claves: estado vacío
+
     def test_revoke_deactivates(self):
         self.client.force_login(self.owner)
         obj, _ = ApiKey.generate(name="k", scope=ApiKeyScope.FULL, user=self.owner)

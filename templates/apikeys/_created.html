@@ -1,6 +1,15 @@
 {% load forge_icons %}
 {% load i18n %}
 {# Se muestra UNA sola vez tras crear la clave: el secreto completo + cómo usarla. #}
+
+{# Fila nueva fuera de banda: la tabla "Claves existentes" se actualiza sin
+   recargar (forge-table.js se reconstruye en htmx:oobAfterSwap). #}
+<tbody id="key-rows" hx-swap-oob="afterbegin">
+  {% include "apikeys/_row.html" with key=key %}
+</tbody>
+{# Quitar el estado vacío si era la primera clave. #}
+<tr id="keys-empty" hx-swap-oob="delete"></tr>
+
 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4" data-api-key-created>
   <div class="flex items-center gap-2 mb-2 text-emerald-800 font-medium">
     {% icon "circle-check" size=18 %} {% blocktrans with name=key.name %}Clave «{{ name }}» creada{% endblocktrans %}
