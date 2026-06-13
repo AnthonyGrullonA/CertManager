@@ -136,9 +136,11 @@ viven en el <style> de abajo para no depender del bundle compartido.
   .forge-userline__name {
     font-family: var(--font-sans); font-size: var(--text-body); font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .forge-userline__mail {
     font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-tertiary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .forge-userline__groups {
     font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-secondary);

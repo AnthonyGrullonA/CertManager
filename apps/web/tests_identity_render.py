@@ -68,6 +68,25 @@ class MembersCardIdentityTests(TestCase):
             html, r">Test Test</a>\s*<div[^>]*>test@certforge\.test<"
         )
 
+    def test_member_name_link_truncates_to_avoid_collision(self):
+        # Un correo largo usado como nombre (sin nombre real) debe truncar con
+        # ellipsis, no desbordar y chocar con el selector de rol.
+        import re
+
+        nameless = User.objects.create_user("jairol_grullon@claro.com.do", "x")
+        Membership.objects.create(
+            user=nameless, team=self.team, role=MembershipRole.CONTRIBUTOR
+        )
+        html = self.client.get(
+            reverse("team-detail", args=[self.team.pk])
+        ).content.decode()
+        link = re.search(
+            r'<a [^>]*>jairol_grullon@claro\.com\.do</a>', html
+        )
+        self.assertIsNotNone(link)
+        self.assertIn("text-overflow:ellipsis", link.group(0))
+        self.assertIn("overflow:hidden", link.group(0))
+
 
 class UsuariosRowIdentityTests(TestCase):
     def setUp(self):
