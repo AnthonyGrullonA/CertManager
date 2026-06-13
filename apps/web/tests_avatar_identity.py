@@ -54,6 +54,15 @@ class GruposOverviewAvatarTests(TestCase):
         resp = self.client.get(reverse("team-list"))
         self.assertIn(avatar_svg(9, size="sm"), resp.content.decode())
 
+    def test_topbar_menu_has_no_duplicate_mail_line(self):
+        # El header del menú de usuario muestra UNA sola línea de identidad:
+        # sin nombre cargado, la línea-nombre cae al correo y la línea-correo
+        # lo duplicaba (y desbordaba el menú). Se eliminó.
+        resp = self.client.get(reverse("team-list"))
+        html = resp.content.decode()
+        self.assertNotIn("forge-menu__profile-mail", html)
+        self.assertIn("forge-menu__profile-name", html)
+
 
 @override_settings(ROOT_URLCONF="apps.web.test_urls_detalle")
 class DetalleResponsablesAvatarTests(TestCase):

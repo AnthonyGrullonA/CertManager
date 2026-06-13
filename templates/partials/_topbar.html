@@ -121,11 +121,13 @@ por click-fuera vía handler delegado en base.html.
       {% icon "chevron-down" size=15 class="forge-user__caret" %}
     </summary>
     <div class="forge-menu forge-menu--user" role="menu">
+      {% comment %} Una sola línea de identidad: sin nombre cargado, profile-name
+      cae al correo y la línea de correo lo duplicaba (y desbordaba el menú).
+      El recorte con elipsis evita que un correo largo se salga del panel. {% endcomment %}
       <div class="forge-menu__profile">
         {% include "components/_avatar.html" with name=forge_user_name email=forge_user_email avatar_choice=forge_user_avatar_choice size="md" only %}
         <div class="min-w-0">
-          <div class="forge-menu__profile-name">{{ forge_user_name }}</div>
-          <div class="forge-menu__profile-mail">{{ forge_user_email }}</div>
+          <div class="forge-menu__profile-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ forge_user_email }}">{{ forge_user_name }}</div>
         </div>
       </div>
       <div class="forge-menu__group">
