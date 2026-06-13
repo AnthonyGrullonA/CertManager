@@ -58,7 +58,8 @@ class UsuariosUiFidelityTests(TestCase):
         resp = self.client.get(reverse("user-list"))
         self.assertContains(resp, "forge-tag forge-tag--brand")  # Owner
         self.assertContains(resp, "Owner")
-        self.assertContains(resp, "Miembro")
+        # El chip refleja el rol de grupo real (member es CONTRIBUTOR).
+        self.assertContains(resp, "Colaborador")
 
     def test_status_dot_rendered(self):
         resp = self.client.get(reverse("user-list"))

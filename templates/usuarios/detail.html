@@ -30,9 +30,7 @@ Variables: target (User), memberships, two_factor_on.
       <h1 style="margin:0; font-family:var(--font-sans); font-size:1.35rem; font-weight:700; color:var(--text-primary);">{{ target.get_full_name|default:target.email }}</h1>
       <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
         <span style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-secondary);">{{ target.email }}</span>
-        {% if target.is_owner %}<span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} Owner</span>
-        {% elif target.is_staff %}<span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} Admin</span>
-        {% else %}<span class="forge-tag">{% trans "Miembro" %}</span>{% endif %}
+        {% include "usuarios/_role_chip.html" with u=target only %}
         {% if target.is_active %}<span class="badge badge--ok badge--sm">{% trans "Activo" %}</span>{% else %}<span class="badge badge--exp badge--sm">{% trans "Inactivo" %}</span>{% endif %}
       </div>
     </div>
@@ -59,8 +57,8 @@ Variables: target (User), memberships, two_factor_on.
         {% icon "lock" size=18 %} {% trans "Cuenta" %}
       </h2>
       <dl style="margin:0; display:grid; grid-template-columns:auto 1fr; gap:11px 16px; font-size:var(--text-sm);">
-        <dt style="color:var(--text-tertiary);">{% trans "Rol global" %}</dt>
-        <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% if target.is_owner %}Owner{% elif target.is_staff %}Admin{% else %}{% trans "Miembro" %}{% endif %}</dd>
+        <dt style="color:var(--text-tertiary);">{% trans "Rol" %}</dt>
+        <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% if target.is_owner %}Owner{% elif target.is_staff %}Admin{% elif target.group_role %}{{ target.group_role.label }}{% else %}{% trans "Miembro" %}{% endif %}</dd>
         <dt style="color:var(--text-tertiary);">{% trans "Estado" %}</dt>
         <dd style="margin:0; color:var(--text-primary); font-weight:500;">{% if target.is_active %}{% trans "Activo" %}{% else %}{% trans "Inactivo" %}{% endif %}</dd>
         <dt style="color:var(--text-tertiary);">2FA</dt>

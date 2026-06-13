@@ -16,15 +16,9 @@ Variables: u (User con memberships prefetcheadas).
     </div>
   </td>
 
-  {% comment %} Rol global (chip). is_owner/is_staff NUNCA editables aquí. {% endcomment %}
+  {% comment %} Rol (chip): Owner o el rol de grupo más alto. {% endcomment %}
   <td>
-    {% if u.is_owner %}
-      <span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} Owner</span>
-    {% elif u.is_staff %}
-      <span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} Admin</span>
-    {% else %}
-      <span class="forge-tag">{% trans "Miembro" %}</span>
-    {% endif %}
+    {% include "usuarios/_role_chip.html" with u=u only %}
   </td>
 
   {% comment %} Grupos {% endcomment %}

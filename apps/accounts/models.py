@@ -62,6 +62,28 @@ class User(AbstractUser):
         # set_password siempre va seguido de save() en los flujos de la app.
         self.password_changed_at = timezone.now()
 
+    @property
+    def group_role(self):
+        """Rol de grupo más alto del usuario (ADMIN > CONTRIBUTOR > VIEWER).
+
+        Es el rol que se muestra en las cards/filas de Usuarios cuando no es
+        Owner: en esta app el "rol" real vive en las membresías por grupo
+        (``is_staff`` solo existe para el superusuario del admin de Django).
+        Itera ``memberships`` ya prefetcheadas (las vistas de Usuarios las
+        traen), así que no dispara N+1. Devuelve None sin membresías.
+        """
+        from apps.core.enums import MembershipRole
+
+        roles = {m.role for m in self.memberships.all()}
+        for role in (
+            MembershipRole.ADMIN,
+            MembershipRole.CONTRIBUTOR,
+            MembershipRole.VIEWER,
+        ):
+            if role in roles:
+                return role
+        return None
+
     def password_age(self):
         """``timedelta`` desde el último cambio de contraseña.
 
