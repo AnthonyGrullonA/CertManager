@@ -12,7 +12,7 @@ roles, request_user_id.
   {% csrf_token %}
   <div style="flex:1; min-width:180px;">
     <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Agregar miembro" %}</label>
-    <select name="user" class="input" required>
+    <select name="user" class="input" required style="width:100%; min-width:0;">
       <option value="">{% trans "Selecciona usuario…" %}</option>
       {% for u in available_users %}
       <option value="{{ u.id }}">{% if u.get_full_name %}{{ u.get_full_name }} · {% endif %}{{ u.email }}</option>
@@ -23,7 +23,7 @@ roles, request_user_id.
   </div>
   <div style="width:160px;">
     <label style="display:block; margin-bottom:7px; font-family:var(--font-sans); font-size:var(--text-sm); font-weight:500; color:var(--text-secondary);">{% trans "Rol" %}</label>
-    <select name="role" class="input">
+    <select name="role" class="input" style="width:100%; min-width:0;">
       {% for value, label in roles %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
     </select>
   </div>

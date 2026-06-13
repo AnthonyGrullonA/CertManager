@@ -40,6 +40,20 @@ class MembersCardIdentityTests(TestCase):
         resp = self.client.get(reverse("team-detail", args=[self.team.pk]))
         self.assertContains(resp, "María Reyes · maria@certforge.test")
 
+    def test_form_selects_fill_width_not_content(self):
+        # Los <select> del form de agregar miembro deben llenar su contenedor
+        # (width:100%), no dimensionarse a la opción (correo) más larga y
+        # desbordar sobre el campo de Rol.
+        import re
+
+        html = self.client.get(
+            reverse("team-detail", args=[self.team.pk])
+        ).content.decode()
+        user_select = re.search(r'<select name="user"[^>]*>', html).group(0)
+        role_select = re.search(r'<select name="role" class="input"[^>]*>', html).group(0)
+        self.assertIn("width:100%", user_select)
+        self.assertIn("width:100%", role_select)
+
     def test_member_row_does_not_duplicate_email(self):
         nameless = User.objects.create_user("plano@certforge.test", "x")
         Membership.objects.create(
