@@ -33,15 +33,16 @@ User = get_user_model()
 class _BaseRBAC(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user(email="owner@cf.test", password="x", is_owner=True)
+        # "admin" pasó a Colaborador: el rol Admin de grupo se eliminó.
         self.admin = User.objects.create_user(email="admin@cf.test", password="x")
         self.member = User.objects.create_user(email="member@cf.test", password="x")
         self.outsider = User.objects.create_user(email="out@cf.test", password="x")
 
         self.team = Team.objects.create(name="Infra")
         self.other_team = Team.objects.create(name="Ajeno")
-        Membership.objects.create(user=self.admin, team=self.team, role=MembershipRole.ADMIN)
+        Membership.objects.create(user=self.admin, team=self.team, role=MembershipRole.CONTRIBUTOR)
         Membership.objects.create(user=self.member, team=self.team, role=MembershipRole.CONTRIBUTOR)
-        Membership.objects.create(user=self.outsider, team=self.other_team, role=MembershipRole.ADMIN)
+        Membership.objects.create(user=self.outsider, team=self.other_team, role=MembershipRole.CONTRIBUTOR)
 
         self.cert = Certificate.objects.create(
             domain="cf.test", team=self.team, status=CertificateStatus.VIGENTE,
@@ -77,8 +78,15 @@ class AlertPersonalStateTests(_BaseRBAC):
         self.alert.refresh_from_db()
         self.assertEqual(self.alert.status, AlertStatus.OPEN)
 
-    def test_admin_can_resolve_alert(self):
+    def test_contributor_cannot_resolve_alert(self):
+        # Resolver alertas compartidas es exclusivo del Owner.
         resp = self.api(self.admin).post(f"/api/alerts/{self.alert.id}/resolve/")
+        self.assertEqual(resp.status_code, 403)
+        self.alert.refresh_from_db()
+        self.assertEqual(self.alert.status, AlertStatus.OPEN)
+
+    def test_owner_can_resolve_alert(self):
+        resp = self.api(self.owner).post(f"/api/alerts/{self.alert.id}/resolve/")
         self.assertEqual(resp.status_code, 200)
         self.alert.refresh_from_db()
         self.assertEqual(self.alert.status, AlertStatus.RESOLVED)
@@ -150,7 +158,7 @@ class MassAssignmentTests(_BaseRBAC):
         self.admin.refresh_from_db()
         self.assertFalse(self.admin.is_owner)
         membership = Membership.objects.get(user=self.admin, team=self.team)
-        self.assertEqual(membership.role, MembershipRole.ADMIN)
+        self.assertEqual(membership.role, MembershipRole.CONTRIBUTOR)
         # El campo legítimo sí se actualizó.
         self.cert.refresh_from_db()
         self.assertEqual(self.cert.notes, "actualizado")

@@ -9,9 +9,10 @@ from rest_framework import permissions
 
 from apps.core.enums import MembershipRole
 
-# La escritura de certificados la pueden hacer Colaboradores y Admins (no Viewers).
-# Acciones de gestión del grupo (resolver alertas, miembros) siguen exigiendo Admin.
-WRITE_CERT_ROLES = [MembershipRole.CONTRIBUTOR, MembershipRole.ADMIN]
+# La escritura de certificados la pueden hacer los Colaboradores (no Viewers).
+# La gestión del grupo (alertas compartidas, miembros) es exclusiva del Owner:
+# el rol Admin de grupo se eliminó por decisión del Owner.
+WRITE_CERT_ROLES = [MembershipRole.CONTRIBUTOR]
 
 
 class ApiKeyScopePermission(permissions.BasePermission):
@@ -46,10 +47,8 @@ def scope_certificates(queryset, user):
 
 
 def user_is_team_admin(user, team_id):
-    """True si el usuario es Owner global o Admin del grupo dado."""
-    if getattr(user, "is_owner", False):
-        return True
-    return team_id in user_team_ids(user, roles=[MembershipRole.ADMIN])
+    """Gestión del grupo: SOLO el Owner global (el rol Admin de grupo no existe)."""
+    return bool(getattr(user, "is_owner", False))
 
 
 class IsOwnerOrTeamMember(permissions.BasePermission):

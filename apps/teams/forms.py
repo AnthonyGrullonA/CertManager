@@ -40,12 +40,6 @@ class TeamForm(forms.ModelForm):
         coerce=int,
         initial=45,
     )
-    admin = forms.ModelChoiceField(
-        label="Admin responsable",
-        queryset=None,
-        required=False,
-        empty_label="Selecciona",
-    )
     default_email = forms.EmailField(
         label="Correo por defecto",
         required=False,
@@ -69,13 +63,7 @@ class TeamForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        from django.contrib.auth import get_user_model
-
         super().__init__(*args, **kwargs)
-        # Candidatos a Admin: usuarios activos de la organización.
-        self.fields["admin"].queryset = get_user_model().objects.filter(
-            is_active=True
-        ).order_by("first_name", "email")
         if self.instance and self.instance.pk and self.instance.default_recipients:
             self.fields["default_email"].initial = self.instance.default_recipients[0]
         # Clase Forge para todos los controles.

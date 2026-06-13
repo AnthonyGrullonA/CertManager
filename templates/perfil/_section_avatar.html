@@ -23,7 +23,7 @@ fragmento completo (target del guardado parcial: vista re-renderiza + toast).
           <span class="forge-tag forge-tag--neutral">{% trans "Miembro" %}</span>
         {% endif %}
       </div>
-      <span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-tertiary);">{{ user.email }}</span>
+      {% if user.get_full_name %}<span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-tertiary);">{{ user.email }}</span>{% endif %}
     </div>
   </div>
 

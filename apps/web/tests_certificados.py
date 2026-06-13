@@ -139,15 +139,15 @@ class CertListTests(TestCase):
         )
         self.assertNotContains(resp, "data-forge-pagesize")
 
-    def test_responsables_recipient_user_then_admin_fallback(self):
+    def test_responsables_recipient_user_then_group_fallback(self):
         # Destinatario con usuario vinculado en cert_a.
         recip_user = User.objects.create_user("recip@certforge.test", "x", first_name="Rita")
         CertificateRecipient.objects.create(
             certificate=self.cert_a, email=recip_user.email, user=recip_user
         )
-        # cert_b sin destinatarios -> fallback a Admin del grupo.
+        # cert_b sin destinatarios -> fallback a Colaboradores del grupo.
         admin = User.objects.create_user("adminb@certforge.test", "x", first_name="Bea")
-        Membership.objects.create(user=admin, team=self.team_b, role=MembershipRole.ADMIN)
+        Membership.objects.create(user=admin, team=self.team_b, role=MembershipRole.CONTRIBUTOR)
         self.client.force_login(self.owner)
         resp = self.client.get(reverse("certificate-list-forge"))
         # La tabla de certificados muestra correos planos, sin avatar/icono.

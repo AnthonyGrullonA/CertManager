@@ -121,15 +121,17 @@ def _responsables(cert):
             })
 
     if not people:
+        # Fallback sin destinatarios: los Colaboradores del grupo (los que
+        # operan los certificados; el rol Admin de grupo no existe).
         for m in cert.team.memberships.select_related("user__preferences"):
             key = m.user.email.lower()
-            if m.role == MembershipRole.ADMIN and key not in seen:
+            if m.role == MembershipRole.CONTRIBUTOR and key not in seen:
                 seen.add(key)
                 people.append(
                     {
                         "name": m.user.get_full_name() or m.user.email,
                         "email": m.user.email,
-                        "source": "admin",
+                        "source": "grupo",
                         "avatar_choice": _avatar_for(m.user, m.user.email),
                     }
                 )

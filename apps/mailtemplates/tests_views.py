@@ -26,7 +26,9 @@ class MailTemplateViewTests(TestCase):
         cls.viewer = U.objects.create_user(email="v@x.io", password="pw")
         cls.admin = U.objects.create_user(email="a@x.io", password="pw")
         Membership.objects.create(user=cls.viewer, team=cls.team, role=R.VIEWER)
-        Membership.objects.create(user=cls.admin, team=cls.team, role=R.ADMIN)
+        # "admin" es el CREADOR de la plantilla: puede editarla por autoría
+        # (el rol Admin de grupo no existe).
+        Membership.objects.create(user=cls.admin, team=cls.team, role=R.CONTRIBUTOR)
         cls.tpl = EmailTemplate.objects.create(
             name="t", kind="CERT", subject="s", blocks=CERT_BLOCKS, created_by=cls.admin
         )

@@ -104,10 +104,10 @@ def _decorate_responsables(cert):
             })
 
     if not people:
-        # Fallback: Admins del grupo.
+        # Fallback: Colaboradores del grupo (el rol Admin de grupo no existe).
         for m in cert.team.memberships.all():
             key = m.user.email.lower()
-            if m.role == MembershipRole.ADMIN and key not in seen:
+            if m.role == MembershipRole.CONTRIBUTOR and key not in seen:
                 seen.add(key)
                 people.append(
                     {

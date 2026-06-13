@@ -3,15 +3,13 @@
 {% comment %}
 Chip de rol de un usuario (filas y detalle de Usuarios). Variable: u (User).
 Owner (global) > Admin del admin de Django (solo superusuario) > rol de grupo
-más alto (Admin de grupo / Colaborador / Visualizador) > Miembro (sin grupos).
+más alto (Colaborador / Visualizador) > Miembro (sin grupos).
 is_owner/is_staff NUNCA editables desde la UI (anti-escalada).
 {% endcomment %}
 {% if u.is_owner %}
   <span class="forge-tag forge-tag--brand">{% icon "shield-check" size=13 %} Owner</span>
 {% elif u.is_staff %}
   <span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} Admin</span>
-{% elif u.group_role == "ADMIN" %}
-  <span class="forge-tag forge-tag--ok">{% icon "shield" size=13 %} {{ u.group_role.label }}</span>
 {% elif u.group_role %}
   <span class="forge-tag">{{ u.group_role.label }}</span>
 {% else %}

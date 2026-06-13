@@ -48,7 +48,7 @@ channels, rows, chain, san, checks, trend, alerts).
           <span style="font-family:var(--font-sans); font-size:var(--text-body); color:var(--text-primary); overflow:hidden; text-overflow:ellipsis;">{{ o.email }}</span>
           {% if o.threshold %}<span style="font-family:var(--font-sans); font-size:var(--text-micro); color:var(--text-tertiary);">{% blocktrans with threshold=o.threshold %}Umbral legacy: {{ threshold }} días{% endblocktrans %}</span>{% endif %}
         </span>
-        <span class="forge-tag">{% if o.source == 'admin' %}{% trans "admin" %}{% else %}{% trans "correo" %}{% endif %}</span>
+        <span class="forge-tag">{% if o.source == 'grupo' %}{% trans "grupo" %}{% else %}{% trans "correo" %}{% endif %}</span>
       </div>
       {% empty %}
       <p style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">

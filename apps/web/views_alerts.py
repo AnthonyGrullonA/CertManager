@@ -60,27 +60,18 @@ def _get_scoped_alert(user, pk):
     )
 
 
-def _admin_team_ids(user):
-    return Membership.objects.filter(
-        user=user, role=MembershipRole.ADMIN
-    ).values_list("team_id", flat=True)
-
-
 def _can_manage_alert(user, alert) -> bool:
-    """¿Puede el usuario RESOLVER esta alerta? Owner global o Admin del grupo."""
-    if getattr(user, "is_owner", False):
-        return True
-    return Membership.objects.filter(
-        user=user, team_id=alert.certificate.team_id, role=MembershipRole.ADMIN
-    ).exists()
+    """¿Puede el usuario RESOLVER esta alerta compartida? SOLO el Owner global
+    (el rol Admin de grupo se eliminó por decisión del Owner)."""
+    return bool(getattr(user, "is_owner", False))
 
 
 def _manageable_open_alerts(user):
-    """Alertas OPEN del ámbito que el usuario puede resolver."""
+    """Alertas OPEN del ámbito que el usuario puede resolver (solo Owner)."""
     qs = _scoped_alerts(user).filter(status=AlertStatus.OPEN)
     if getattr(user, "is_owner", False):
         return qs
-    return qs.filter(certificate__team_id__in=list(_admin_team_ids(user)))
+    return qs.none()
 
 
 def _states_by_alert(user, alerts):

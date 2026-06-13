@@ -74,19 +74,22 @@ class PermissionTests(TestCase):
     def setUpTestData(cls):
         cls.team = Team.objects.create(name="G")
         cls.owner = U.objects.create_user(email="o@x.io", password="x", is_owner=True)
-        cls.admin = U.objects.create_user(email="a@x.io", password="x")
+        cls.contrib = U.objects.create_user(email="a@x.io", password="x")
         cls.viewer = U.objects.create_user(email="v@x.io", password="x")
         cls.creator = U.objects.create_user(email="c@x.io", password="x")
-        Membership.objects.create(user=cls.admin, team=cls.team, role=R.ADMIN)
+        Membership.objects.create(user=cls.contrib, team=cls.team, role=R.CONTRIBUTOR)
         Membership.objects.create(user=cls.viewer, team=cls.team, role=R.VIEWER)
         Membership.objects.create(user=cls.creator, team=cls.team, role=R.VIEWER)
         cls.tpl = EmailTemplate.objects.create(
             name="t", kind="CERT", subject="s", blocks=CERT_DATA_BLOCKS, created_by=cls.creator
         )
 
-    def test_owner_and_admin_can_edit(self):
+    def test_owner_can_edit(self):
         self.assertTrue(can_edit_template(self.owner, self.tpl))
-        self.assertTrue(can_edit_template(self.admin, self.tpl))
+
+    def test_contributor_cannot_edit_others_template(self):
+        # Editar/borrar plantillas ajenas es del Owner (o del creador).
+        self.assertFalse(can_edit_template(self.contrib, self.tpl))
 
     def test_creator_can_edit_even_if_viewer(self):
         self.assertTrue(can_edit_template(self.creator, self.tpl))

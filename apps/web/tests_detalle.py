@@ -371,9 +371,11 @@ class NotifyTests(TestCase):
         self.assertContains(resp, "Demasiadas notificaciones", status_code=429)
 
     def test_notify_without_recipients_warns(self):
-        # Cert sin destinatarios ni admins de grupo => aviso, no error.
+        # Cert sin destinatarios ni Colaboradores en el grupo => aviso, no error.
+        # (team_b no tiene miembros; team_a tiene un Colaborador que ahora es
+        # el fallback de responsables.)
         bare = Certificate.objects.create(
-            domain="solo.ejemplo.com", port=443, team=self.team_a,
+            domain="solo.ejemplo.com", port=443, team=self.team_b,
             notify_platform=False, notify_email=True, notify_webhook=False,
         )
         self.client.force_login(self.owner)

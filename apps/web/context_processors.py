@@ -124,7 +124,6 @@ def forge_globals(request):
 
     # --- Rol efectivo en el ámbito --------------------------------------
     _ROLE_LABELS = {
-        MembershipRole.ADMIN: _("Admin"),
         MembershipRole.CONTRIBUTOR: _("Colaborador"),
         MembershipRole.VIEWER: _("Visualizador"),
     }

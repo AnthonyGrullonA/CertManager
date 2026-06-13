@@ -87,11 +87,12 @@ class BootstrapCommandTests(TestCase):
         self.assertTrue(Team.objects.filter(name="sp_canales_electronicos").exists())
         # Nombre normalizado: sp_ordenes-aprov -> sp_ordenes_aprov.
         self.assertTrue(Team.objects.filter(name="sp_ordenes_aprov").exists())
-        # El Owner es ADMIN SOLO de su grupo.
+        # El Owner es miembro (Colaborador) SOLO de su grupo; su gestión es
+        # por rol global, no por membresía.
         memberships = list(Membership.objects.filter(user=owner))
         self.assertEqual(len(memberships), 1)
         self.assertEqual(memberships[0].team.name, "sp_canales_electronicos")
-        self.assertEqual(memberships[0].role, MembershipRole.ADMIN)
+        self.assertEqual(memberships[0].role, MembershipRole.CONTRIBUTOR)
 
     def test_cert_assigned_to_its_sp_groups(self):
         self._run(CF_OWNER_PASSWORD="x")

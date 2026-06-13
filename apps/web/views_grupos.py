@@ -20,7 +20,7 @@ from apps.certificates.models import Certificate
 from apps.core.enums import CertificateStatus, MembershipRole
 from apps.teams.forms import TeamForm
 from apps.teams.models import Membership, Team
-from apps.teams.permissions import can_view, is_team_admin
+from apps.teams.permissions import can_view
 
 User = get_user_model()
 
@@ -68,10 +68,6 @@ def _decorate_team(team):
     team.health_total = sum(counts.values())
     team.cert_count = team.health_total
     team.member_count = team.memberships.count()
-    team.admin_memberships = [
-        m for m in team.memberships.select_related("user__preferences")
-        if m.role == MembershipRole.ADMIN
-    ]
     team.default_email = (team.default_recipients or [""])[0] if team.default_recipients else ""
     return team
 
@@ -117,13 +113,6 @@ class TeamCreateView(LoginRequiredMixin, View):
             team = form.save(commit=False)
             team.created_by = request.user
             team.save()
-            admin = form.cleaned_data.get("admin")
-            if admin:
-                Membership.objects.get_or_create(
-                    user=admin,
-                    team=team,
-                    defaults={"role": MembershipRole.ADMIN},
-                )
             _decorate_team(team)
             html = render_to_string(
                 "grupos/_row_created.html",
@@ -150,9 +139,8 @@ def _html(html, status=200):
 # Detalle de grupo (overview + gestión de miembros inline).
 # ===========================================================================
 MEMBER_ROLE_ORDER = {
-    MembershipRole.ADMIN: 0,
-    MembershipRole.CONTRIBUTOR: 1,
-    MembershipRole.VIEWER: 2,
+    MembershipRole.CONTRIBUTOR: 0,
+    MembershipRole.VIEWER: 1,
 }
 
 
@@ -165,8 +153,8 @@ def _get_team_visible(user, pk):
 
 
 def _can_manage_team(user, team):
-    """Gestiona miembros: el Owner global o un Admin del propio grupo."""
-    return bool(getattr(user, "is_owner", False)) or is_team_admin(user, team)
+    """Gestiona miembros: SOLO el Owner global (el rol Admin de grupo no existe)."""
+    return bool(getattr(user, "is_owner", False))
 
 
 def _members_context(team, user):

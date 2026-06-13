@@ -81,8 +81,8 @@ class TeamListTests(TestCase):
         self.client.force_login(self.owner)
         resp = self.client.get(reverse("team-list"))
         self.assertContains(resp, "data-forge-sortable")
-        # Tres columnas no ordenables: Salud, Admin(s), acciones.
-        self.assertEqual(resp.content.decode().count("data-no-sort"), 3)
+        # Dos columnas no ordenables: Salud y acciones (Admin(s) se eliminó).
+        self.assertEqual(resp.content.decode().count("data-no-sort"), 2)
 
     def test_native_search_present_with_groups(self):
         # ForgeDataTable genera el buscador en cliente.
@@ -127,7 +127,6 @@ class TeamCreateTests(TestCase):
                 "description": "Equipo de plataforma",
                 "default_threshold_days": 30,
                 "default_check_interval": 6,
-                "admin": self.admin_user.id,
                 "default_email": "plataforma@certforge.test",
             },
         )
@@ -142,9 +141,6 @@ class TeamCreateTests(TestCase):
         self.assertEqual(team.default_threshold_days, 30)
         self.assertEqual(team.default_recipients, ["plataforma@certforge.test"])
         self.assertEqual(team.created_by, self.owner)
-        # Admin asignado como Membership ADMIN.
-        m = Membership.objects.get(team=team, user=self.admin_user)
-        self.assertEqual(m.role, MembershipRole.ADMIN)
 
     def test_create_without_admin_is_allowed(self):
         self.client.force_login(self.owner)

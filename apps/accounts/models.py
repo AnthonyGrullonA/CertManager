@@ -64,7 +64,7 @@ class User(AbstractUser):
 
     @property
     def group_role(self):
-        """Rol de grupo más alto del usuario (ADMIN > CONTRIBUTOR > VIEWER).
+        """Rol de grupo más alto del usuario (CONTRIBUTOR > VIEWER).
 
         Es el rol que se muestra en las cards/filas de Usuarios cuando no es
         Owner: en esta app el "rol" real vive en las membresías por grupo
@@ -75,11 +75,7 @@ class User(AbstractUser):
         from apps.core.enums import MembershipRole
 
         roles = {m.role for m in self.memberships.all()}
-        for role in (
-            MembershipRole.ADMIN,
-            MembershipRole.CONTRIBUTOR,
-            MembershipRole.VIEWER,
-        ):
+        for role in (MembershipRole.CONTRIBUTOR, MembershipRole.VIEWER):
             if role in roles:
                 return role
         return None

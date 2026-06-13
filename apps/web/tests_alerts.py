@@ -51,9 +51,9 @@ class AlertCenterBaseTest(TestCase):
         return alert
 
     def _make_admin(self, email="admin@cf.test"):
-        admin = User.objects.create_user(email=email, password="x")
-        Membership.objects.create(user=admin, team=self.team, role=MembershipRole.ADMIN)
-        return admin
+        # Resolver alertas compartidas es exclusivo del Owner (el rol Admin de
+        # grupo se eliminó); el "gestor" de los tests es un Owner.
+        return User.objects.create_user(email=email, password="x", is_owner=True)
 
 
 class AlertCenterViewTests(AlertCenterBaseTest):
@@ -264,9 +264,9 @@ class SharedVsPersonalTests(TestCase):
 
     def setUp(self):
         self.team = Team.objects.create(name="Compartido")
-        self.admin = User.objects.create_user(email="adm@cf.test", password="x")
+        # El gestor es un Owner: resolver es exclusivo del Owner global.
+        self.admin = User.objects.create_user(email="adm@cf.test", password="x", is_owner=True)
         self.b = User.objects.create_user(email="b@cf.test", password="x")
-        Membership.objects.create(user=self.admin, team=self.team, role=MembershipRole.ADMIN)
         Membership.objects.create(user=self.b, team=self.team, role=MembershipRole.CONTRIBUTOR)
         self.cert = Certificate.objects.create(domain="shared.test", team=self.team)
         for i in range(2):

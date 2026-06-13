@@ -49,10 +49,10 @@ class ProfilePageTests(TestCase):
 
     def test_my_groups_lists_role_per_group(self):
         team = Team.objects.create(name="Pagos")
-        Membership.objects.create(user=self.user, team=team, role=MembershipRole.ADMIN)
+        Membership.objects.create(user=self.user, team=team, role=MembershipRole.CONTRIBUTOR)
         resp = self.client.get(reverse("profile"))
         self.assertContains(resp, "Pagos")
-        self.assertContains(resp, "Admin de grupo")
+        self.assertContains(resp, "Colaborador")
         self.assertNotContains(resp, "Aún no perteneces")
 
     def test_identity_card_shows_avatar_name_and_email(self):

@@ -11,7 +11,7 @@ Variables: u (User con memberships prefetcheadas).
       {% include "components/_avatar.html" with name=u.get_full_name email=u.email avatar_choice=u.preferences.avatar_choice size="md" only %}
       <div class="forge-userline__meta">
         <span class="forge-userline__name">{{ u.get_full_name|default:u.email }}</span>
-        <span class="forge-userline__mail">{{ u.email }}</span>
+        {% if u.get_full_name %}<span class="forge-userline__mail">{{ u.email }}</span>{% endif %}
       </div>
     </div>
   </td>

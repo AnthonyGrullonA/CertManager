@@ -41,7 +41,7 @@ class UserListAccessTests(TestCase):
             email="member@certforge.test", password=PWD
         )
         Membership.objects.create(
-            user=cls.admin, team=cls.team, role=MembershipRole.ADMIN
+            user=cls.admin, team=cls.team, role=MembershipRole.CONTRIBUTOR
         )
         Membership.objects.create(
             user=cls.member, team=cls.team, role=MembershipRole.CONTRIBUTOR
@@ -100,7 +100,7 @@ class UserListContentTests(TestCase):
             last_name="Cabrera",
         )
         Membership.objects.create(
-            user=cls.other, team=cls.team, role=MembershipRole.ADMIN
+            user=cls.other, team=cls.team, role=MembershipRole.CONTRIBUTOR
         )
 
     def setUp(self):
@@ -214,7 +214,7 @@ class UserInviteTests(TestCase):
                 "password1": "Intruso-Usuario-2026!",
                 "password2": "Intruso-Usuario-2026!",
                 "groups": [self.team.pk],
-                "role": MembershipRole.ADMIN,
+                "role": MembershipRole.CONTRIBUTOR,
                 "is_owner": "true",
                 "is_staff": "true",
             },
@@ -224,20 +224,20 @@ class UserInviteTests(TestCase):
         self.assertFalse(new.is_owner)
         self.assertFalse(new.is_staff)
 
-    def test_invite_role_admin_assigns_group_role_not_global(self):
+    def test_invite_role_assigns_group_role_not_global(self):
         self.client.post(
             reverse("user-invite"),
             {
-                "email": "groupadmin@certforge.test",
-                "password1": "Admin-Grupo-2026!",
-                "password2": "Admin-Grupo-2026!",
+                "email": "groupcolab@certforge.test",
+                "password1": "Colab-Grupo-2026!",
+                "password2": "Colab-Grupo-2026!",
                 "groups": [self.team.pk],
-                "role": MembershipRole.ADMIN,
+                "role": MembershipRole.CONTRIBUTOR,
             },
         )
-        new = User.objects.get(email="groupadmin@certforge.test")
+        new = User.objects.get(email="groupcolab@certforge.test")
         m = Membership.objects.get(user=new, team=self.team)
-        self.assertEqual(m.role, MembershipRole.ADMIN)
+        self.assertEqual(m.role, MembershipRole.CONTRIBUTOR)
 
     def test_create_ldap_user_has_unusable_password(self):
         resp = self.client.post(
@@ -355,7 +355,7 @@ class UserEditTests(TestCase):
                 "last_name": "Luna Díaz",
                 "is_active": "",  # desactivar
                 "groups": [self.team_b.pk],  # cambia de grupo
-                "role": MembershipRole.ADMIN,
+                "role": MembershipRole.CONTRIBUTOR,
             },
         )
         self.assertEqual(resp.status_code, 200)
@@ -365,13 +365,13 @@ class UserEditTests(TestCase):
         self.assertEqual(self.target.first_name, "Anabel")
         self.assertEqual(self.target.last_name, "Luna Díaz")
         self.assertFalse(self.target.is_active)
-        # Reconciliación de membresías: solo team_b, rol ADMIN.
+        # Reconciliación de membresías: solo team_b, rol Colaborador.
         teams = set(
             self.target.memberships.values_list("team__name", flat=True)
         )
         self.assertEqual(teams, {"Pagos"})
         m = self.target.memberships.get(team=self.team_b)
-        self.assertEqual(m.role, MembershipRole.ADMIN)
+        self.assertEqual(m.role, MembershipRole.CONTRIBUTOR)
         # NUNCA se promueve a Owner.
         self.assertFalse(self.target.is_owner)
 

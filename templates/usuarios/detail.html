@@ -29,7 +29,7 @@ Variables: target (User), memberships, two_factor_on.
     <div style="flex:1; min-width:0;">
       <h1 style="margin:0; font-family:var(--font-sans); font-size:1.35rem; font-weight:700; color:var(--text-primary);">{{ target.get_full_name|default:target.email }}</h1>
       <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
-        <span style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-secondary);">{{ target.email }}</span>
+        {% if target.get_full_name %}<span style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-secondary);">{{ target.email }}</span>{% endif %}
         {% include "usuarios/_role_chip.html" with u=target only %}
         {% if target.is_active %}<span class="badge badge--ok badge--sm">{% trans "Activo" %}</span>{% else %}<span class="badge badge--exp badge--sm">{% trans "Inactivo" %}</span>{% endif %}
       </div>
@@ -81,7 +81,7 @@ Variables: target (User), memberships, two_factor_on.
           <a href="{% url 'team-detail' m.team_id %}" style="flex:1; min-width:0; color:var(--text-primary); font-weight:500; font-size:var(--text-sm); text-decoration:none; display:flex; align-items:center; gap:8px;">
             {% icon "layers" size=15 %} {{ m.team.name }}
           </a>
-          <span class="forge-tag{% if m.role == 'ADMIN' %} forge-tag--brand{% endif %}">{{ m.get_role_display }}</span>
+          <span class="forge-tag">{{ m.get_role_display }}</span>
         </div>
         {% empty %}
         <span style="color:var(--text-tertiary); font-size:var(--text-sm);">{% trans "Este usuario no pertenece a ningún grupo." %}</span>

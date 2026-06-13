@@ -37,18 +37,21 @@ class GruposOverviewAvatarTests(TestCase):
         cache.clear()
         self.viewer = User.objects.create_user("owner@certforge.test", "x", is_owner=True)
         _set_avatar(self.viewer, 9)
-        self.admin = User.objects.create_user("admin@certforge.test", "x")
-        _set_avatar(self.admin, 7)
-        team = Team.objects.create(name="Plataforma")
-        Membership.objects.create(user=self.admin, team=team, role=MembershipRole.ADMIN)
+        self.member = User.objects.create_user("colab@certforge.test", "x")
+        _set_avatar(self.member, 7)
+        self.team = Team.objects.create(name="Plataforma")
+        Membership.objects.create(
+            user=self.member, team=self.team, role=MembershipRole.CONTRIBUTOR
+        )
         self.client.force_login(self.viewer)
 
-    def test_admin_rows_use_each_admins_avatar(self):
-        resp = self.client.get(reverse("team-list"))
+    def test_member_rows_use_each_members_avatar(self):
+        # La región de miembros del detalle pinta el avatar de CADA miembro
+        # (md), no el del usuario autenticado.
+        resp = self.client.get(reverse("team-detail", args=[self.team.pk]))
         html = resp.content.decode()
-        # La fila pinta el avatar del admin (xs), no el del usuario autenticado.
-        self.assertIn(avatar_svg(7, size="xs"), html)
-        self.assertNotIn(avatar_svg(9, size="xs"), html)
+        self.assertIn(avatar_svg(7, size="md"), html)
+        self.assertNotIn(avatar_svg(9, size="md"), html)
 
     def test_topbar_still_shows_authenticated_user_avatar(self):
         resp = self.client.get(reverse("team-list"))
@@ -102,10 +105,13 @@ class DetalleResponsablesAvatarTests(TestCase):
         self.assertIn(avatar_svg(derived, size="sm"), html)
         self.assertNotIn(avatar_svg(derived % 50 + 1, size="sm"), html)
 
-    def test_admin_fallback_shows_admins_avatar(self):
-        admin = User.objects.create_user("admin@certforge.test", "x")
-        _set_avatar(admin, 7)
-        Membership.objects.create(user=admin, team=self.team, role=MembershipRole.ADMIN)
+    def test_group_fallback_shows_contributors_avatar(self):
+        # Sin destinatarios, los responsables son los Colaboradores del grupo.
+        colab = User.objects.create_user("colab@certforge.test", "x")
+        _set_avatar(colab, 7)
+        Membership.objects.create(
+            user=colab, team=self.team, role=MembershipRole.CONTRIBUTOR
+        )
         html = self._resumen()
         self.assertIn(avatar_svg(7, size="sm"), html)
         self.assertNotIn(avatar_svg(9, size="sm"), html)

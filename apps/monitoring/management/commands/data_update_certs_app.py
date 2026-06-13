@@ -14,7 +14,7 @@ Carga, de forma idempotente:
        - **Ubicación**: dominios que empiezan con ``ntp``/``ntt`` -> "Servidor";
          los que contienen ``claro.com.do`` -> "netscaler".
        - **Grupos**: cada correo de soporte ``sp*`` se vuelve un Team; el cert se
-         asigna a esos grupos (M2M). El Owner es ADMIN solo de
+         asigna a esos grupos (M2M). El Owner queda como Colaborador de
          ``sp_canales_electronicos`` (su grupo); los demás ``sp*`` se crean sin él.
        - **Destinatarios**: TODOS los correos del dominio (sp y no-sp) quedan como
          CertificateRecipient (notificación por correo).
@@ -310,6 +310,8 @@ class Command(BaseCommand):
         return team
 
     def _ensure_membership(self, user, team):
+        # El rol Admin de grupo no existe: el Owner ya gestiona todo por rol
+        # global; su membresía en el grupo es de Colaborador.
         Membership.objects.get_or_create(
-            user=user, team=team, defaults={"role": MembershipRole.ADMIN}
+            user=user, team=team, defaults={"role": MembershipRole.CONTRIBUTOR}
         )

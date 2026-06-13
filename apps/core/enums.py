@@ -21,9 +21,12 @@ class CertificateStatus(models.TextChoices):
 
 
 class MembershipRole(models.TextChoices):
+    """Roles por grupo. La gestión (grupos, miembros, alertas compartidas,
+    plantillas) es exclusiva del Owner global: el rol ADMIN de grupo se eliminó
+    por decisión del Owner (migración teams 0005 convirtió ADMIN->CONTRIBUTOR)."""
+
     VIEWER = "VIEWER", _("Visualizador")           # ve certs + genera/recibe reportes
     CONTRIBUTOR = "CONTRIBUTOR", _("Colaborador")  # + crea/edita/borra certs en sus grupos
-    ADMIN = "ADMIN", _("Admin de grupo")           # + plantillas, miembros, alertas compartidas
 
 
 class TemplateKind(models.TextChoices):
