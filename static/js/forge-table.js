@@ -54,14 +54,14 @@
     return n > 0 ? n : fallback;
   }
 
-  function sizeOptions(defSize, total) {
-    var base = [8, 15, 30];
-    if (total > 30) base.push(50);
-    if (base.indexOf(defSize) === -1) {
-      base.push(defSize);
-      base.sort(function (a, b) { return a - b; });
-    }
-    return base;
+  function sizeOptions(st) {
+    var total = st.baseRows.length;
+    var set = {};
+    // Las que caben en pantalla (default) y la elección actual, siempre.
+    [st.fitSize, st.size].forEach(function (n) { if (n > 0) set[n] = true; });
+    // Pasos fijos útiles, sin pasarnos del total.
+    [8, 15, 30, 50].forEach(function (n) { if (n <= total) set[n] = true; });
+    return Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
   }
 
   // ---- construcción del footer -------------------------------------------
@@ -116,7 +116,7 @@
   }
 
   function fillSizeOptions(st) {
-    var opts = sizeOptions(st.defSize, st.baseRows.length);
+    var opts = sizeOptions(st);
     st.select.innerHTML = "";
     opts.forEach(function (n) {
       var o = document.createElement("option");
@@ -130,6 +130,7 @@
   function wireFooter(st) {
     st.select.addEventListener("change", function () {
       st.size = parseInt(st.select.value, 10) || st.defSize;
+      st.userSized = true; // elección manual: respétala al redimensionar
       st.page = 0;
       render(st); // la ALTURA no cambia: solo el scroll interno
     });
@@ -200,15 +201,49 @@
     });
   }
 
-  // ---- altura fija --------------------------------------------------------
-  // Mide el alto natural mostrando exactamente `defSize` filas y lo congela.
-  // Así la tarjeta mide siempre lo mismo, sin importar el page-size elegido.
+  // ---- altura adaptativa al viewport --------------------------------------
+  // El alto de la tarjeta se ajusta a la pantalla (px reales / zoom): muestra
+  // tantas filas como quepan entre la tabla y el borde inferior del viewport,
+  // en vez de un alto fijo de `defSize`. Así no se desperdicia media pantalla
+  // en monitores grandes y, al hacer zoom, encoge para no provocar scroll.
+  // Opt-out: añade data-no-fill al wrapper para conservar el alto fijo.
+  var FIT_MIN = 5;        // nunca menos de estas filas (legibilidad)
+  var FIT_MAX = 60;       // tope de seguridad
+  var FIT_BOTTOM_GAP = 28; // respiro con el padding inferior de la pantalla
+
+  // Alto real de una fila de datos (mide la primera, visible un instante).
+  function rowHeight(st) {
+    var first = st.baseRows[0];
+    if (!first) return 44;
+    var prev = first.style.display;
+    first.style.display = "";
+    var h = first.getBoundingClientRect().height || first.offsetHeight || 44;
+    first.style.display = prev;
+    return h || 44;
+  }
+
+  // Cuántas filas caben entre el tope de la tabla y el fondo del viewport.
+  function computeFit(st) {
+    if (st.wrap.hasAttribute("data-no-fill") || !st.baseRows.length) {
+      st.fitSize = st.defSize;
+      return;
+    }
+    var rect = st.scroll.getBoundingClientRect();
+    var footH = st.foot ? st.foot.getBoundingClientRect().height : 0;
+    var avail = window.innerHeight - rect.top - footH - FIT_BOTTOM_GAP;
+    var n = Math.floor(avail / rowHeight(st));
+    st.fitSize = Math.max(FIT_MIN, Math.min(FIT_MAX, n));
+  }
+
+  // Congela el alto de la tarjeta a exactamente `fitSize` filas. El page-size
+  // (st.size) sigue mandando cuántas filas hay por página: si el usuario pide
+  // más de las que caben, el cuerpo hace scroll interno (la tarjeta no crece).
   function lockHeight(st) {
     var scroll = st.scroll;
     scroll.style.height = "auto";
     scroll.style.maxHeight = "none";
-    var def = st.defSize;
-    st.baseRows.forEach(function (tr, i) { tr.style.display = i < def ? "" : "none"; });
+    var rows = st.fitSize || st.defSize;
+    st.baseRows.forEach(function (tr, i) { tr.style.display = i < rows ? "" : "none"; });
     var h = Math.ceil(scroll.scrollHeight);
     scroll.style.height = h + "px";
     scroll.style.maxHeight = h + "px";
@@ -260,7 +295,8 @@
     var defSize = intAttr(wrap, "data-page-size", 8);
     var st = {
       wrap: wrap, table: table, tbody: table.tBodies[0], scroll: scroll,
-      defSize: defSize, size: defSize, page: 0, sort: null
+      defSize: defSize, size: defSize, fitSize: defSize, userSized: false,
+      page: 0, sort: null
     };
     st.baseRows = dataRows(st.tbody);
     st.rows = st.baseRows.slice();
@@ -276,6 +312,9 @@
     setupSort(st);
     st.foot = buildFooter(st);
     wrap.appendChild(st.foot);
+    // Cuántas filas caben en pantalla → alto de la tarjeta y page-size default.
+    computeFit(st);
+    st.size = st.fitSize;
     fillSizeOptions(st);
     wireFooter(st);
 
@@ -323,14 +362,25 @@
       document.querySelectorAll("[data-forge-table].forge-table-ready").forEach(function (wrap) {
         var prev = store.get(wrap);
         if (!prev) return;
-        var keep = { size: prev.size, page: prev.page, sort: prev.sort };
+        var keep = {
+          size: prev.size, page: prev.page, sort: prev.sort,
+          userSized: prev.userSized
+        };
         teardown(wrap);
-        enhance(wrap);
+        enhance(wrap); // recalcula fitSize para el nuevo viewport/zoom
         var st = store.get(wrap);
         if (!st || !st.baseRows.length) return;
-        st.size = keep.size;
+        // Solo conservamos el page-size si el usuario lo eligió a mano;
+        // si no, dejamos el fit recién calculado para la nueva pantalla.
+        if (keep.userSized) {
+          st.size = keep.size;
+          st.userSized = true;
+          if (st.select) {
+            fillSizeOptions(st); // asegura que la opción elegida exista
+            st.select.value = keep.size;
+          }
+        }
         st.sort = keep.sort;
-        if (st.select) st.select.value = keep.size;
         applySort(st);
         updateSortGlyphs(st);
         st.page = keep.page;

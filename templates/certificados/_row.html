@@ -47,8 +47,8 @@ Una fila del DataTable de certificados. Variable: cert
   </td>
   {# Vence el #}
   <td><span style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-secondary);">{{ cert.valid_to|date:"d M Y"|default:"—" }}</span></td>
-  {# Emisor #}
-  <td><span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary);">{{ cert.issuer|default:"—" }}</span></td>
+  {# Emisor — una sola línea con ellipsis (el DN largo no debe inflar la fila) #}
+  <td><span title="{{ cert.issuer }}" style="display:block; font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;">{{ cert.issuer|default:"—" }}</span></td>
   {# Último chequeo #}
   <td><span style="font-family:var(--font-sans); font-size:var(--text-sm); color:var(--text-tertiary);">{{ cert.last_checked_at|date:"d M H:i"|default:"Sin chequear" }}</span></td>
   {# Correos responsables #}

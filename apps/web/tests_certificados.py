@@ -57,6 +57,25 @@ class CertListTests(TestCase):
         resp = self.client.get(reverse("certificate-list-forge"))
         self.assertEqual(resp.status_code, 302)
 
+    def test_issuer_cell_truncates_to_single_line(self):
+        # Un emisor con DN largo no debe envolver a varias líneas e inflar la
+        # fila (rompe el datatable): se trunca a una línea con ellipsis + title.
+        import re
+
+        self.cert_a.issuer = (
+            "CN=Sectigo Public Server Authentication CA DV R36,"
+            "O=Sectigo Limited,C=GB"
+        )
+        self.cert_a.save(update_fields=["issuer"])
+        self.client.force_login(self.owner)
+        html = self.client.get(reverse("certificate-list-forge")).content.decode()
+        cell = re.search(r'<span[^>]*>CN=Sectigo[^<]*</span>', html).group(0)
+        self.assertIn("white-space:nowrap", cell)
+        self.assertIn("text-overflow:ellipsis", cell)
+        self.assertIn("overflow:hidden", cell)
+        self.assertIn("max-width:", cell)
+        self.assertIn("title=", cell)
+
     def test_owner_sees_all(self):
         self.client.force_login(self.owner)
         resp = self.client.get(reverse("certificate-list-forge"))
