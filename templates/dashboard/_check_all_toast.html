@@ -1,8 +1,8 @@
 {% comment %}
-Respuesta HTMX de "Chequear todo" (PASO 6). Empuja un toast OOB con el conteo
-real de certificados del ámbito ("Verificando los N certificados…"). El refresco
-de los KPIs lo dispara la cabecera HX-Trigger: cf:check-all-started que emite la
-vista, no este markup.
+Respuesta HTMX de "Chequear todo". El chequeo real corre en segundo plano; este
+toast OOB confirma el inicio con el conteo real del ámbito ("Chequeo en curso
+para N…"). El refresco de los KPIs lo dispara la cabecera HX-Trigger:
+cf:check-all-started que emite la vista, no este markup.
 {% endcomment %}
 {% include "partials/_toast.html" with tone="ok" title="Chequeo iniciado" message=message %}
 {# Texto plano para aserciones/no-HTMX: conteo real visible en el cuerpo. #}

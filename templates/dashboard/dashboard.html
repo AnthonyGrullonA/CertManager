@@ -71,7 +71,7 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
         {% if seg.value %}
         <a href="{{ seg.href }}" class="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-900">
           <span class="w-2.5 h-2.5 rounded-full flex-none"
-                style="background: var(--status-{{ seg.family }}-solid, #94a3b8);"></span>
+                style="background: {{ seg.color }};"></span>
           <span class="flex-1 truncate">{{ seg.label }}</span>
           <span class="tabular-nums font-medium">{{ seg.value }}</span>
         </a>
@@ -103,10 +103,11 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
       </div>
     </div>
 
-    {# Tendencia (8 semanas) — sparkline ilustrativo del periodo #}
+    {# Tendencia real (8 semanas) — derivada del historial de chequeos #}
     <div class="card">
       <h2 class="font-medium text-slate-900">{% trans "Tendencia" %}</h2>
-      <p class="text-xs text-slate-500 mb-2">{% trans "Por vencer · 8 semanas" %}</p>
+      <p class="text-xs text-slate-500 mb-2">{% trans "Por vencer y vencidos · últimas 8 semanas" %}</p>
+      {% if trend.has_data %}
       <div class="h-40"><canvas id="trendChart"></canvas></div>
       <div class="flex items-center gap-4 mt-2 text-xs text-slate-500">
         <span class="flex items-center gap-1.5">
@@ -116,6 +117,16 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
           <span class="w-2.5 h-2.5 rounded-full" style="background: var(--status-exp-solid);"></span> {% trans "Vencidos" %}
         </span>
       </div>
+      {% else %}
+      <div class="h-40 flex flex-col items-center justify-center text-center gap-2.5">
+        <span class="text-slate-300">{% icon "trending-up" size=26 %}</span>
+        <p class="text-sm text-slate-400">{% trans "Aún no hay historial de chequeos para mostrar la tendencia." %}</p>
+        <button type="button" class="btn-outline btn-sm"
+                hx-post="{{ check_all_url }}{% if scope_team %}?team={{ scope_team }}{% endif %}" hx-swap="none">
+          {% icon "refresh-cw" size=14 %} {% trans "Chequear ahora" %}
+        </button>
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -207,17 +218,28 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
 {% block extra_js %}
 <script src="{% static 'js/chart.umd.min.js' %}"></script>
 {{ status_distribution|json_script:"status-data" }}
+{{ trend|json_script:"trend-data" }}
 <script>
 (function () {
   if (typeof Chart === "undefined") return;
-  var statusData = JSON.parse(document.getElementById("status-data").textContent);
 
-  // Paleta Forge UI por familia de estado (espejo de los tokens --status-*-solid).
-  // Error = rojo (convención: rojo = error); Vencido = rojo oscuro (distinguible).
-  var FAMILY_COLORS = {
-    ok: "#10b981", warn: "#f59e0b", crit: "#f97316",
-    exp: "#ef4444", err: "#ef4444", none: "#94a3b8",
-  };
+  // Resuelve un valor CSS (p.ej. "var(--status-exp-solid)") a su color final con
+  // un nodo sonda. Así el donut y la tendencia toman EXACTAMENTE el mismo color
+  // que sus leyendas (los tokens --status-*), coinciden en claro y oscuro y no se
+  // duplica ningún hex. `fallback` cubre el caso raro de token sin resolver.
+  var probe = document.createElement("span");
+  probe.style.display = "none";
+  document.body.appendChild(probe);
+  function cssColor(value, fallback) {
+    probe.style.color = "";
+    probe.style.color = value || "";
+    var c = getComputedStyle(probe).color;
+    return c || fallback || "#94a3b8";
+  }
+  var WARN = cssColor("var(--status-warn-solid)", "#f59e0b");
+  var EXP = cssColor("var(--status-exp-solid)", "#ef4444");
+
+  var statusData = JSON.parse(document.getElementById("status-data").textContent);
 
   var donutEl = document.getElementById("statusChart");
   if (donutEl) {
@@ -227,7 +249,7 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
         labels: statusData.map(function (d) { return d.label; }),
         datasets: [{
           data: statusData.map(function (d) { return d.value; }),
-          backgroundColor: statusData.map(function (d) { return FAMILY_COLORS[d.family] || "#94a3b8"; }),
+          backgroundColor: statusData.map(function (d) { return cssColor(d.color, "#94a3b8"); }),
           borderWidth: 0,
         }],
       },
@@ -239,15 +261,17 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
   }
 
   var trendEl = document.getElementById("trendChart");
-  if (trendEl) {
-    var weeks = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+  var trendNode = document.getElementById("trend-data");
+  if (trendEl && trendNode) {
+    // Serie REAL calculada en la vista desde el historial de CertificateCheck.
+    var trend = JSON.parse(trendNode.textContent);
     new Chart(trendEl, {
       type: "line",
       data: {
-        labels: weeks,
+        labels: trend.labels,
         datasets: [
-          { label: "Por vencer", data: [6, 7, 9, 8, 11, 10, 13, 14], borderColor: FAMILY_COLORS.warn, backgroundColor: "rgba(245,158,11,.12)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
-          { label: "Vencidos", data: [1, 1, 2, 1, 2, 3, 2, 2], borderColor: FAMILY_COLORS.exp, backgroundColor: "transparent", fill: false, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+          { label: "Por vencer", data: trend.por_vencer, borderColor: WARN, backgroundColor: "rgba(245,158,11,.12)", fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+          { label: "Vencidos", data: trend.vencidos, borderColor: EXP, backgroundColor: "transparent", fill: false, tension: 0.35, pointRadius: 0, borderWidth: 2 },
         ],
       },
       options: {
@@ -257,6 +281,8 @@ de cada barra == filas del drill; KPI Crítico/Vencido abre status__in correcto.
       },
     });
   }
+
+  probe.remove();
 })();
 </script>
 {% endblock %}

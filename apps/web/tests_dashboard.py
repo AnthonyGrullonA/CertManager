@@ -13,6 +13,7 @@ Definition of Done verificada aquí:
 - caracterización intacta: labels Total/Vigentes/Por vencer/Vencidos presentes.
 """
 from datetime import timedelta
+from unittest import mock
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
@@ -110,7 +111,7 @@ class DashboardForgeTests(TestCase):
 
     def test_kpi_error_sin_chequear_drill_status_in(self):
         resp = self.client.get(self.url)
-        card = next(c for c in resp.context["kpi_cards"] if c["label"] == "Sin chequear")
+        card = next(c for c in resp.context["kpi_cards"] if c["label"] == "Error / sin chequear")
         qs = parse_qs(urlparse(card["href"]).query)
         self.assertEqual(set(qs["status"]), {"ERROR", "SIN_CHEQUEAR"})
 
@@ -184,6 +185,45 @@ class DashboardForgeTests(TestCase):
             qs = parse_qs(urlparse(seg["href"]).query)
             self.assertEqual(qs["status"], [seg["key"]])
 
+    def test_donut_color_distinguishes_critico_from_vencido(self):
+        """Cada segmento expone un color CSS y CRITICO != VENCIDO (ambos rojos,
+        pero el vencido más oscuro) para que el donut no los confunda."""
+        resp = self.client.get(self.url)
+        by_key = {s["key"]: s for s in resp.context["status_distribution"]}
+        for seg in by_key.values():
+            self.assertTrue(seg["color"])  # toda fila trae color
+        self.assertNotEqual(by_key["CRITICO"]["color"], by_key["VENCIDO"]["color"])
+        self.assertEqual(by_key["VENCIDO"]["color"], "var(--status-exp-fg)")
+
+    # --- tendencia real (sin datos inventados) ---------------------------
+    def test_trend_is_real_and_empty_without_history(self):
+        """La tendencia se calcula del historial: 8 semanas y, sin chequeos
+        registrados, series en cero (has_data=False) en vez de datos fijos."""
+        resp = self.client.get(self.url)
+        trend = resp.context["trend"]
+        self.assertEqual(len(trend["labels"]), 8)
+        self.assertEqual(len(trend["por_vencer"]), 8)
+        self.assertEqual(len(trend["vencidos"]), 8)
+        # _make_certs no crea CertificateCheck -> sin historial.
+        self.assertFalse(trend["has_data"])
+        self.assertEqual(sum(trend["por_vencer"]) + sum(trend["vencidos"]), 0)
+
+    def test_trend_counts_history(self):
+        """Con chequeos en el historial, la semana corriente refleja el conteo."""
+        from apps.certificates.models import Certificate, CertificateCheck
+
+        now = timezone.now()
+        cert = Certificate.objects.filter(domain="porvencer.example.do").first()
+        CertificateCheck.objects.create(
+            certificate=cert, checked_at=now - timedelta(days=1),
+            status=CertificateStatus.POR_VENCER, days_left=20,
+        )
+        resp = self.client.get(self.url)
+        trend = resp.context["trend"]
+        self.assertTrue(trend["has_data"])
+        # La última ventana (semana corriente) contiene el chequeo recién creado.
+        self.assertEqual(trend["por_vencer"][-1], 1)
+
 
 @override_settings(ROOT_URLCONF=ROOT)
 class CheckAllTests(TestCase):
@@ -216,28 +256,66 @@ class CheckAllTests(TestCase):
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 405)
 
-    def test_check_all_toast_real_count_all_scope(self):
-        resp = self.client.post(self.url)
+    def test_check_all_dispatches_background_with_scope_ids(self):
+        """"Chequear todo" lanza el chequeo en segundo plano con los ids del
+        ámbito y confirma de inmediato (no bloquea con run_check real)."""
+        with mock.patch("apps.web.views_dashboard._dispatch_check_all") as disp:
+            resp = self.client.post(self.url)
         self.assertEqual(resp.status_code, 200)
-        # 5 certificados en total (3 Alpha + 2 Beta).
-        self.assertContains(resp, "Verificando los 5 certificados")
+        disp.assert_called_once()
+        ids = list(disp.call_args.args[0])
+        self.assertEqual(len(ids), 5)  # 3 Alpha + 2 Beta
+        self.assertContains(resp, "Chequeo en curso para 5 certificados")
         self.assertContains(resp, "forge-toast")
 
     def test_check_all_emits_hx_trigger(self):
-        resp = self.client.post(self.url)
+        with mock.patch("apps.web.views_dashboard._dispatch_check_all"):
+            resp = self.client.post(self.url)
         self.assertEqual(resp["HX-Trigger"], "cf:check-all-started")
 
     def test_check_all_respects_scope(self):
-        resp = self.client.post(self.url, {"team": str(self.team_b.id)})
-        self.assertContains(resp, "Verificando los 2 certificados")
+        with mock.patch("apps.web.views_dashboard._dispatch_check_all") as disp:
+            resp = self.client.post(self.url, {"team": str(self.team_b.id)})
+        self.assertEqual(len(list(disp.call_args.args[0])), 2)
+        self.assertContains(resp, "Chequeo en curso para 2 certificados")
 
     def test_check_all_singular_message(self):
         Certificate.objects.exclude(team=self.team_b).delete()
         Certificate.objects.filter(team=self.team_b).exclude(
             domain="b0.example.do"
         ).delete()
-        resp = self.client.post(self.url, {"team": str(self.team_b.id)})
-        self.assertContains(resp, "Verificando 1 certificado")
+        with mock.patch("apps.web.views_dashboard._dispatch_check_all") as disp:
+            resp = self.client.post(self.url, {"team": str(self.team_b.id)})
+        self.assertEqual(len(list(disp.call_args.args[0])), 1)
+        self.assertContains(resp, "Chequeo en curso para 1 certificado")
+
+    def test_check_all_empty_scope_does_not_dispatch(self):
+        Certificate.objects.all().delete()
+        with mock.patch("apps.web.views_dashboard._dispatch_check_all") as disp:
+            resp = self.client.post(self.url)
+        disp.assert_not_called()
+        self.assertContains(resp, "No hay certificados")
+
+    # --- worker (chequeo real, síncrono y testeable) ---------------------
+    def test_worker_runs_real_checks(self):
+        from apps.web.views_dashboard import _check_all_worker
+
+        ids = list(Certificate.objects.values_list("id", flat=True))
+        with mock.patch("apps.monitoring.runner.run_check") as run:
+            ok = _check_all_worker(ids)
+        self.assertEqual(run.call_count, 5)
+        self.assertEqual(ok, 5)
+
+    def test_worker_isolates_failures(self):
+        """Un run_check que revienta no cuenta como verificado, pero no aborta."""
+        from apps.web.views_dashboard import _check_all_worker
+
+        ids = list(Certificate.objects.values_list("id", flat=True))
+        with mock.patch("apps.monitoring.runner.run_check") as run:
+            run.side_effect = [None, RuntimeError("boom"), None, None, None]
+            ok = _check_all_worker(ids)
+        self.assertEqual(run.call_count, 5)
+        self.assertEqual(ok, 4)
 
     def test_check_all_requires_authentication(self):
         self.client.logout()

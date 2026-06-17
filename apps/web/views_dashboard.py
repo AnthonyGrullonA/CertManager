@@ -23,6 +23,9 @@ compartidas. Se cablea de forma definitiva en el PASO 14.
 """
 from __future__ import annotations
 
+import logging
+import threading
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -35,8 +38,13 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, View
 
 from apps.alerts.models import Alert
-from apps.certificates.models import Certificate
+from apps.certificates.models import Certificate, CertificateCheck
 from apps.core.enums import AlertStatus, CertificateStatus
+
+logger = logging.getLogger("certmanager.dashboard")
+
+# Nº de semanas que abarca la gráfica de tendencia del dashboard.
+TREND_WEEKS = 8
 
 # Ventanas de vencimiento (cotas superiores, en días). El primer bucket incluye
 # los vencidos (días < 0); ver migration-plan.md §7.
@@ -65,6 +73,19 @@ STATUS_FAMILY = {
 
 # Familia de la barra según su ventana (urgencia visual).
 WINDOW_FAMILY = {7: "crit", 15: "warn", 30: "warn", 60: "ok", 90: "ok"}
+
+# Color CSS (token) por estado para el donut y su leyenda. Arco y punto comparten
+# esta MISMA fuente para que coincidan exacto (y sigan el tema claro/oscuro). Por
+# defecto es ``--status-<familia>-solid``; VENCIDO se overridea a un rojo más
+# oscuro (``--status-exp-fg``) para distinguirse de CRITICO en el donut: ambos son
+# rojo (= peligro), pero el vencido, más severo, se ve más oscuro.
+STATUS_COLOR_VAR = {
+    CertificateStatus.VENCIDO: "var(--status-exp-fg)",
+}
+
+
+def _status_color(status) -> str:
+    return STATUS_COLOR_VAR.get(status, f"var(--status-{STATUS_FAMILY[status]}-solid)")
 
 
 def _scoped_certificates(request):
@@ -104,6 +125,42 @@ def _list_url(**params) -> str:
         else:
             pairs.append((key, str(value)))
     return f"{base}?{urlencode(pairs)}" if pairs else base
+
+
+def _weekly_trend(certs, now, weeks: int = TREND_WEEKS) -> dict:
+    """Tendencia **real** de las últimas ``weeks`` semanas desde el historial.
+
+    Para cada ventana semanal cuenta los certificados DISTINTOS del ámbito cuyo
+    chequeo registrado (``CertificateCheck``) en esa semana resultó en estado
+    "Por vencer" o "Vencido". La fuente es el historial real, no datos fijos: si
+    aún no hay chequeos, las series quedan en cero (``has_data=False``) y la
+    plantilla muestra un estado vacío honesto en vez de una curva inventada.
+    """
+    labels: list[str] = []
+    por_vencer: list[int] = []
+    vencidos: list[int] = []
+    history = CertificateCheck.objects.filter(certificate__in=certs)
+    for i in range(weeks - 1, -1, -1):
+        w_start = now - timedelta(weeks=i + 1)
+        w_end = now - timedelta(weeks=i)
+        window = history.filter(checked_at__gte=w_start, checked_at__lt=w_end)
+        pv = (
+            window.filter(status=CertificateStatus.POR_VENCER)
+            .values("certificate").distinct().count()
+        )
+        vc = (
+            window.filter(status=CertificateStatus.VENCIDO)
+            .values("certificate").distinct().count()
+        )
+        labels.append(w_end.strftime("%d %b"))
+        por_vencer.append(pv)
+        vencidos.append(vc)
+    return {
+        "labels": labels,
+        "por_vencer": por_vencer,
+        "vencidos": vencidos,
+        "has_data": any(por_vencer) or any(vencidos),
+    }
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -175,9 +232,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 ),
             },
             {
-                # "Sin chequear" (incluye los pocos en ERROR): atención, no peligro
-                # → naranja (familia crit), NO rojo (el rojo queda para Crítico/Vencido).
-                "label": "Sin chequear", "value": n_error + n_sin, "family": "crit",
+                # Agrupa ERROR + SIN_CHEQUEAR: la etiqueta lo nombra explícitamente
+                # para que el valor coincida con lo mostrado (no oculta los ERROR).
+                # Atención, no peligro → naranja (familia crit), NO rojo (el rojo
+                # queda para Crítico/Vencido).
+                "label": "Error / sin chequear", "value": n_error + n_sin, "family": "crit",
                 "icon": "circle-alert",
                 "href": _list_url(
                     status=[CertificateStatus.ERROR, CertificateStatus.SIN_CHEQUEAR],
@@ -193,6 +252,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 "label": s.label,
                 "value": counts.get(s.value, 0),
                 "family": STATUS_FAMILY[s],
+                "color": _status_color(s),
                 "href": _list_url(status=s.value, team=scope_team),
             }
             for s in CertificateStatus
@@ -247,34 +307,87 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .order_by("-created_at")[:8]
         )
 
+        # --- Tendencia (real, últimas 8 semanas) -------------------------
+        ctx["trend"] = _weekly_trend(certs, timezone.now())
+
         ctx["scope_team"] = scope_team
         return ctx
 
 
+def _check_all_worker(cert_ids) -> int:
+    """Ejecuta el chequeo REAL de cada certificado por id y devuelve cuántos
+    terminaron sin reventar.
+
+    Función pura de orquestación (sin hilos ni conexiones): corre ``run_check``
+    (mismo runner que "Probar ahora" y el command ``check_certificates``;
+    ``notify=False`` porque es un re-chequeo manual y no debe disparar alertas).
+    Un fallo aislado se registra y NO detiene el lote. Es directamente testeable.
+    """
+    from apps.monitoring.runner import run_check
+
+    ok = 0
+    certs = Certificate.objects.filter(id__in=cert_ids).select_related("team")
+    for cert in certs:
+        try:
+            run_check(cert, notify=False)
+            ok += 1
+        except Exception:  # noqa: BLE001 — un fallo aislado no detiene el lote.
+            logger.exception("Chequear todo: run_check falló (cert_id=%s)", cert.pk)
+            continue
+    return ok
+
+
+def _dispatch_check_all(cert_ids) -> threading.Thread:
+    """Lanza ``_check_all_worker`` en un hilo en segundo plano (no bloquea la
+    petición). Cierra las conexiones de BD del hilo al terminar para no filtrar
+    sockets. Devuelve el hilo (útil en pruebas)."""
+    ids = list(cert_ids)
+
+    def _run():
+        try:
+            _check_all_worker(ids)
+        finally:
+            from django.db import connections
+
+            connections.close_all()
+
+    thread = threading.Thread(target=_run, name="check-all", daemon=True)
+    thread.start()
+    return thread
+
+
 class DashboardCheckAllView(LoginRequiredMixin, View):
-    """"Chequear todo" atado al scope activo (síncrono en MVP).
+    """"Chequear todo" atado al scope activo: dispara el chequeo REAL en segundo
+    plano (no bloquea la petición, aguanta inventarios grandes).
 
-    En el MVP el chequeo real es síncrono/encolado por management-command; aquí
-    contabilizamos los certificados del ámbito y devolvemos:
+    Cuenta los certificados del ámbito, lanza ``_dispatch_check_all`` y responde:
 
-    - un **toast OOB** con el conteo real ("Verificando los N certificados…");
+    - un **toast OOB** con el conteo real en curso ("Chequeo en curso para N…");
     - una cabecera ``HX-Trigger: cf:check-all-started`` para que el dashboard
-      refresque sus KPIs sin recargar la página.
+      refresque sus KPIs (los estados van actualizándose conforme terminan los
+      chequeos; una recarga posterior muestra el resultado final).
 
     Responde a ``POST`` (acción con efecto) y exige sesión.
     """
 
     def post(self, request, *args, **kwargs):
         certs = _scoped_certificates(request)
-        count = certs.count()
-        if count == 1:
-            msg = _("Verificando 1 certificado…")
+        cert_ids = list(certs.values_list("id", flat=True))
+        total = len(cert_ids)
+
+        if total:
+            _dispatch_check_all(cert_ids)
+
+        if total == 0:
+            msg = _("No hay certificados en este ámbito para chequear.")
+        elif total == 1:
+            msg = _("Chequeo en curso para 1 certificado…")
         else:
-            msg = _("Verificando los %(count)s certificados…") % {"count": count}
+            msg = _("Chequeo en curso para %(total)s certificados…") % {"total": total}
 
         html = render_to_string(
             "dashboard/_check_all_toast.html",
-            {"count": count, "message": msg},
+            {"count": total, "message": msg},
             request=request,
         )
         resp = HttpResponse(html)
