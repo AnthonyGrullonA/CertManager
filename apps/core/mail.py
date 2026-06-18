@@ -24,8 +24,10 @@ def smtp_connection(org=None):
     if not org.smtp_host:
         return get_connection()  # backend por defecto (settings.EMAIL_*)
 
+    # Backend propio: evita CRAM-MD5 (HMAC-MD5), que falla en hosts con OpenSSL
+    # en modo FIPS. Usa AUTH PLAIN/LOGIN sobre STARTTLS. Ver apps/core/email_backends.
     return get_connection(
-        backend="django.core.mail.backends.smtp.EmailBackend",
+        backend="apps.core.email_backends.FipsSafeEmailBackend",
         host=org.smtp_host,
         port=org.smtp_port or 587,
         username=org.smtp_user or "",
