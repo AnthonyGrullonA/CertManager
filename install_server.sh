@@ -1,101 +1,121 @@
 #!/usr/bin/env bash
 # =============================================================================
-# install_server.sh — Instala CertManager en un servidor Linux como SERVICIO.
+# install_server.sh — Instala CertManager en un servidor Linux como SERVICIO,
+#                      para PREPROD/STAGING (requiere root).
 #
-#   · Gunicorn (web) + run_scheduler (tareas) como unidades systemd.
-#   · NGINX como reverse proxy con terminación TLS (redirección 80->443).
-#   · Solo el APLICATIVO: la base de datos MySQL es EXTERNA (la provee Claro,
-#     vía las vars DB_* en CLARO_NECESIDAD/.env).
+#   · Perfil SQLite/standalone (sin servidor de BD externo).
+#   · Gunicorn (web) + run_scheduler (tareas) como unidades systemd
+#     (arrancan tras reboot y se reinician si crashean).
+#   · NGINX como reverse proxy en HTTP :8000, ABIERTO A TODA LA RED.
+#   · Crea automáticamente el usuario Owner y los grupos/Teams desde cert.txt
+#     (bootstrap idempotente data_update_certs_app).
 #
-# Requisitos: ejecutar como root en RHEL/Rocky/Debian/Ubuntu. Completar antes el
-# archivo CLARO_NECESIDAD/.env (copia de .env.example) y, si vas a terminar TLS
-# aquí, tener el certificado del FQDN.
+#   NO es producción endurecida (SQLite + HTTP sin TLS). Si tienes MySQL/Postgres
+#   externo, exporta DATABASE_URL y el perfil standalone lo usa sin tocar nada:
+#     DATABASE_URL=mysql://user:pass@host:3306/certmanager sudo ./install_server.sh
 #
-# Uso:   sudo ./install_server.sh
+#   ¿Sin permisos de root en el servidor? Usa ./levantamiento.sh (rootless).
+#
+# Requisitos: root en RHEL/Rocky/Debian/Ubuntu, python3 (3.11+), y cert.txt en la
+# raíz para sembrar el monitoreo (si falta, crea solo Owner + grupo propio).
+#
+# Uso:
+#   sudo ./install_server.sh
+#   sudo CF_OWNER_PASSWORD=xxx ./install_server.sh           # sin prompt
+#   sudo PORT=8080 ./install_server.sh                       # otro puerto
 # =============================================================================
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_USER="${APP_USER:-certmanager}"
 VENV="${VENV:-$APP_DIR/.venv}"
-ENV_FILE="$APP_DIR/CLARO_NECESIDAD/.env"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-GUNICORN_BIND="127.0.0.1:8000"
+PORT="${PORT:-8000}"                       # puerto público (NGINX), HTTP plano
+GUNICORN_BIND="127.0.0.1:8001"             # interno: NGINX hace proxy aquí
 WORKERS="${WORKERS:-3}"
-# Certificado wildcard *.claro.com.do (colócalo en estas rutas antes de correr,
-# o pásalas por entorno). Ver CLARO_NECESIDAD/04_aprovisionamiento_y_certificados.md
-#   TLS_CERT = certificado + cadena intermedia (fullchain)
-#   TLS_KEY  = clave privada
-TLS_CERT="${TLS_CERT:-/etc/ssl/claro/claro-wildcard.crt}"
-TLS_KEY="${TLS_KEY:-/etc/ssl/claro/claro-wildcard.key}"
+DATA_DIR="${CERTFORGE_DATA_DIR:-$APP_DIR/data}"
+LOG_DIR="${LOG_DIR:-/var/log/certmanager}"
+ENV_FILE="${ENV_FILE:-$APP_DIR/.env.preprod}"   # gitignored (.env.*)
+CF_OWNER_EMAIL="${CF_OWNER_EMAIL:-jairol_grullon@claro.com.do}"
+# Rutas del sistema (sobreescribibles solo para pruebas/sandbox).
+SYSTEMD_DIR="${SYSTEMD_DIR:-/etc/systemd/system}"
+NGINX_CONF_DIR="${NGINX_CONF_DIR:-/etc/nginx/conf.d}"
 
-[ "$(id -u)" -eq 0 ] || { echo "ERROR: corre como root (sudo)." >&2; exit 1; }
-[ -f "$ENV_FILE" ] || { echo "ERROR: falta $ENV_FILE. Copia CLARO_NECESIDAD/.env.example y complétalo." >&2; exit 1; }
-if [ ! -f "$TLS_CERT" ] || [ ! -f "$TLS_KEY" ]; then
-  echo "ADVERTENCIA: no se encuentra el certificado TLS:" >&2
-  echo "   $TLS_CERT / $TLS_KEY" >&2
-  echo "   Coloca el wildcard *.claro.com.do ahí (o exporta TLS_CERT/TLS_KEY) antes de" >&2
-  echo "   exponer en 443. NGINX no arrancará en TLS hasta que existan." >&2
-fi
+[ "$(id -u)" -eq 0 ] || { echo "ERROR: corre como root (sudo ./install_server.sh). Sin root usa ./levantamiento.sh." >&2; exit 1; }
 
-# FQDN desde ALLOWED_HOSTS del .env (primer host).
-FQDN="$(grep -E '^ALLOWED_HOSTS=' "$ENV_FILE" | head -1 | cut -d= -f2- | tr -d ' ' | cut -d, -f1)"
-FQDN="${FQDN:-certmanager.local}"
-# server_name de NGINX: '*' no es válido; se usa '_' (catch-all) en ese caso.
-NGINX_NAME="$FQDN"
-[ "$FQDN" = "*" ] && NGINX_NAME="_"
-echo ">> FQDN: $FQDN"
+echo "== CertManager — install_server.sh PREPROD/STG (SQLite, systemd+NGINX, HTTP :$PORT, abierto a todos) =="
 
-# --- 1) Paquetes de sistema -------------------------------------------------
-echo ">> Instalando paquetes de sistema…"
+# --- 1) Paquetes de sistema (SQLite: sin libs de MySQL) ---------------------
+echo ">> [1/8] Instalando paquetes de sistema…"
 if command -v apt-get >/dev/null; then
   apt-get update
   apt-get install -y --no-install-recommends \
     python3 python3-venv python3-dev build-essential pkg-config \
-    default-libmysqlclient-dev libmariadb3 nginx gettext curl
+    nginx gettext curl
 elif command -v dnf >/dev/null; then
-  dnf install -y python3 python3-devel gcc make pkgconf-pkg-config \
-    mysql-devel nginx gettext curl
+  dnf install -y python3 python3-devel gcc make pkgconf-pkg-config nginx gettext curl
 elif command -v yum >/dev/null; then
-  yum install -y python3 python3-devel gcc make pkgconfig \
-    mysql-devel nginx gettext curl
+  yum install -y python3 python3-devel gcc make pkgconfig nginx gettext curl
 else
-  echo "ADVERTENCIA: gestor de paquetes no detectado; instala las deps manualmente." >&2
+  echo "ADVERTENCIA: gestor de paquetes no detectado; instala python3/venv, nginx, gcc y curl a mano." >&2
 fi
 
 # --- 2) Usuario de servicio -------------------------------------------------
 if ! id "$APP_USER" >/dev/null 2>&1; then
-  echo ">> Creando usuario de servicio $APP_USER"
+  echo ">> [2/8] Creando usuario de servicio $APP_USER"
   useradd --system --home-dir "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER" 2>/dev/null \
     || useradd -r -d "$APP_DIR" -s /sbin/nologin "$APP_USER"
-fi
-
-# --- 3) Virtualenv + dependencias ------------------------------------------
-echo ">> Creando virtualenv y dependencias…"
-"$PYTHON_BIN" -m venv "$VENV"
-"$VENV/bin/pip" install --upgrade pip wheel
-# obsforge vive en índice privado: si no lo tienes, usa requirements/docker.txt
-REQ="requirements/prod.txt"
-if [ -n "${PIP_EXTRA_INDEX_URL:-}" ]; then
-  "$VENV/bin/pip" install -r "$APP_DIR/$REQ" --extra-index-url "$PIP_EXTRA_INDEX_URL"
 else
-  echo "   (sin PIP_EXTRA_INDEX_URL: instalando sin obsforge — requirements/docker.txt)"
-  "$VENV/bin/pip" install -r "$APP_DIR/requirements/docker.txt"
+  echo ">> [2/8] Usuario de servicio $APP_USER ya existe"
 fi
 
-# --- 4) CSS (Tailwind): compilar si hay npm; si no, debe existir forge.css --
+# --- 3) Virtualenv + dependencias (SQLite: base + gunicorn, sin MySQL) ------
+echo ">> [3/8] Virtualenv y dependencias…"
+[ -d "$VENV" ] || "$PYTHON_BIN" -m venv "$VENV"
+"$VENV/bin/pip" install --upgrade pip wheel
+# Si exportaste DATABASE_URL apuntando a MySQL, añade el driver:
+EXTRA_REQ=""
+case "${DATABASE_URL:-}" in mysql://*) EXTRA_REQ="mysqlclient>=2.2" ;; esac
+"$VENV/bin/pip" install -r "$APP_DIR/requirements/base.txt" "gunicorn>=21.2" $EXTRA_REQ
+
+# --- 4) CSS (Tailwind): ya viene compilado; recompila solo si falta y hay npm
 if [ ! -f "$APP_DIR/static/css/forge.css" ]; then
   if command -v npm >/dev/null; then
-    echo ">> Compilando CSS (Tailwind)…"
+    echo ">> [4/8] Compilando CSS (Tailwind)…"
     ( cd "$APP_DIR" && npm ci && npm run build:css )
   else
-    echo "ADVERTENCIA: no existe static/css/forge.css y no hay npm." >&2
-    echo "             Compílalo en otra máquina (npm run build:css) y cópialo." >&2
+    echo "ADVERTENCIA: no existe static/css/forge.css y no hay npm; la UI se verá sin estilos." >&2
   fi
+else
+  echo ">> [4/8] CSS ya compilado (static/css/forge.css)"
 fi
 
-# --- 5) Migraciones, estáticos, traducciones --------------------------------
-echo ">> migrate / collectstatic / compilemessages…"
+# --- 5) Archivo de entorno del servicio (SQLite + HTTP plano + abierto) -----
+echo ">> [5/8] Generando ${ENV_FILE}…"
+mkdir -p "$DATA_DIR" "$LOG_DIR"
+cat > "$ENV_FILE" <<ENV
+# Generado por install_server.sh — perfil PREPROD/STG (SQLite, HTTP :$PORT).
+DJANGO_SETTINGS_MODULE=config.settings.standalone
+DEBUG=False
+CERTFORGE_DATA_DIR=$DATA_DIR
+LOG_DIR=$LOG_DIR
+ALLOWED_HOSTS=*
+# HTTP PLANO: sin redirección TLS ni cookies Secure (no rompe el login en :$PORT).
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
+SECURE_HSTS_SECONDS=0
+# El scheduler corre en su propio servicio (run_scheduler); que NO arranque
+# también dentro de cada worker de gunicorn (evita tareas duplicadas).
+RUN_SCHEDULER=False
+OBSFORGE_ENABLED=False
+ENV
+# Si exportaste DATABASE_URL (MySQL/Postgres externos), lo respeta el perfil standalone.
+[ -n "${DATABASE_URL:-}" ] && echo "DATABASE_URL=$DATABASE_URL" >> "$ENV_FILE"
+chmod 600 "$ENV_FILE"
+
+# --- 6) migrate / collectstatic / compilemessages + Owner & grupos ----------
+echo ">> [6/8] migrate / collectstatic / compilemessages…"
 set -a; . "$ENV_FILE"; set +a
 ( cd "$APP_DIR"
   "$VENV/bin/python" manage.py migrate --no-input
@@ -103,15 +123,32 @@ set -a; . "$ENV_FILE"; set +a
   "$VENV/bin/python" manage.py compilemessages 2>/dev/null || echo "   (compilemessages omitido; el .mo ya viene compilado)"
 )
 
-# Permisos + dir de logs
-mkdir -p "${LOG_DIR:-/var/log/certmanager}"
-chown -R "$APP_USER":"$APP_USER" "$APP_DIR" "${LOG_DIR:-/var/log/certmanager}"
+echo ">> [6/8] Creando el Owner y los grupos/Teams (bootstrap idempotente)…"
+export CF_OWNER_EMAIL
+while [ -z "${CF_OWNER_PASSWORD:-}" ]; do
+  read -r -s -p "   Contraseña para el Owner ($CF_OWNER_EMAIL): " CF_OWNER_PASSWORD
+  echo
+  [ -z "$CF_OWNER_PASSWORD" ] && echo "      La contraseña no puede estar vacía. Intenta de nuevo."
+done
+export CF_OWNER_PASSWORD
+( cd "$APP_DIR"
+  if [ -f "cert.txt" ]; then
+    echo "   cert.txt encontrado: Owner + grupos (sp_*) + certificados…"
+    "$VENV/bin/python" manage.py data_update_certs_app --source cert.txt
+  else
+    echo "   Sin cert.txt: Owner + grupo propio (coloca cert.txt y reejecuta para los demás grupos)."
+    "$VENV/bin/python" manage.py data_update_certs_app --skip-certs
+  fi
+)
 
-# --- 6) Unidades systemd (web + scheduler) ----------------------------------
-echo ">> Instalando unidades systemd…"
-cat > /etc/systemd/system/certmanager.service <<UNIT
+# Permisos: lo que el servicio debe poder escribir (SQLite/WAL, media, logs).
+chown -R "$APP_USER":"$APP_USER" "$APP_DIR" "$DATA_DIR" "$LOG_DIR"
+
+# --- 7) Unidades systemd (web + scheduler) ----------------------------------
+echo ">> [7/8] Instalando unidades systemd…"
+cat > "$SYSTEMD_DIR/certmanager.service" <<UNIT
 [Unit]
-Description=CertManager (Gunicorn)
+Description=CertManager (Gunicorn — preprod/stg SQLite)
 After=network-online.target
 Wants=network-online.target
 
@@ -130,9 +167,9 @@ RestartSec=3
 WantedBy=multi-user.target
 UNIT
 
-cat > /etc/systemd/system/certmanager-scheduler.service <<UNIT
+cat > "$SYSTEMD_DIR/certmanager-scheduler.service" <<UNIT
 [Unit]
-Description=CertManager (Scheduler / tareas)
+Description=CertManager (Scheduler — monitoreo/reportes/backup)
 After=certmanager.service
 Wants=network-online.target
 
@@ -149,52 +186,57 @@ RestartSec=5
 WantedBy=multi-user.target
 UNIT
 
-# --- 7) NGINX (reverse proxy + TLS) -----------------------------------------
-echo ">> Configurando NGINX…"
-# Quita el sitio default de Debian/Ubuntu para no chocar con default_server.
-rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
-NGINX_SITE="/etc/nginx/conf.d/certmanager.conf"
+# --- 8) NGINX (:$PORT HTTP) -> gunicorn (127.0.0.1:8001) --------------------
+echo ">> [8/8] Configurando NGINX en :$PORT (HTTP plano)…"
+NGINX_SITE="$NGINX_CONF_DIR/certmanager.conf"
 cat > "$NGINX_SITE" <<NGINX
+# CertManager preprod/stg — HTTP plano en :$PORT, proxy a gunicorn local.
 server {
-    listen 80 default_server;
-    server_name $NGINX_NAME;
-    return 301 https://\$host\$request_uri;
-}
-server {
-    listen 443 ssl default_server;
-    server_name $NGINX_NAME;
-
-    ssl_certificate     $TLS_CERT;
-    ssl_certificate_key $TLS_KEY;
+    listen $PORT default_server;
+    listen [::]:$PORT default_server;
+    server_name _;
 
     client_max_body_size 10m;
 
     location / {
         proxy_pass http://$GUNICORN_BIND;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Host              \$host;
+        proxy_set_header X-Real-IP         \$remote_addr;
+        proxy_set_header X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
     location = /health/ {
         access_log off;
         proxy_pass http://$GUNICORN_BIND;
         proxy_set_header Host              \$host;
-        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 NGINX
+# Si PORT=80 hay que quitar el sitio default de Debian/Ubuntu (evita duplicar default_server).
+[ "$PORT" = "80" ] && rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
 
-# --- 8) Arranque ------------------------------------------------------------
-echo ">> Habilitando y arrancando servicios…"
+# SELinux (RHEL/Rocky): permite que NGINX haga proxy a un socket local.
+if command -v getenforce >/dev/null && [ "$(getenforce)" = "Enforcing" ]; then
+  command -v setsebool >/dev/null && setsebool -P httpd_can_network_connect 1 || true
+fi
+# Firewall: abre el puerto público para que acceda toda la red.
+if command -v firewall-cmd >/dev/null && firewall-cmd --state >/dev/null 2>&1; then
+  firewall-cmd --permanent --add-port="$PORT"/tcp && firewall-cmd --reload || true
+elif command -v ufw >/dev/null && ufw status >/dev/null 2>&1; then
+  ufw allow "$PORT"/tcp || true
+fi
+
+# --- Arranque ---------------------------------------------------------------
 systemctl daemon-reload
 systemctl enable --now certmanager certmanager-scheduler
 nginx -t && systemctl enable --now nginx && systemctl reload nginx
 
+IPS="$(hostname -I 2>/dev/null || true)"
 echo ""
-echo ">> Listo. Verifica:"
-echo "     systemctl status certmanager certmanager-scheduler"
-echo "     curl -fsS https://$FQDN/health/"
+echo ">> ¡Listo! CertManager accesible a toda la red en HTTP :$PORT (Owner: $CF_OWNER_EMAIL)."
+for ip in $IPS; do echo "     http://$ip:$PORT/"; done
 echo ""
-echo ">> Bootstrap (Owner + configuración + certificados):"
-echo "     coloca cert.txt en la raíz y corre:  sudo -u $APP_USER ./data_update_certs_app.sh"
+echo ">> Verificar:"
+echo "     systemctl status certmanager certmanager-scheduler nginx"
+echo "     curl -fsS http://127.0.0.1:$PORT/health/"
